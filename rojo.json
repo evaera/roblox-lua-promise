@@ -1,0 +1,10 @@
+{
+  "name": "lua-promise",
+  "servePort": 8000,
+  "partitions": {
+    "lib": {
+      "path": "src",
+      "target": "ServerScriptService.roblox-request"
+    }
+  }
+}
