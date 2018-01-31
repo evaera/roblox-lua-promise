@@ -3,8 +3,8 @@
   "servePort": 8000,
   "partitions": {
     "lib": {
-      "path": "src",
-      "target": "ServerScriptService.roblox-request"
+      "path": "lib",
+      "target": "ReplicatedStorage.lua-promise"
     }
   }
 }

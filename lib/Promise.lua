@@ -4,8 +4,8 @@
 
 local PROMISE_DEBUG = false
 
--- If promise debugging is on, use a version of pcall that warns on failure.
--- This is useful for finding errors that happen within Promise itself.
+-- If promise debugging is on, use a version of pcall that warns on failure. This is useful for finding errors that
+-- happen within Promise itself.
 local wpcall
 if PROMISE_DEBUG then
 	wpcall = function(f, ...)
@@ -71,8 +71,8 @@ Promise.Status = {
 		end
 
 		get("https://google.com")
-			:andThen(function(stuff)
-				print("Got some stuff!", stuff)
+			:andThen(function(body)
+				print("Got a body:", body)
 			end)
 ]]
 function Promise.new(callback)
@@ -139,8 +139,33 @@ end
 		* is resolved when all input promises resolve
 		* is rejected if ANY input promises reject
 ]]
-function Promise.all(...)
-	error("unimplemented", 2)
+function Promise.all(promises)
+	return Promise.new(function(resolve, reject)
+		local results = {}
+		local totalCount = #promises
+		local finishedCount = 0
+		local rejected = false
+
+		local function rejectedHandler(value)
+			if rejected then
+				return
+			end
+
+			rejected = true
+			reject(value)
+		end
+
+		for index, promise in ipairs(promises) do
+			promise:andThen(function(value)
+				results[index] = value
+				finishedCount = finishedCount + 1
+
+				if finishedCount == totalCount then
+					resolve(results)
+				end
+			end, rejectedHandler)
+		end
+	end)
 end
 
 --[[
