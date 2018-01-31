@@ -144,16 +144,6 @@ function Promise.all(promises)
 		local results = {}
 		local totalCount = #promises
 		local finishedCount = 0
-		local rejected = false
-
-		local function rejectedHandler(value)
-			if rejected then
-				return
-			end
-
-			rejected = true
-			reject(value)
-		end
 
 		for index, promise in ipairs(promises) do
 			promise:andThen(function(value)
@@ -163,7 +153,7 @@ function Promise.all(promises)
 				if finishedCount == totalCount then
 					resolve(results)
 				end
-			end, rejectedHandler)
+			end, reject)
 		end
 	end)
 end
