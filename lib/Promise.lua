@@ -193,7 +193,7 @@ function Promise:andThen(successHandler, failureHandler)
 		end
 
 		if self._status == Promise.Status.Started then
-			-- If we haven't resolved yet, put ourselves into the queue
+			-- If we haven't resolved yet, put ourself into the queue
 			table.insert(self._queuedResolve, successCallback)
 			table.insert(self._queuedReject, failureCallback)
 		elseif self._status == Promise.Status.Resolved then
