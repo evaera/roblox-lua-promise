@@ -4,7 +4,7 @@
   "partitions": {
     "lib": {
       "path": "lib",
-      "target": "ReplicatedStorage.lua-promise"
+      "target": "ReplicatedStorage.Promise"
     }
   }
 }
