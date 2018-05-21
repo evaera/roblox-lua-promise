@@ -65,6 +65,11 @@ return function()
 			expect(callCount).to.equal(1)
 			expect(promise._status).to.equal(Promise.Status.Rejected)
 			expect(promise._value[1]:find("hahah")).to.be.ok()
+
+			-- Loosely check for the pieces of the stack trace we expect
+			expect(promise._value[1]:find("init.spec")).to.be.ok()
+			expect(promise._value[1]:find("new")).to.be.ok()
+			expect(promise._value[1]:find("error")).to.be.ok()
 		end)
 	end)
 

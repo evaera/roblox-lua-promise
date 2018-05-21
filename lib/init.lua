@@ -4,21 +4,24 @@
 
 local PROMISE_DEBUG = false
 
--- If promise debugging is on, use a version of pcall that warns on failure.
--- This is useful for finding errors that happen within Promise itself.
-local wpcall
-if PROMISE_DEBUG then
-	wpcall = function(f, ...)
-		local result = { pcall(f, ...) }
+local function wpcall(f, ...)
+	local args = {...}
+	local argCount = select("#", ...)
 
-		if not result[1] then
-			warn(result[2])
-		end
+	local result = {
+		xpcall(function()
+			return f(unpack(args, 1, argCount))
+		end, debug.traceback)
+	}
 
-		return unpack(result)
+	-- If promise debugging is on, warn whenever a pcall fails.
+	-- This is useful for debugging issues within the Promise implementation
+	-- itself.
+	if PROMISE_DEBUG and not result[1] then
+		warn(result[2])
 	end
-else
-	wpcall = pcall
+
+	return unpack(result)
 end
 
 --[[
