@@ -64,12 +64,12 @@ return function()
 			expect(promise).to.be.ok()
 			expect(callCount).to.equal(1)
 			expect(promise:getStatus()).to.equal(Promise.Status.Rejected)
-			expect(promise._value[1]:find("hahah")).to.be.ok()
+			expect(promise._values[1]:find("hahah")).to.be.ok()
 
 			-- Loosely check for the pieces of the stack trace we expect
-			expect(promise._value[1]:find("init.spec")).to.be.ok()
-			expect(promise._value[1]:find("new")).to.be.ok()
-			expect(promise._value[1]:find("error")).to.be.ok()
+			expect(promise._values[1]:find("init.spec")).to.be.ok()
+			expect(promise._values[1]:find("new")).to.be.ok()
+			expect(promise._values[1]:find("error")).to.be.ok()
 		end)
 	end)
 
@@ -79,7 +79,7 @@ return function()
 
 			expect(promise).to.be.ok()
 			expect(promise:getStatus()).to.equal(Promise.Status.Resolved)
-			expect(promise._value[1]).to.equal(5)
+			expect(promise._values[1]).to.equal(5)
 		end)
 
 		it("should chain onto passed promises", function()
@@ -89,7 +89,7 @@ return function()
 
 			expect(promise).to.be.ok()
 			expect(promise:getStatus()).to.equal(Promise.Status.Rejected)
-			expect(promise._value[1]).to.equal(7)
+			expect(promise._values[1]).to.equal(7)
 		end)
 	end)
 
@@ -99,7 +99,7 @@ return function()
 
 			expect(promise).to.be.ok()
 			expect(promise:getStatus()).to.equal(Promise.Status.Rejected)
-			expect(promise._value[1]).to.equal(6)
+			expect(promise._values[1]).to.equal(6)
 		end)
 
 		it("should pass a promise as-is as an error", function()
@@ -111,7 +111,7 @@ return function()
 
 			expect(promise).to.be.ok()
 			expect(promise:getStatus()).to.equal(Promise.Status.Rejected)
-			expect(promise._value[1]).to.equal(innerPromise)
+			expect(promise._values[1]).to.equal(innerPromise)
 		end)
 	end)
 
@@ -141,12 +141,12 @@ return function()
 
 			expect(promise).to.be.ok()
 			expect(promise:getStatus()).to.equal(Promise.Status.Resolved)
-			expect(promise._value[1]).to.equal(5)
+			expect(promise._values[1]).to.equal(5)
 
 			expect(chained).to.be.ok()
 			expect(chained).never.to.equal(promise)
 			expect(chained:getStatus()).to.equal(Promise.Status.Resolved)
-			expect(#chained._value).to.equal(0)
+			expect(#chained._values).to.equal(0)
 		end)
 
 		it("should chain onto rejected promises", function()
@@ -174,12 +174,12 @@ return function()
 
 			expect(promise).to.be.ok()
 			expect(promise:getStatus()).to.equal(Promise.Status.Rejected)
-			expect(promise._value[1]).to.equal(5)
+			expect(promise._values[1]).to.equal(5)
 
 			expect(chained).to.be.ok()
 			expect(chained).never.to.equal(promise)
 			expect(chained:getStatus()).to.equal(Promise.Status.Resolved)
-			expect(#chained._value).to.equal(0)
+			expect(#chained._values).to.equal(0)
 		end)
 
 		it("should chain onto asynchronously resolved promises", function()
@@ -215,12 +215,12 @@ return function()
 
 			expect(promise).to.be.ok()
 			expect(promise:getStatus()).to.equal(Promise.Status.Resolved)
-			expect(promise._value[1]).to.equal(6)
+			expect(promise._values[1]).to.equal(6)
 
 			expect(chained).to.be.ok()
 			expect(chained).never.to.equal(promise)
 			expect(chained:getStatus()).to.equal(Promise.Status.Resolved)
-			expect(#chained._value).to.equal(0)
+			expect(#chained._values).to.equal(0)
 		end)
 
 		it("should chain onto asynchronously rejected promises", function()
@@ -256,12 +256,12 @@ return function()
 
 			expect(promise).to.be.ok()
 			expect(promise:getStatus()).to.equal(Promise.Status.Rejected)
-			expect(promise._value[1]).to.equal(6)
+			expect(promise._values[1]).to.equal(6)
 
 			expect(chained).to.be.ok()
 			expect(chained).never.to.equal(promise)
 			expect(chained:getStatus()).to.equal(Promise.Status.Resolved)
-			expect(#chained._value).to.equal(0)
+			expect(#chained._values).to.equal(0)
 		end)
 	end)
 end

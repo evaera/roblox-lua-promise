@@ -90,7 +90,7 @@ function Promise.new(callback)
 
 		-- A table containing a list of all results, whether success or failure.
 		-- Only valid if _status is set to something besides Started
-		_value = nil,
+		_values = nil,
 
 		-- If an error occurs with no observers, this will be set.
 		_unhandledRejection = false,
@@ -190,10 +190,10 @@ function Promise:andThen(successHandler, failureHandler)
 			table.insert(self._queuedReject, failureCallback)
 		elseif self._status == Promise.Status.Resolved then
 			-- This promise has already resolved! Trigger success immediately.
-			successCallback(unpack(self._value))
+			successCallback(unpack(self._values))
 		elseif self._status == Promise.Status.Rejected then
 			-- This promise died a terrible death! Trigger failure immediately.
-			failureCallback(unpack(self._value))
+			failureCallback(unpack(self._values))
 		end
 	end)
 end
@@ -230,9 +230,9 @@ function Promise:await()
 
 		return ok, unpack(result)
 	elseif self._status == Promise.Status.Resolved then
-		return true, unpack(self._value)
+		return true, unpack(self._values)
 	elseif self._status == Promise.Status.Rejected then
-		return false, unpack(self._value)
+		return false, unpack(self._values)
 	end
 end
 
@@ -264,7 +264,7 @@ function Promise:_resolve(...)
 	end
 
 	self._status = Promise.Status.Resolved
-	self._value = {...}
+	self._values = {...}
 
 	-- We assume that these callbacks will not throw errors.
 	for _, callback in ipairs(self._queuedResolve) do
@@ -278,7 +278,7 @@ function Promise:_reject(...)
 	end
 
 	self._status = Promise.Status.Rejected
-	self._value = {...}
+	self._values = {...}
 
 	-- If there are any rejection handlers, call those!
 	if not isEmpty(self._queuedReject) then
