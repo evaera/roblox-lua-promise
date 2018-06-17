@@ -194,10 +194,10 @@ function Promise:andThen(successHandler, failureHandler)
 			table.insert(self._queuedReject, failureCallback)
 		elseif self._status == Promise.Status.Resolved then
 			-- This promise has already resolved! Trigger success immediately.
-			successCallback(unpack(self._values))
+			successCallback(unpack(self._values, 1, self._valuesLength))
 		elseif self._status == Promise.Status.Rejected then
 			-- This promise died a terrible death! Trigger failure immediately.
-			failureCallback(unpack(self._values))
+			failureCallback(unpack(self._values, 1, self._valuesLength))
 		end
 	end)
 end
