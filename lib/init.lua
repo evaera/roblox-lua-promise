@@ -6,11 +6,11 @@ local PROMISE_DEBUG = false
 
 local function wpcall(f, ...)
 	local args = {...}
-	local argCount = select("#", ...)
+	local argsLength = select("#", ...)
 
 	local result = {
 		xpcall(function()
-			return f(unpack(args, 1, argCount))
+			return f(unpack(args, 1, argsLength))
 		end, debug.traceback)
 	}
 
@@ -91,6 +91,10 @@ function Promise.new(callback)
 		-- A table containing a list of all results, whether success or failure.
 		-- Only valid if _status is set to something besides Started
 		_values = nil,
+
+		-- Lua doesn't like sparse arrays very much, so we explicitly store the
+		-- length of _values to handle middle nils.
+		_valuesLength = -1,
 
 		-- If an error occurs with no observers, this will be set.
 		_unhandledRejection = false,
@@ -215,24 +219,27 @@ function Promise:await()
 
 	if self._status == Promise.Status.Started then
 		local result
+		local resultLength
 		local bindable = Instance.new("BindableEvent")
 
 		self:andThen(function(...)
 			result = {...}
+			resultLength = select("#", ...)
 			bindable:Fire(true)
 		end, function(...)
 			result = {...}
+			resultLength = select("#", ...)
 			bindable:Fire(false)
 		end)
 
 		local ok = bindable.Event:Wait()
 		bindable:Destroy()
 
-		return ok, unpack(result)
+		return ok, unpack(result, 1, resultLength)
 	elseif self._status == Promise.Status.Resolved then
-		return true, unpack(self._values)
+		return true, unpack(self._values, 1, self._valuesLength)
 	elseif self._status == Promise.Status.Rejected then
-		return false, unpack(self._values)
+		return false, unpack(self._values, 1, self._valuesLength)
 	end
 end
 
@@ -241,10 +248,12 @@ function Promise:_resolve(...)
 		return
 	end
 
+	local argLength = select("#", ...)
+
 	-- If the resolved value was a Promise, we chain onto it!
 	if Promise.is((...)) then
 		-- Without this warning, arguments sometimes mysteriously disappear
-		if select("#", ...) > 1 then
+		if argLength > 1 then
 			local message = (
 				"When returning a Promise from andThen, extra arguments are " ..
 				"discarded! See:\n\n%s"
@@ -265,6 +274,7 @@ function Promise:_resolve(...)
 
 	self._status = Promise.Status.Resolved
 	self._values = {...}
+	self._valuesLength = argLength
 
 	-- We assume that these callbacks will not throw errors.
 	for _, callback in ipairs(self._queuedResolve) do
@@ -279,6 +289,7 @@ function Promise:_reject(...)
 
 	self._status = Promise.Status.Rejected
 	self._values = {...}
+	self._valuesLength = select("#", ...)
 
 	-- If there are any rejection handlers, call those!
 	if not isEmpty(self._queuedReject) then
