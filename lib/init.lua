@@ -157,6 +157,10 @@ function Promise.is(object)
 	return object._type == "Promise"
 end
 
+function Promise:getStatus()
+	return self._status
+end
+
 --[[
 	Creates a new promise that receives the result of this promise.
 
