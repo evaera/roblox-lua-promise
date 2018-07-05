@@ -4,15 +4,32 @@
 
 local PROMISE_DEBUG = false
 
-local function wpcall(f, ...)
-	local args = {...}
-	local argsLength = select("#", ...)
+--[[
+	Packs a number of arguments into a table and returns its length.
 
-	local result = {
-		xpcall(function()
-			return f(unpack(args, 1, argsLength))
-		end, debug.traceback)
-	}
+	Used to cajole varargs without dropping sparse values.
+]]
+local function pack(...)
+	local len = select("#", ...)
+
+	return len, { ... }
+end
+
+--[[
+	wpcallPacked is a version of xpcall that:
+	* Returns the length of the result first
+	* Returns the result packed into a table
+	* Passes extra arguments through to the passed function, which xpcall does not
+	* Issues a warning if PROMISE_DEBUG is enabled
+]]
+local function wpcallPacked(f, ...)
+	local argsLength, args = pack(...)
+
+	local body = function()
+		return f(unpack(args, 1, argsLength))
+	end
+
+	local resultLength, result = pack(xpcall(body, debug.traceback))
 
 	-- If promise debugging is on, warn whenever a pcall fails.
 	-- This is useful for debugging issues within the Promise implementation
@@ -21,7 +38,7 @@ local function wpcall(f, ...)
 		warn(result[2])
 	end
 
-	return unpack(result)
+	return resultLength, result
 end
 
 --[[
@@ -30,13 +47,13 @@ end
 ]]
 local function createAdvancer(callback, resolve, reject)
 	return function(...)
-		local result = { wpcall(callback, ...) }
-		local ok = table.remove(result, 1)
+		local resultLength, result = wpcallPacked(callback, ...)
+		local ok = result[1]
 
 		if ok then
-			resolve(unpack(result))
+			resolve(unpack(result, 2, resultLength))
 		else
-			reject(unpack(result))
+			reject(unpack(result, 2, resultLength))
 		end
 	end
 end
@@ -114,7 +131,9 @@ function Promise.new(callback)
 		promise:_reject(...)
 	end
 
-	local ok, err = wpcall(callback, resolve, reject)
+	local _, result = wpcallPacked(callback, resolve, reject)
+	local ok = result[1]
+	local err = result[2]
 
 	if not ok and promise._status == Promise.Status.Started then
 		reject(err)
