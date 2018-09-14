@@ -74,6 +74,8 @@ local function createSymbol(name)
 	return symbol
 end
 
+local PromiseMarker = createSymbol("PromiseMarker")
+
 local Promise = {}
 Promise.prototype = {}
 Promise.__index = Promise.prototype
@@ -114,7 +116,7 @@ function Promise.new(callback)
 		_source = debug.traceback(),
 
 		-- A tag to identify us as a promise
-		_type = "Promise",
+		[PromiseMarker] = true,
 
 		_status = Promise.Status.Started,
 
@@ -245,7 +247,7 @@ function Promise.is(object)
 		return false
 	end
 
-	return object._type == "Promise"
+	return object[PromiseMarker] == true
 end
 
 function Promise.prototype:getStatus()
