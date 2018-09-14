@@ -338,12 +338,10 @@ function Promise:_resolve(...)
 		return
 	end
 
-	local argLength = select("#", ...)
-
 	-- If the resolved value was a Promise, we chain onto it!
 	if Promise.is((...)) then
 		-- Without this warning, arguments sometimes mysteriously disappear
-		if argLength > 1 then
+		if select("#", ...) > 1 then
 			local message = (
 				"When returning a Promise from andThen, extra arguments are " ..
 				"discarded! See:\n\n%s"
@@ -366,8 +364,7 @@ function Promise:_resolve(...)
 	end
 
 	self._status = Promise.Status.Resolved
-	self._values = {...}
-	self._valuesLength = argLength
+	self._valuesLength, self._values = pack(...)
 
 	-- We assume that these callbacks will not throw errors.
 	for _, callback in ipairs(self._queuedResolve) do
