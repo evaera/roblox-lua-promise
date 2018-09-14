@@ -62,14 +62,26 @@ local function isEmpty(t)
 	return next(t) == nil
 end
 
+local function createSymbol(name)
+	assert(type(name) == "string", "createSymbol requires `name` to be a string.")
+
+	local symbol = newproxy(true)
+
+	getmetatable(symbol).__tostring = function()
+		return ("Symbol(%s)"):format(name)
+	end
+
+	return symbol
+end
+
 local Promise = {}
 Promise.prototype = {}
 Promise.__index = Promise.prototype
 
 Promise.Status = {
-	Started = "Started",
-	Resolved = "Resolved",
-	Rejected = "Rejected",
+	Started = createSymbol("Started"),
+	Resolved = createSymbol("Resolved"),
+	Rejected = createSymbol("Rejected"),
 }
 
 --[[
