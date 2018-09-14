@@ -272,14 +272,14 @@ return function()
 			end).to.throw()
 		end)
 
-		it("should resolve instantly with an empty table if given no values", function()
+		it("should resolve instantly with an empty table if given no promises", function()
 			local promise = Promise.all({})
-			local success, value = promise:await()
+			local success, value = promise:_unwrap()
 
 			expect(success).to.equal(true)
 			expect(promise:getStatus()).to.equal(Promise.Status.Resolved)
 			expect(value).to.be.a("table")
-			expect(#value).to.equal(0)
+			expect(next(value)).to.equal(nil)
 		end)
 
 		it("should error if given non-promise values", function()
@@ -289,23 +289,31 @@ return function()
 		end)
 
 		it("should wait for all promises to be resolved and return their values", function()
+			local resolveFunctions = {}
+
 			local promises = {
 				Promise.new(function(resolve)
-					resolve(1)
+					table.insert(resolveFunctions, {resolve, 1})
 				end),
 				Promise.new(function(resolve)
-					resolve("A string")
+					table.insert(resolveFunctions, {resolve, "A string"})
 				end),
 				Promise.new(function(resolve)
-					resolve(nil)
+					table.insert(resolveFunctions, {resolve, nil})
 				end),
 				Promise.new(function(resolve)
-					resolve(false)
-				end)
+					table.insert(resolveFunctions, {resolve, false})
+				end),
 			}
 
-			local promise = Promise.all(promises)
-			local success, resolved = promise:await()
+			local combinedPromise = Promise.all(promises)
+
+			for _, resolve in ipairs(resolveFunctions) do
+				expect(combinedPromise:getStatus()).to.equal(Promise.Status.Started)
+				resolve[1](resolve[2])
+			end
+
+			local success, resolved = combinedPromise:_unwrap()
 
 			expect(success).to.equal(true)
 			expect(resolved).to.be.a("table")

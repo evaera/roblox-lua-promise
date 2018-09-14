@@ -167,7 +167,7 @@ end
 ]]
 function Promise.all(promises)
 	if type(promises) ~= "table" then
-		error("Please pass an array of promises or values to Promise.all", 2)
+		error("Please pass a list of promises to Promise.all", 2)
 	end
 
 	-- If there are no values then return an already resolved promise.
@@ -208,15 +208,16 @@ function Promise.all(promises)
 
 		-- We can assume the values inside `promises` are all promises since we checked above.
 		for i = 1, #promises do
-			promises[i]:andThen(function(...)
-				resolveOne(i, ...)
-			end)
-			:catch(function(...)
-				-- Only reject if this promise is unrejected.
-				if not rejected then
-					reject(...)
+			promises[i]:andThen(
+				function(...)
+					resolveOne(i, ...)
+				end,
+				function(...)
+					if not rejected then
+						reject(...)
+					end
 				end
-			end)
+			)
 		end
 	end)
 end
@@ -312,6 +313,23 @@ function Promise:await()
 	elseif self._status == Promise.Status.Rejected then
 		return false, unpack(self._values, 1, self._valuesLength)
 	end
+end
+
+--[[
+	Intended for use in tests.
+
+	Similar to await(), but instead of yielding if the promise is unresolved,
+	_unwrap will throw. This indicates an assumption that a promise has
+	resolved.
+]]
+function Promise:_unwrap()
+	if self._status == Promise.Status.Started then
+		error("Promise has not resolved or rejected.", 2)
+	end
+
+	local success = self._status == Promise.Status.Resolved
+
+	return success, unpack(self._values, 1, self._valuesLength)
 end
 
 function Promise:_resolve(...)
