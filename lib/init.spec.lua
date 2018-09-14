@@ -1,6 +1,12 @@
 return function()
 	local Promise = require(script.Parent)
 
+	local function pack(...)
+		local len = select("#", ...)
+
+		return len, { ... }
+	end
+
 	describe("Promise.new", function()
 		it("should instantiate with a callback", function()
 			local promise = Promise.new(function() end)
@@ -124,14 +130,15 @@ return function()
 
 			local promise = Promise.resolve(5)
 
-			local chained = promise
-				:andThen(function(...)
-					args = {...}
-					argsLength = select("#", ...)
+			local chained = promise:andThen(
+				function(...)
+					argsLength, args = pack(...)
 					callCount = callCount + 1
-				end, function()
+				end,
+				function()
 					badCallCount = badCallCount + 1
-				end)
+				end
+			)
 
 			expect(badCallCount).to.equal(0)
 
@@ -157,14 +164,15 @@ return function()
 
 			local promise = Promise.reject(5)
 
-			local chained = promise
-				:andThen(function(...)
+			local chained = promise:andThen(
+				function(...)
 					badCallCount = badCallCount + 1
-				end, function(...)
-					args = {...}
-					argsLength = select("#", ...)
+				end,
+				function(...)
+					argsLength, args = pack(...)
 					callCount = callCount + 1
-				end)
+				end
+			)
 
 			expect(badCallCount).to.equal(0)
 
@@ -193,14 +201,16 @@ return function()
 				startResolution = resolve
 			end)
 
-			local chained = promise
-				:andThen(function(...)
+			local chained = promise:andThen(
+				function(...)
 					args = {...}
 					argsLength = select("#", ...)
 					callCount = callCount + 1
-				end, function()
+				end,
+				function()
 					badCallCount = badCallCount + 1
-				end)
+				end
+			)
 
 			expect(callCount).to.equal(0)
 			expect(badCallCount).to.equal(0)
@@ -234,14 +244,16 @@ return function()
 				startResolution = reject
 			end)
 
-			local chained = promise
-				:andThen(function()
+			local chained = promise:andThen(
+				function()
 					badCallCount = badCallCount + 1
-				end, function(...)
+				end,
+				function(...)
 					args = {...}
 					argsLength = select("#", ...)
 					callCount = callCount + 1
-				end)
+				end
+			)
 
 			expect(callCount).to.equal(0)
 			expect(badCallCount).to.equal(0)
@@ -291,20 +303,15 @@ return function()
 		it("should wait for all promises to be resolved and return their values", function()
 			local resolveFunctions = {}
 
-			local promises = {
-				Promise.new(function(resolve)
-					table.insert(resolveFunctions, {resolve, 1})
-				end),
-				Promise.new(function(resolve)
-					table.insert(resolveFunctions, {resolve, "A string"})
-				end),
-				Promise.new(function(resolve)
-					table.insert(resolveFunctions, {resolve, nil})
-				end),
-				Promise.new(function(resolve)
-					table.insert(resolveFunctions, {resolve, false})
-				end),
-			}
+			local testValuesLength, testValues = pack(1, "A string", nil, false)
+
+			local promises = {}
+
+			for i = 1, testValuesLength do
+				promises[i] = Promise.new(function(resolve)
+					resolveFunctions[i] = {resolve, testValues[i]}
+				end)
+			end
 
 			local combinedPromise = Promise.all(promises)
 
@@ -313,15 +320,73 @@ return function()
 				resolve[1](resolve[2])
 			end
 
-			local success, resolved = combinedPromise:_unwrap()
+			local resultLength, result = pack(combinedPromise:_unwrap())
+			local success, resolved = unpack(result, 1, resultLength)
 
+			expect(resultLength).to.equal(2)
 			expect(success).to.equal(true)
 			expect(resolved).to.be.a("table")
-			expect(#resolved).to.equal(4)
-			expect(resolved[1]).to.equal(1)
-			expect(resolved[2]).to.equal("A string")
-			expect(resolved[3]).to.equal(nil)
-			expect(resolved[4]).to.equal(false)
+			expect(#resolved).to.equal(#promises)
+
+			for i = 1, testValuesLength do
+				expect(resolved[i]).to.equal(testValues[i])
+			end
+		end)
+
+		it("should reject if any individual promise rejected", function()
+			local rejectA
+			local resolveB
+
+			local a = Promise.new(function(_, reject)
+				rejectA = reject
+			end)
+
+			local b = Promise.new(function(resolve)
+				resolveB = resolve
+			end)
+
+			local combinedPromise = Promise.all({a, b})
+
+			expect(combinedPromise:getStatus()).to.equal(Promise.Status.Started)
+
+			resolveB("foo", "bar")
+			rejectA("baz", "qux")
+
+			local resultLength, result = pack(combinedPromise:_unwrap())
+			local success, first, second = unpack(result, 1, resultLength)
+
+			expect(resultLength).to.equal(3)
+			expect(success).to.equal(false)
+			expect(first).to.equal("baz")
+			expect(second).to.equal("qux")
+		end)
+
+		it("should not resolve if resolved after rejecting", function()
+			local rejectA
+			local resolveB
+
+			local a = Promise.new(function(_, reject)
+				rejectA = reject
+			end)
+
+			local b = Promise.new(function(resolve)
+				resolveB = resolve
+			end)
+
+			local combinedPromise = Promise.all({a, b})
+
+			expect(combinedPromise:getStatus()).to.equal(Promise.Status.Started)
+
+			rejectA("baz", "qux")
+			resolveB("foo", "bar")
+
+			local resultLength, result = pack(combinedPromise:_unwrap())
+			local success, first, second = unpack(result, 1, resultLength)
+
+			expect(resultLength).to.equal(3)
+			expect(success).to.equal(false)
+			expect(first).to.equal("baz")
+			expect(second).to.equal("qux")
 		end)
 	end)
 end

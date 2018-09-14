@@ -295,12 +295,10 @@ function Promise:await()
 		local bindable = Instance.new("BindableEvent")
 
 		self:andThen(function(...)
-			result = {...}
-			resultLength = select("#", ...)
+			resultLength, result = pack(...)
 			bindable:Fire(true)
 		end, function(...)
-			result = {...}
-			resultLength = select("#", ...)
+			resultLength, result = pack(...)
 			bindable:Fire(false)
 		end)
 
@@ -352,11 +350,14 @@ function Promise:_resolve(...)
 			warn(message)
 		end
 
-		(...):andThen(function(...)
-			self:_resolve(...)
-		end, function(...)
-			self:_reject(...)
-		end)
+		(...):andThen(
+			function(...)
+				self:_resolve(...)
+			end,
+			function(...)
+				self:_reject(...)
+			end
+		)
 
 		return
 	end
@@ -377,8 +378,7 @@ function Promise:_reject(...)
 	end
 
 	self._status = Promise.Status.Rejected
-	self._values = {...}
-	self._valuesLength = select("#", ...)
+	self._valuesLength, self._values = pack(...)
 
 	-- If there are any rejection handlers, call those!
 	if not isEmpty(self._queuedReject) then
