@@ -294,13 +294,16 @@ function Promise:await()
 		local resultLength
 		local bindable = Instance.new("BindableEvent")
 
-		self:andThen(function(...)
-			resultLength, result = pack(...)
-			bindable:Fire(true)
-		end, function(...)
-			resultLength, result = pack(...)
-			bindable:Fire(false)
-		end)
+		self:andThen(
+			function(...)
+				resultLength, result = pack(...)
+				bindable:Fire(true)
+			end,
+			function(...)
+				resultLength, result = pack(...)
+				bindable:Fire(false)
+			end
+		)
 
 		local ok = bindable.Event:Wait()
 		bindable:Destroy()
