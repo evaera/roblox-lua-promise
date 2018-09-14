@@ -63,7 +63,8 @@ local function isEmpty(t)
 end
 
 local Promise = {}
-Promise.__index = Promise
+Promise.prototype = {}
+Promise.__index = Promise.prototype
 
 Promise.Status = {
 	Started = "Started",
@@ -233,7 +234,7 @@ function Promise.is(object)
 	return object._type == "Promise"
 end
 
-function Promise:getStatus()
+function Promise.prototype:getStatus()
 	return self._status
 end
 
@@ -242,7 +243,7 @@ end
 
 	The given callbacks are invoked depending on that result.
 ]]
-function Promise:andThen(successHandler, failureHandler)
+function Promise.prototype:andThen(successHandler, failureHandler)
 	self._unhandledRejection = false
 
 	-- Create a new promise to follow this part of the chain
@@ -277,7 +278,7 @@ end
 --[[
 	Used to catch any errors that may have occurred in the promise.
 ]]
-function Promise:catch(failureCallback)
+function Promise.prototype:catch(failureCallback)
 	return self:andThen(nil, failureCallback)
 end
 
@@ -286,7 +287,7 @@ end
 
 	This matches the execution model of normal Roblox functions.
 ]]
-function Promise:await()
+function Promise.prototype:await()
 	self._unhandledRejection = false
 
 	if self._status == Promise.Status.Started then
@@ -323,7 +324,7 @@ end
 	_unwrap will throw. This indicates an assumption that a promise has
 	resolved.
 ]]
-function Promise:_unwrap()
+function Promise.prototype:_unwrap()
 	if self._status == Promise.Status.Started then
 		error("Promise has not resolved or rejected.", 2)
 	end
@@ -333,7 +334,7 @@ function Promise:_unwrap()
 	return success, unpack(self._values, 1, self._valuesLength)
 end
 
-function Promise:_resolve(...)
+function Promise.prototype:_resolve(...)
 	if self._status ~= Promise.Status.Started then
 		return
 	end
@@ -372,7 +373,7 @@ function Promise:_resolve(...)
 	end
 end
 
-function Promise:_reject(...)
+function Promise.prototype:_reject(...)
 	if self._status ~= Promise.Status.Started then
 		return
 	end
