@@ -25,6 +25,11 @@ This Promise implementation attempts to satisfy those traits.
 	* Creates an immediately rejected Promise with the given value.
 * `Promise.is(object) -> bool`
 	* Returns whether the given object is a Promise.
+* `Promise.all(array) -> array`
+	* Accepts an array of promises and returns a new promise that:
+		* is resolved after all input promises resolve.
+		* is rejected if ANY input promises reject.
+	* Note: Only the first return value from each promise will be present in the resulting array.
 
 ### Instance Methods
 * `Promise:andThen(successHandler, [failureHandler]) -> Promise`
@@ -69,8 +74,6 @@ httpGet("https://google.com")
 ```
 
 ## Future Additions
-* `Promise.all`
-	* Currently stubbed out, throws an error.
 * `Promise.wrapAsync`
 	* Intended to wrap an existing Roblox API that yields, exposing a new one that returns a Promise.
 

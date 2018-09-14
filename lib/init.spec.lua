@@ -264,4 +264,56 @@ return function()
 			expect(#chained._values).to.equal(0)
 		end)
 	end)
+
+	describe("Promise.all", function()
+		it("should error if given something other than a table", function()
+			expect(function()
+				Promise.all(1)
+			end).to.throw()
+		end)
+
+		it("should resolve instantly with an empty table if given no values", function()
+			local promise = Promise.all({})
+			local success, value = promise:await()
+
+			expect(success).to.equal(true)
+			expect(promise:getStatus()).to.equal(Promise.Status.Resolved)
+			expect(value).to.be.a("table")
+			expect(#value).to.equal(0)
+		end)
+
+		it("should error if given non-promise values", function()
+			expect(function()
+				Promise.all({{}, {}, {}})
+			end).to.throw()
+		end)
+
+		it("should wait for all promises to be resolved and return their values", function()
+			local promises = {
+				Promise.new(function(resolve)
+					resolve(1)
+				end),
+				Promise.new(function(resolve)
+					resolve("A string")
+				end),
+				Promise.new(function(resolve)
+					resolve(nil)
+				end),
+				Promise.new(function(resolve)
+					resolve(false)
+				end)
+			}
+
+			local promise = Promise.all(promises)
+			local success, resolved = promise:await()
+
+			expect(success).to.equal(true)
+			expect(resolved).to.be.a("table")
+			expect(#resolved).to.equal(4)
+			expect(resolved[1]).to.equal(1)
+			expect(resolved[2]).to.equal("A string")
+			expect(resolved[3]).to.equal(nil)
+			expect(resolved[4]).to.equal(false)
+		end)
+	end)
 end

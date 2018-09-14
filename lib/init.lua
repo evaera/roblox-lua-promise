@@ -165,8 +165,60 @@ end
 		* is resolved when all input promises resolve
 		* is rejected if ANY input promises reject
 ]]
-function Promise.all(...)
-	error("unimplemented", 2)
+function Promise.all(promises)
+	if type(promises) ~= "table" then
+		error("Please pass an array of promises or values to Promise.all", 2)
+	end
+
+	-- If there are no values then return an already resolved promise.
+	if #promises == 0 then
+		return Promise.resolve({})
+	end
+
+	-- We need to check that each value is a promise here so that we can produce a
+	-- proper error rather than a rejected promise with our error.
+	for i = 1, #promises do
+		if not Promise.is(promises[i]) then
+			error(("Non-promise value passed into Promise.all at index #%d"):format(i), 2)
+		end
+	end
+
+	return Promise.new(function(resolve, reject)
+		-- An array to contain our resolved values from the given promises.
+		local resolvedValues = {}
+		-- Keep a count of resolved promises because just checking the resolved values length
+		-- wouldn't account for promises that resolve with nil.
+		local resolvedCount = 0
+		local rejected = false
+
+		-- Called when a single value is resolved and resolves if all are done.
+		local function resolveOne(i, ...)
+			if rejected then
+				-- Bail out if this promise has already been rejected.
+				return
+			end
+
+			resolvedValues[i] = ...
+			resolvedCount = resolvedCount + 1
+
+			if resolvedCount == #promises then
+				resolve(resolvedValues)
+			end
+		end
+
+		-- We can assume the values inside `promises` are all promises since we checked above.
+		for i = 1, #promises do
+			promises[i]:andThen(function(...)
+				resolveOne(i, ...)
+			end)
+			:catch(function(...)
+				-- Only reject if this promise is unrejected.
+				if not rejected then
+					reject(...)
+				end
+			end)
+		end
+	end)
 end
 
 --[[
