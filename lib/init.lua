@@ -109,7 +109,7 @@ Promise.Status = {
 			end)
 ]]
 function Promise.new(callback)
-	local promise = {
+	local self = {
 		-- Used to locate where a promise was created
 		_source = debug.traceback(),
 
@@ -134,25 +134,25 @@ function Promise.new(callback)
 		_queuedReject = {},
 	}
 
-	setmetatable(promise, Promise)
+	setmetatable(self, Promise)
 
 	local function resolve(...)
-		promise:_resolve(...)
+		self:_resolve(...)
 	end
 
 	local function reject(...)
-		promise:_reject(...)
+		self:_reject(...)
 	end
 
 	local _, result = wpcallPacked(callback, resolve, reject)
 	local ok = result[1]
 	local err = result[2]
 
-	if not ok and promise._status == Promise.Status.Started then
+	if not ok and self._status == Promise.Status.Started then
 		reject(err)
 	end
 
-	return promise
+	return self
 end
 
 --[[
