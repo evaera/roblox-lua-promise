@@ -388,5 +388,36 @@ return function()
 			expect(first).to.equal("baz")
 			expect(second).to.equal("qux")
 		end)
+
+		it("should only reject once", function()
+			local rejectA
+			local rejectB
+
+			local a = Promise.new(function(_, reject)
+				rejectA = reject
+			end)
+
+			local b = Promise.new(function(_, reject)
+				rejectB = reject
+			end)
+
+			local combinedPromise = Promise.all({a, b})
+
+			expect(combinedPromise:getStatus()).to.equal(Promise.Status.Started)
+
+			rejectA("foo", "bar")
+
+			expect(combinedPromise:getStatus()).to.equal(Promise.Status.Rejected)
+
+			rejectB("baz", "qux")
+
+			local resultLength, result = pack(combinedPromise:_unwrap())
+			local success, first, second = unpack(result, 1, resultLength)
+
+			expect(resultLength).to.equal(3)
+			expect(success).to.equal(false)
+			expect(first).to.equal("foo")
+			expect(second).to.equal("bar")
+		end)
 	end)
 end

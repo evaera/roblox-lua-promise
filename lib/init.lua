@@ -205,15 +205,9 @@ function Promise.all(promises)
 		-- Keep a count of resolved promises because just checking the resolved
 		-- values length wouldn't account for promises that resolve with nil.
 		local resolvedCount = 0
-		local rejected = false
 
 		-- Called when a single value is resolved and resolves if all are done.
 		local function resolveOne(i, ...)
-			if rejected then
-				-- Bail out if this promise has already been rejected.
-				return
-			end
-
 			resolvedValues[i] = ...
 			resolvedCount = resolvedCount + 1
 
@@ -230,9 +224,7 @@ function Promise.all(promises)
 					resolveOne(i, ...)
 				end,
 				function(...)
-					if not rejected then
-						reject(...)
-					end
+					reject(...)
 				end
 			)
 		end
