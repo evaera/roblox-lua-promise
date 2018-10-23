@@ -315,6 +315,13 @@ function Promise.prototype:cancel()
 end
 
 --[[
+	Used to set a callback for when the promise resolves OR rejects.
+]]
+function Promise.prototype:finally(finallyCallback)
+	return self:andThen(finallyCallback, finallyCallback)
+end
+
+--[[
 	Yield until the promise is completed.
 
 	This matches the execution model of normal Roblox functions.
