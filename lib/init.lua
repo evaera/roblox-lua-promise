@@ -84,6 +84,7 @@ Promise.Status = {
 	Started = createSymbol("Started"),
 	Resolved = createSymbol("Resolved"),
 	Rejected = createSymbol("Rejected"),
+	Cancelled = createSymbol("Cancelled"),
 }
 
 --[[
@@ -134,6 +135,9 @@ function Promise.new(callback)
 		-- Queues representing functions we should invoke when we update!
 		_queuedResolve = {},
 		_queuedReject = {},
+
+		-- The function to run when/if this promise is cancelled.
+		_cancellationHook = nil,
 	}
 
 	setmetatable(self, Promise)
@@ -146,7 +150,11 @@ function Promise.new(callback)
 		self:_reject(...)
 	end
 
-	local _, result = wpcallPacked(callback, resolve, reject)
+	local function onCancel(cancellationHook)
+		self._cancellationHook = cancellationHook
+	end
+
+	local _, result = wpcallPacked(callback, resolve, reject, onCancel)
 	local ok = result[1]
 	local err = result[2]
 
@@ -288,6 +296,22 @@ end
 ]]
 function Promise.prototype:catch(failureCallback)
 	return self:andThen(nil, failureCallback)
+end
+
+--[[
+	Cancels the promise, disallowing it from rejecting or resolving, and calls
+	the cancellation hook if provided.
+]]
+function Promise.prototype:cancel()
+	if self._status ~= Promise.Status.Started then
+		return
+	end
+
+	self._status = Promise.Status.Cancelled
+
+	if self._cancellationHook then
+		self._cancellationHook()
+	end
 end
 
 --[[
