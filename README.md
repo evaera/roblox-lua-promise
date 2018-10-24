@@ -21,7 +21,7 @@ This Promise implementation attempts to satisfy those traits.
 	* Construct a new Promise that will be resolved or rejected with the given callbacks.
 	* You may register an optional cancellation hook by using the `onCancel` argument.
 		* This should be used to abort any ongoing operations leading up to the promise being settled. 
-		* Call the `onCancel` function with a new function as its only argument to set a hook which will in turn be called when/if the promise is cancelled.
+		* Call the `onCancel` function with a function callback as its only argument to set a hook which will in turn be called when/if the promise is cancelled.
 		* When a promise is cancelled, calls to `resolve` or `reject` will be ignored, regardless of if you set a cancellation hook or not.
 * `Promise.resolve(value) -> Promise`
 	* Creates an immediately resolved Promise with the given value.
