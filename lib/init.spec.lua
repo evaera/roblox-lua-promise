@@ -277,6 +277,100 @@ return function()
 		end)
 	end)
 
+	describe("Promise:cancel", function()
+		it("should mark promises as cancelled and not resolve or reject them", function()
+			local callCount = 0
+			local finallyCallCount = 0
+			local promise = Promise.new(function() end):andThen(function()
+				callCount = callCount + 1
+			end):finally(function()
+				finallyCallCount = finallyCallCount + 1
+			end)
+
+			promise:cancel()
+			promise:cancel() -- Twice to check call counts
+
+			expect(callCount).to.equal(0)
+			expect(finallyCallCount).to.equal(1)
+			expect(promise:getStatus()).to.equal(Promise.Status.Cancelled)
+		end)
+
+		it("should call the cancellation hook once", function()
+			local callCount = 0
+
+			local promise = Promise.new(function(resolve, reject, onCancel)
+				onCancel(function()
+					callCount = callCount + 1
+				end)
+			end)
+
+			promise:cancel()
+			promise:cancel() -- Twice to check call count
+
+			expect(callCount).to.equal(1)
+		end)
+
+		it("should propagate cancellations", function()
+			local promise = Promise.new(function() end)
+
+			local consumer1 = promise:andThen()
+			local consumer2 = promise:andThen()
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Started)
+			expect(consumer1:getStatus()).to.equal(Promise.Status.Started)
+			expect(consumer2:getStatus()).to.equal(Promise.Status.Started)
+
+			consumer1:cancel()
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Started)
+			expect(consumer1:getStatus()).to.equal(Promise.Status.Cancelled)
+			expect(consumer2:getStatus()).to.equal(Promise.Status.Started)
+
+			consumer2:cancel()
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Cancelled)
+			expect(consumer1:getStatus()).to.equal(Promise.Status.Cancelled)
+			expect(consumer2:getStatus()).to.equal(Promise.Status.Cancelled)
+		end)
+
+		it("should not affect downstream promises", function()
+			local promise = Promise.new(function() end)
+			local consumer = promise:andThen()
+
+			promise:cancel()
+
+			expect(consumer:getStatus()).to.equal(Promise.Status.Started)
+		end)
+	end)
+
+	describe("Promise:finally", function()
+		it("should be called upon resolve, reject, or cancel", function()
+			local callCount = 0
+
+			local function finally()
+				callCount = callCount + 1
+			end
+
+			-- Resolved promise
+			Promise.new(function(resolve, reject)
+				resolve()
+			end):finally(finally)
+
+			-- Chained promise
+			Promise.resolve():andThen(function()
+
+			end):finally(finally):finally(finally)
+
+			-- Rejected promise
+			Promise.reject():finally(finally)
+
+			local cancelledPromise = Promise.new(function() end):finally(finally)
+			cancelledPromise:cancel()
+
+			expect(callCount).to.equal(5)
+		end)
+	end)
+
 	describe("Promise.all", function()
 		it("should error if given something other than a table", function()
 			expect(function()

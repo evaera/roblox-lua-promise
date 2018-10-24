@@ -110,8 +110,15 @@ Promise.Status = {
 			:andThen(function(stuff)
 				print("Got some stuff!", stuff)
 			end)
+
+	Second parameter, parent, is used internally for tracking the "parent" in a
+	promise chain. External code shouldn't need to worry about this.
 ]]
-function Promise.new(callback)
+function Promise.new(callback, parent)
+	if parent ~= nil and not Promise.is(parent) then
+		error("Argument #2 to Promise.new must be a promise or nil", 2)
+	end
+
 	local self = {
 		-- Used to locate where a promise was created
 		_source = debug.traceback(),
@@ -135,9 +142,19 @@ function Promise.new(callback)
 		-- Queues representing functions we should invoke when we update!
 		_queuedResolve = {},
 		_queuedReject = {},
+		_queuedFinally = {},
 
 		-- The function to run when/if this promise is cancelled.
 		_cancellationHook = nil,
+
+		-- The "parent" of this promise in a promise chain. Required for
+		-- cancellation propagation.
+		_parent = parent,
+
+		-- The number of consumers attached to this promise. This is needed so that
+		-- we don't propagate promise cancellations when there are still uncancelled
+		-- consumers.
+		_numConsumers = 0,
 	}
 
 	setmetatable(self, Promise)
@@ -261,6 +278,7 @@ end
 ]]
 function Promise.prototype:andThen(successHandler, failureHandler)
 	self._unhandledRejection = false
+	self._numConsumers = self._numConsumers + 1
 
 	-- Create a new promise to follow this part of the chain
 	return Promise.new(function(resolve, reject)
@@ -287,8 +305,12 @@ function Promise.prototype:andThen(successHandler, failureHandler)
 		elseif self._status == Promise.Status.Rejected then
 			-- This promise died a terrible death! Trigger failure immediately.
 			failureCallback(unpack(self._values, 1, self._valuesLength))
+		elseif self._status == Promise.Status.Cancelled then
+			-- We don't want to call the success handler or the failure handler,
+			-- we just reject this promise outright.
+			reject("Promise is cancelled")
 		end
-	end)
+	end, self)
 end
 
 --[[
@@ -312,13 +334,48 @@ function Promise.prototype:cancel()
 	if self._cancellationHook then
 		self._cancellationHook()
 	end
+
+	if self._parent then
+		self._parent:_consumerCancelled()
+	end
+
+	self:_finalize()
 end
 
 --[[
-	Used to set a callback for when the promise resolves OR rejects.
+	Used to decrease the number of consumers by 1, and if there are no more,
+	cancel this promise.
 ]]
-function Promise.prototype:finally(finallyCallback)
-	return self:andThen(finallyCallback, finallyCallback)
+function Promise.prototype:_consumerCancelled()
+	self._numConsumers = self._numConsumers - 1
+
+	if self._numConsumers <= 0 then
+		self:cancel()
+	end
+end
+
+--[[
+	Used to set a handler for when the promise resolves, rejects, or is
+	cancelled. Returns a new promise chained from this promise.
+]]
+function Promise.prototype:finally(finallyHandler)
+	self._numConsumers = self._numConsumers + 1
+
+	-- Return a promise chained off of this promise
+	return Promise.new(function(resolve, reject)
+		local finallyCallback = resolve
+		if finallyHandler then
+			finallyCallback = createAdvancer(finallyHandler, resolve, reject)
+		end
+
+		if self._status == Promise.Status.Started then
+			-- The promise is not settled, so queue this.
+			table.insert(self._queuedFinally, finallyCallback)
+		else
+			-- The promise already settled or was cancelled, run the callback now.
+			finallyCallback()
+		end
+	end, self)
 end
 
 --[[
@@ -410,6 +467,8 @@ function Promise.prototype:_resolve(...)
 	for _, callback in ipairs(self._queuedResolve) do
 		callback(...)
 	end
+
+	self:_finalize()
 end
 
 function Promise.prototype:_reject(...)
@@ -448,6 +507,22 @@ function Promise.prototype:_reject(...)
 			)
 			warn(message)
 		end)
+	end
+
+	self:_finalize()
+end
+
+--[[
+	Calls any :finally handlers. We need this to be a separate method and
+	queue because we must call all of the finally callbacks upon a success,
+	failure, *and* cancellation.
+]]
+function Promise.prototype:_finalize()
+	for _, callback in ipairs(self._queuedFinally) do
+		-- Purposefully not passing values to callbacks here, as it could be the
+		-- resolved values, or rejected errors. If the developer needs the values,
+		-- they should use :andThen or :catch explicitly.
+		callback()
 	end
 end
 
