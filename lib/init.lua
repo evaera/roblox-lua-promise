@@ -168,6 +168,8 @@ function Promise.new(callback, parent)
 	end
 
 	local function onCancel(cancellationHook)
+		assert(type(cancellationHook) == "function", "onCancel must be called with a function as its first argument.")
+
 		self._cancellationHook = cancellationHook
 	end
 
