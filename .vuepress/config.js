@@ -32,6 +32,7 @@ module.exports = {
   ],
 
   themeConfig: {
+    activeHeaderLinks: false,
     searchOptions: {
       placeholder: 'Press S to search...'
     },

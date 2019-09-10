@@ -190,6 +190,15 @@ function Promise.new(callback, parent)
 end
 
 --[[
+	Promise.new, except Promise.spawn is implicit.
+]]
+function Promise.async(callback)
+	return Promise.new(function(...)
+		return Promise.spawn(callback, ...)
+	end)
+end
+
+--[[
 	Spawns a thread with predictable timing.
 ]]
 function Promise.spawn(callback, ...)

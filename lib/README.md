@@ -26,8 +26,15 @@ docs:
 
   functions:
     - name: new
+      tags: [ 'constructor' ]
       desc: |
         Construct a new Promise that will be resolved or rejected with the given callbacks.
+
+        ::: tip
+          Generally, it is recommended to use [[Promise.async]] instead. You cannot directly yield inside the `executor` function of [[Promise.new]].
+        :::
+
+        If you `resolve` with a Promise, it will be chained onto.
         
         You may register an optional cancellation hook by using the `onCancel` argument.
           * This should be used to abort any ongoing operations leading up to the promise being settled. 
@@ -60,6 +67,44 @@ docs:
                     - name: abortHandler
                       kind: function
                   returns: void
+      returns: Promise
+    - name: async
+      tags: [ 'constructor' ]
+      desc: |
+        The same as [[Promise.new]], except it implicitly uses `Promise.spawn` internally. Use this if you want to yield inside your Promise body.
+
+        ::: tip
+        Promises created with [[Promise.async]] are guaranteed to yield for at least one frame, even if the executor function doesn't yield itself. <a href="/roblox-lua-promise/lib/Details.html#yielding-in-promise-executor">Learn more</a>
+        :::
+      static: true
+      params:
+        - name: asyncExecutor
+          type:
+            kind: function
+            params:
+              - name: resolve
+                type:
+                  kind: function
+                  params:
+                    - name: "..."
+                      type: ...any?
+                  returns: void
+              - name: reject
+                type:
+                  kind: function
+                  params:
+                    - name: "..."
+                      type: ...any?
+                  returns: void
+              - name: onCancel
+                type:
+                  kind: function
+                  params:
+                    - name: abortHandler
+                      kind: function
+                  returns: void
+      returns: Promise
+  
     - name: resolve
       desc: Creates an immediately resolved Promise with the given value.
       static: true
@@ -106,7 +151,10 @@ docs:
           type: "...any?"
     
     - name: andThen
-      desc: Chains onto an existing Promise and returns a new Promise.
+      desc: |
+        Chains onto an existing Promise and returns a new Promise.
+
+        Return a Promise from the success or failure handler and it will be chained onto.
       params:
         - name: successHandler
           type:
