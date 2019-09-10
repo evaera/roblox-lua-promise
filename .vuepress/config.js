@@ -36,7 +36,8 @@ module.exports = {
       placeholder: 'Press S to search...'
     },
     nav: [
-      { text: 'API Reference', link: '/lib/' }
+      { text: 'API Reference', link: '/lib/' },
+      { text: 'GitHub', link: 'https://github.com/evaera/roblox-lua-promise' }
     ],
 
     sidebarDepth: 3,

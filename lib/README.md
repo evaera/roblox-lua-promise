@@ -21,6 +21,7 @@ docs:
     - name: Status
       tags: [ 'read only', 'static', 'enums' ]
       type: PromiseStatus
+      desc: A table containing all members of the `PromiseStatus` enum, e.g., `Promise.Status.Resolved`.
       
 
   functions:
@@ -94,7 +95,7 @@ docs:
         - type: boolean
           desc: "`true` if the given `object` is a Promise."
     - name: spawn
-      desc: Spawns a thread with predictable timing. The callback will be called on the next `RunService.Stepped` event.
+      desc: Spawns a thread with predictable timing. The callback will be called on the next `RunService.Heartbeat` event.
       static: true
       params:
         - name: callback
