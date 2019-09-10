@@ -1,10 +1,3 @@
----
-home: true
-actionText: API docs →
-actionLink: /lib/
-footer: MIT Licensed 
----
-
 # Roblox Lua Promise
 An implementation of `Promise` similar to Promise/A+.
 
@@ -26,7 +19,7 @@ This Promise implementation attempts to satisfy these traits:
 * Predictable timing
 
 ## Example
-This Promise implementation finished synchronously. In order to wrap an existing async API, you should use `spawn` or `delay` in order to prevent your calling thread from accidentally yielding.
+This Promise implementation finished synchronously. In order to wrap an existing async API, you should use `Promise.spawn` in order to prevent your calling thread from accidentally yielding.
 
 ```lua
 local HttpService = game:GetService("HttpService")
