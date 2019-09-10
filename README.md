@@ -31,16 +31,14 @@ local HttpService = game:GetService("HttpService")
 -- A light wrapper around HttpService
 -- Ideally, you do this once per project per async method that you use.
 local function httpGet(url)
-	return Promise.new(function(resolve, reject)
-		Promise.spawn(function()
-			local ok, result = pcall(HttpService.GetAsync, HttpService, url)
+	return Promise.async(function(resolve, reject)
+		local ok, result = pcall(HttpService.GetAsync, HttpService, url)
 
-			if ok then
-				resolve(result)
-			else
-				reject(result)
-			end
-		end)
+		if ok then
+			resolve(result)
+		else
+			reject(result)
+		end
 	end)
 end
 
