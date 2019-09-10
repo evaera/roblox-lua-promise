@@ -2,6 +2,7 @@
 	An implementation of Promises similar to Promise/A+.
 ]]
 
+local RunService = game:GetService("RunService")
 local PROMISE_DEBUG = false
 
 --[[
@@ -189,6 +190,21 @@ function Promise.new(callback, parent)
 end
 
 --[[
+	Spawns a thread with predictable timing.
+]]
+function Promise.spawn(callback, ...)
+	local spawnBindable = Instance.new("BindableEvent")
+	local args = { ... }
+	local length = select("#", ...)
+	spawnBindable.Event:Connect(function()
+		RunService.Heartbeat:Wait()
+		callback(unpack(args, 1, length))
+	end)
+	spawnBindable:Fire()
+	spawnBindable:Destroy()
+end
+
+--[[
 	Create a promise that represents the immediately resolved value.
 ]]
 function Promise.resolve(value)
@@ -258,6 +274,36 @@ function Promise.all(promises)
 					reject(...)
 				end
 			)
+		end
+	end)
+end
+
+--[[
+	Races a set of Promises and returns the first one that resolves,
+	cancelling the others.
+]]
+function Promise.race(promises)
+	assert(type(promises) == "table", "Please pass a list of promises to Promise.race")
+
+	for i, promise in ipairs(promises) do
+		assert(Promise.is(promise), ("Non-promise value passed into Promise.race at index #%d"):format(i))
+	end
+
+	return Promise.new(function(resolve, reject, onCancel)
+		local function finalize(callback)
+			return function (...)
+				for _, promise in ipairs(promises) do
+					promise:cancel()
+				end
+
+				return callback(...)
+			end
+		end
+
+		onCancel(finalize(reject))
+
+		for _, promise in ipairs(promises) do
+			promise:andThen(finalize(resolve), finalize(reject))
 		end
 	end)
 end

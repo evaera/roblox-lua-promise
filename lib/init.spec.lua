@@ -72,10 +72,11 @@ return function()
 			expect(promise:getStatus()).to.equal(Promise.Status.Rejected)
 			expect(promise._values[1]:find("hahah")).to.be.ok()
 
+
 			-- Loosely check for the pieces of the stack trace we expect
 			expect(promise._values[1]:find("init.spec")).to.be.ok()
 			expect(promise._values[1]:find("new")).to.be.ok()
-			expect(promise._values[1]:find("error")).to.be.ok()
+			expect(promise._values[1]:find("Stack Begin")).to.be.ok()
 		end)
 	end)
 
@@ -512,6 +513,37 @@ return function()
 			expect(success).to.equal(false)
 			expect(first).to.equal("foo")
 			expect(second).to.equal("bar")
+		end)
+	end)
+
+	describe("Promise.race", function()
+		it("should resolve with the first settled value", function()
+			local promise = Promise.race({
+				Promise.resolve(1),
+				Promise.resolve(2)
+			}):andThen(function(value)
+				expect(value).to.equal(1)
+			end)
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Resolved)
+		end)
+
+		it("should cancel other promises", function()
+			local promises = {
+				Promise.new(function(resolve)
+					-- resolve(1)
+				end),
+				Promise.new(function(resolve)
+					resolve(2)
+				end)
+			}
+
+			local promise = Promise.race(promises)
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Resolved)
+			expect(promise._values[1]).to.equal(2)
+			expect(promises[1]:getStatus()).to.equal(Promise.Status.Cancelled)
+			expect(promises[2]:getStatus()).to.equal(Promise.Status.Resolved)
 		end)
 	end)
 end

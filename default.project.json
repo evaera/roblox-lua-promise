@@ -1,0 +1,12 @@
+{
+	"name": "lua-promise",
+	"tree": {
+		"$className": "DataModel",
+		"ReplicatedStorage": {
+			"$className": "ReplicatedStorage",
+			"Promise": {
+				"$path": "lib"
+			}
+		}
+	}
+}
