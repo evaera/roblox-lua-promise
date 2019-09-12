@@ -44,7 +44,8 @@ module.exports = {
     sidebarDepth: 3,
     sidebar: [
       '/lib/',
-      '/lib/Details'
+      '/lib/Usage',
+      '/lib/Examples'
     ]
   }
 }

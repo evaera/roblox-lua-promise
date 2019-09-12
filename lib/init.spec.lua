@@ -334,13 +334,41 @@ return function()
 			expect(consumer2:getStatus()).to.equal(Promise.Status.Cancelled)
 		end)
 
-		it("should not affect downstream promises", function()
+		it("should affect downstream promises", function()
 			local promise = Promise.new(function() end)
 			local consumer = promise:andThen()
 
 			promise:cancel()
 
-			expect(consumer:getStatus()).to.equal(Promise.Status.Started)
+			expect(consumer:getStatus()).to.equal(Promise.Status.Cancelled)
+		end)
+
+		it("should track consumers", function()
+			local pending = Promise.new(function() end)
+			local p0 = Promise.resolve()
+			local p1 = p0:finally(function() return pending end)
+			local p2 = Promise.new(function(resolve)
+				resolve(p1)
+			end)
+			local p3 = p2:andThen(function() end)
+
+			expect(p1._parent).to.never.equal(p0)
+			expect(p2._parent).to.never.equal(p1)
+			expect(p2._consumers[p3]).to.be.ok()
+			expect(p3._parent).to.equal(p2)
+		end)
+
+		it("should cancel resolved pending promises", function()
+			local p1 = Promise.new(function() end)
+
+			local p2 = Promise.new(function(resolve)
+				resolve(p1)
+			end):finally(function() end)
+
+			p2:cancel()
+
+			expect(p1._status).to.equal(Promise.Status.Cancelled)
+			expect(p2._status).to.equal(Promise.Status.Cancelled)
 		end)
 	end)
 
@@ -369,6 +397,14 @@ return function()
 			cancelledPromise:cancel()
 
 			expect(callCount).to.equal(5)
+		end)
+
+		it("should be a child of the parent Promise", function()
+			local p1 = Promise.new(function() end)
+			local p2 = p1:finally(function() end)
+
+			expect(p2._parent).to.equal(p1)
+			expect(p1._consumers[p2]).to.equal(true)
 		end)
 	end)
 

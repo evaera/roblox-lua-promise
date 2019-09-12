@@ -31,7 +31,7 @@ docs:
         Construct a new Promise that will be resolved or rejected with the given callbacks.
 
         ::: tip
-          Generally, it is recommended to use [[Promise.async]] instead. You cannot directly yield inside the `executor` function of [[Promise.new]].
+          If your Promise executor needs to yield, it is recommended to use [[Promise.async]] instead. You cannot directly yield inside the `executor` function of [[Promise.new]].
         :::
 
         If you `resolve` with a Promise, it will be chained onto.
@@ -39,6 +39,9 @@ docs:
         You may register an optional cancellation hook by using the `onCancel` argument.
           * This should be used to abort any ongoing operations leading up to the promise being settled. 
           * Call the `onCancel` function with a function callback as its only argument to set a hook which will in turn be called when/if the promise is cancelled.
+          * `onCancel` returns `true` if the Promise was already cancelled when you called `onCancel`.
+          * Calling `onCancel` with no argument will not override a previously set cancellation hook, but it will still return `true` if the Promise is currently cancelled.
+          * You can set the cancellation hook at any time before resolving.
           * When a promise is cancelled, calls to `resolve` or `reject` will be ignored, regardless of if you set a cancellation hook or not.
       static: true
       params:
@@ -66,15 +69,19 @@ docs:
                   params:
                     - name: abortHandler
                       kind: function
-                  returns: void
+                  returns:
+                    - type: boolean
+                      desc: "Returns `true` if the Promise was already cancelled at the time of calling `onCancel`."
       returns: Promise
     - name: async
       tags: [ 'constructor' ]
       desc: |
-        The same as [[Promise.new]], except it implicitly uses `Promise.spawn` internally. Use this if you want to yield inside your Promise body.
-
+        The same as [[Promise.new]], except it implicitly uses [[Promise.spawn]] internally. Use this if you want to yield inside your Promise body.
+        
+        If your Promise body does not need to yield, such as when attaching `resolve` to an event listener, you should use [[Promise.new]] instead.
+        
         ::: tip
-        Promises created with [[Promise.async]] are guaranteed to yield for at least one frame, even if the executor function doesn't yield itself. <a href="/roblox-lua-promise/lib/Details.html#yielding-in-promise-executor">Learn more</a>
+        Promises created with [[Promise.async]] don't begin executing until the next `RunService.Heartbeat` event, even if the executor function doesn't yield itself. <a href="/roblox-lua-promise/lib/Details.html#yielding-in-promise-executor">Learn more</a>
         :::
       static: true
       params:
@@ -102,7 +109,9 @@ docs:
                   params:
                     - name: abortHandler
                       kind: function
-                  returns: void
+                  returns:
+                    - type: boolean
+                      desc: "Returns `true` if the Promise was already cancelled at the time of calling `onCancel`."
       returns: Promise
   
     - name: resolve
@@ -149,7 +158,37 @@ docs:
             params: "...: ...any?"
         - name: "..."
           type: "...any?"
-    
+    - name: promisify
+      desc: |
+        Wraps a function that yields into one that returns a Promise.
+
+        ```lua
+        local sleep = Promise.promisify(wait)
+
+        sleep(1):andThen(print)
+        ```
+      static: true
+      params:
+        - name: function
+          type:
+            kind: function
+            params: "...: ...any?"
+        - name: selfValue
+          type: any?
+          desc: This value will be prepended to the arguments list given to the curried function. This can be used to lock a method to a single instance. Otherwise, you can pass the self value before the argument list.
+      returns:
+        - desc: The function acts like the passed function but now returns a Promise of its return values.
+          type:
+            kind: function
+            params:
+              - name: "..."
+                type: "...any?"
+                desc: The same arguments the wrapped function usually takes.
+            returns:
+              - name: "*"
+                desc: The return values from the wrapped function.
+
+    # Instance methods
     - name: andThen
       desc: |
         Chains onto an existing Promise and returns a new Promise.
@@ -210,6 +249,7 @@ docs:
         - name: finallyHandler
           type:
             kind: function
+            params: "status: PromiseStatus"
             returns: ...any? 
       returns: Promise<...any?> 
       overloads:
@@ -217,6 +257,7 @@ docs:
           - name: finallyHandler
             type:
               kind: function
+              params: "status: PromiseStatus"
               returns: Promise<T>
           returns: Promise<T>
 
@@ -231,12 +272,20 @@ docs:
         Promises will only be cancelled if all of their consumers are also cancelled. This is to say that if you call `andThen` twice on the same promise, and you cancel only one of the child promises, it will not cancel the parent promise until the other child promise is also cancelled.
 
     - name: await
-      desc: Yields the current thread until the given Promise completes. Returns `ok` as a bool, followed by the value that the promise returned.
+      desc: Yields the current thread until the given Promise completes. Returns true if the Promise resolved, followed by the values that the promise resolved or rejected with.
       returns:
-        - desc: Fate of the Promise. `true` if resolved, `false` if rejected, `nil` if cancelled.
-          type: boolean | nil
+        - desc: "`true` if the Promise successfully resolved."
+          type: boolean
         - desc: The values that the Promise resolved or rejected with.
           type: ...any?
+    
+    - name: awaitStatus
+      desc: Yields the current thread until the given Promise completes. Returns the Promise's status, followed by the values that the promise resolved or rejected with.
+      returns:
+        - type: PromiseStatus
+          desc: The Promise's status.
+        - type: ...any?
+          desc: The values that the Promise resolved or rejected with.
     
     - name: getStatus
       desc: Returns the current Promise status.
