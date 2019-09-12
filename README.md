@@ -5,7 +5,7 @@
 </div>
 
 
-## Motivation
+## Why you should use Promises
 
 The way Roblox models asynchronous operations by default is by yielding (stopping) the thread and then resuming it when the future value is available. This model is not ideal because:
 
@@ -14,8 +14,6 @@ The way Roblox models asynchronous operations by default is by yielding (stoppin
 - When an asynchronous operation fails or an error is encountered, Lua functions usually either raise an error or return a success value followed by the actual value. Both of these methods lead to repeating the same tired patterns many times over for checking if the operation was successful.
 - Yielding lacks easy access to introspection and the ability to cancel an operation if the value is no longer needed.
 
-### Goals
-
 This Promise implementation attempts to satisfy these traits:
 
 * An object that represents a unit of asynchronous work
@@ -23,7 +21,7 @@ This Promise implementation attempts to satisfy these traits:
 * Predictable timing
 
 ## Example
-This Promise implementation finished synchronously. In order to wrap an existing async API, you should use `Promise.spawn` in order to prevent your calling thread from accidentally yielding.
+`Promise.async` returns synchronously.
 
 ```lua
 local HttpService = game:GetService("HttpService")
