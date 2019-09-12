@@ -60,13 +60,7 @@ We take advantage of Promise chaining by returning Promises from the `finally` h
 local Promise = require(game.ReplicatedStorage.Promise)
 local TweenService = game:GetService("TweenService")
 
-local function sleep(seconds)
-	return function()
-		return Promise.async(function(resolve)
-			resolve(wait(seconds))
-		end)
-	end
-end
+local sleep = Promise.promisify(wait)
 
 local function apply(obj, props)
 	for key, value in pairs(props) do
