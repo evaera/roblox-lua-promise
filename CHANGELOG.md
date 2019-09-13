@@ -1,3 +1,8 @@
+# 2.1.0
+
+- Add `finallyCall`, `andThenCall`
+- Add `awaitValue`
+
 # 2.0.0
 
 - Add Promise.race

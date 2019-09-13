@@ -401,6 +401,16 @@ function Promise.prototype:catch(failureCallback)
 end
 
 --[[
+	Calls a callback on `andThen` with specific arguments.
+]]
+function Promise.prototype:andThenCall(callback, ...)
+	local length, values = pack(...)
+	return self:andThen(function()
+		return callback(unpack(values, 1, length))
+	end)
+end
+
+--[[
 	Cancels the promise, disallowing it from rejecting or resolving, and calls
 	the cancellation hook if provided.
 ]]
@@ -467,6 +477,16 @@ function Promise.prototype:finally(finallyHandler)
 end
 
 --[[
+	Calls a callback on `finally` with specific arguments.
+]]
+function Promise.prototype:finallyCall(callback, ...)
+	local length, values = pack(...)
+	return self:finally(function()
+		return callback(unpack(values, 1, length))
+	end)
+end
+
+--[[
 	Yield until the promise is completed.
 
 	This matches the execution model of normal Roblox functions.
@@ -502,6 +522,22 @@ function Promise.prototype:await(...)
 	local status = table.remove(result, 1)
 
 	return status == Promise.Status.Resolved, unpack(result, 1, length - 1)
+end
+
+--[[
+	Calls await and only returns if the Promise resolves.
+	Throws if the Promise rejects or gets cancelled.
+]]
+function Promise.prototype:awaitValue(...)
+	local length, result = pack(self:awaitStatus(...))
+	local status = table.remove(result, 1)
+
+	assert(
+		status == Promise.Status.Resolved,
+		tostring(result[1] == nil and "" or result[1])
+	)
+
+	return unpack(result, 1, length - 1)
 end
 
 --[[

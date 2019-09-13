@@ -261,7 +261,47 @@ docs:
               returns: Promise<T>
           returns: Promise<T>
 
+    - name: andThenCall
+      desc: |
+        Attaches an `andThen` handler to this Promise that calls the given callback with the predefined arguments. The resolved value is discarded.
 
+        ```lua
+          promise:andThenCall(someFunction, "some", "arguments")
+        ```
+
+        This is sugar for
+
+        ```lua
+          promise:andThen(function()
+            return callback(...args)
+          end)
+        ```
+      params:
+        - name: callback
+          type:
+            kind: function
+            params: "...: ...any?"
+            returns: "any"
+        - name: "..."
+          type: "...any?"
+          desc: Arguments which will be passed to the callback.
+      returns: Promise
+
+    - name: finallyCall
+      desc: |
+        Same as `andThenCall`, except for `finally`.
+
+        Attaches a `finally` handler to this Promise that calls the given callback with the predefined arguments.
+      params:
+        - name: callback
+          type:
+            kind: function
+            params: "...: ...any?"
+            returns: "any"
+        - name: "..."
+          type: "...any?"
+          desc: Arguments which will be passed to the callback.
+      returns: Promise
 
     - name: cancel
       desc: |
@@ -272,7 +312,12 @@ docs:
         Promises will only be cancelled if all of their consumers are also cancelled. This is to say that if you call `andThen` twice on the same promise, and you cancel only one of the child promises, it will not cancel the parent promise until the other child promise is also cancelled.
 
     - name: await
-      desc: Yields the current thread until the given Promise completes. Returns true if the Promise resolved, followed by the values that the promise resolved or rejected with.
+      desc: |
+        Yields the current thread until the given Promise completes. Returns true if the Promise resolved, followed by the values that the promise resolved or rejected with.
+
+        ::: warning
+        If the Promise gets cancelled, this function will return `false`, which is indistinguishable from a rejection. If you need to differentiate, you should use [[Promise.awaitStatus]] instead.
+        :::
       returns:
         - desc: "`true` if the Promise successfully resolved."
           type: boolean
@@ -286,6 +331,14 @@ docs:
           desc: The Promise's status.
         - type: ...any?
           desc: The values that the Promise resolved or rejected with.
+    - name: awaitValue
+      desc: |
+        Yields the current thread until the given Promise completes. Returns the the values that the promise resolved with.
+        
+        Errors if the Promise rejects or gets cancelled.
+      returns:
+        - type: ...any?
+          desc: The values that the Promise resolved with.
     
     - name: getStatus
       desc: Returns the current Promise status.
