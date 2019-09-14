@@ -68,7 +68,7 @@ end)
 
 You must observe the result of a Promise, either with `catch` or `finally`, otherwise an unhandled Promise rejection warning will be printed to the console.
 
-If an error occurs while executing the Promise body, the Promise will be rejected automatically with the error text.
+If an error occurs while executing the Promise body, the Promise will be rejected automatically with the error text if it's in a synchronous Promise. Otherwise, the error won't be caught.
 
 ## Chaining
 

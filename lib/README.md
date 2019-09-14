@@ -83,6 +83,17 @@ docs:
         ::: tip
         Promises created with [[Promise.async]] don't begin executing until the next `RunService.Heartbeat` event, even if the executor function doesn't yield itself. <a href="/roblox-lua-promise/lib/Details.html#yielding-in-promise-executor">Learn more</a>
         :::
+        
+        ```lua
+        local function waitForChild(instance, childName, timeout)
+          return Promise.async(function(resolve, reject)
+            local child = instance:WaitForChild(childName, timeout)
+
+            ;(child and resolve or reject)(child)
+          end)
+        end
+        ```
+        
       static: true
       params:
         - name: asyncExecutor
@@ -113,6 +124,42 @@ docs:
                     - type: boolean
                       desc: "Returns `true` if the Promise was already cancelled at the time of calling `onCancel`."
       returns: Promise
+
+    - name: promisify
+      desc: |
+        Wraps a function that yields into one that returns a Promise.
+
+        ```lua
+        local sleep = Promise.promisify(wait)
+
+        sleep(1):andThen(print)
+        ```
+
+        ```lua
+        local isPlayerInGroup = Promise.promisify(function(player, groupId)
+          return player:IsInGroup(groupId)
+        end)
+        ```        
+      static: true
+      params:
+        - name: function
+          type:
+            kind: function
+            params: "...: ...any?"
+        - name: selfValue
+          type: any?
+          desc: This value will be prepended to the arguments list given to the curried function. This can be used to lock a method to a single instance. Otherwise, you can pass the self value before the argument list.
+      returns:
+        - desc: The function acts like the passed function but now returns a Promise of its return values.
+          type:
+            kind: function
+            params:
+              - name: "..."
+                type: "...any?"
+                desc: The same arguments the wrapped function usually takes.
+            returns:
+              - name: "*"
+                desc: The return values from the wrapped function.
   
     - name: resolve
       desc: Creates an immediately resolved Promise with the given value.
@@ -158,35 +205,6 @@ docs:
             params: "...: ...any?"
         - name: "..."
           type: "...any?"
-    - name: promisify
-      desc: |
-        Wraps a function that yields into one that returns a Promise.
-
-        ```lua
-        local sleep = Promise.promisify(wait)
-
-        sleep(1):andThen(print)
-        ```
-      static: true
-      params:
-        - name: function
-          type:
-            kind: function
-            params: "...: ...any?"
-        - name: selfValue
-          type: any?
-          desc: This value will be prepended to the arguments list given to the curried function. This can be used to lock a method to a single instance. Otherwise, you can pass the self value before the argument list.
-      returns:
-        - desc: The function acts like the passed function but now returns a Promise of its return values.
-          type:
-            kind: function
-            params:
-              - name: "..."
-                type: "...any?"
-                desc: The same arguments the wrapped function usually takes.
-            returns:
-              - name: "*"
-                desc: The return values from the wrapped function.
 
     # Instance methods
     - name: andThen
@@ -273,7 +291,7 @@ docs:
 
         ```lua
           promise:andThen(function()
-            return callback(...args)
+            return someFunction("some", "arguments")
           end)
         ```
       params:
