@@ -338,7 +338,7 @@ end
 function Promise.promisify(callback, selfValue)
 	return function(...)
 		local length, values = pack(...)
-		return Promise.async(function(resolve)
+		return Promise.new(function(resolve)
 			if selfValue == nil then
 				resolve(callback(unpack(values, 1, length)))
 			else
