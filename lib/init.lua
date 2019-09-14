@@ -335,15 +335,11 @@ end
 --[[
 	Converts a yielding function into a Promise-returning one.
 ]]
-function Promise.promisify(callback, selfValue)
+function Promise.promisify(callback)
 	return function(...)
 		local length, values = pack(...)
 		return Promise.new(function(resolve)
-			if selfValue == nil then
-				resolve(callback(unpack(values, 1, length)))
-			else
-				resolve(callback(selfValue, unpack(values, 1, length)))
-			end
+			resolve(coroutine.wrap(callback)(unpack(values, 1, length)))
 		end)
 	end
 end

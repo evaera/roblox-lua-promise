@@ -146,9 +146,6 @@ docs:
           type:
             kind: function
             params: "...: ...any?"
-        - name: selfValue
-          type: any?
-          desc: This value will be prepended to the arguments list given to the curried function. This can be used to lock a method to a single instance. Otherwise, you can pass the self value before the argument list.
       returns:
         - desc: The function acts like the passed function but now returns a Promise of its return values.
           type:

@@ -1,3 +1,7 @@
+# 2.2.0 
+
+- `Promise.promisify` now uses `coroutine.wrap` instead of `Promise.spawn`
+
 # 2.1.0
 
 - Add `finallyCall`, `andThenCall`
