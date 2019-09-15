@@ -339,7 +339,9 @@ function Promise.promisify(callback)
 	return function(...)
 		local length, values = pack(...)
 		return Promise.new(function(resolve)
-			resolve(coroutine.wrap(callback)(unpack(values, 1, length)))
+			coroutine.wrap(function()
+				resolve(callback(unpack(values, 1, length)))
+			end)()
 		end)
 	end
 end

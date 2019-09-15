@@ -582,4 +582,18 @@ return function()
 			expect(promises[2]:getStatus()).to.equal(Promise.Status.Resolved)
 		end)
 	end)
+
+	describe("Promise.promisify", function()
+		it("should wrap functions", function()
+			local function test(n)
+				return n + 1
+			end
+
+			local promisified = Promise.promisify(test)
+			local status, result = promisified(1):awaitStatus()
+
+			expect(status).to.equal(Promise.Status.Resolved)
+			expect(result).to.equal(2)
+		end)
+	end)
 end
