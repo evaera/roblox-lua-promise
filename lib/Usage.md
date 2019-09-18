@@ -68,7 +68,7 @@ end)
 
 You must observe the result of a Promise, either with `catch` or `finally`, otherwise an unhandled Promise rejection warning will be printed to the console.
 
-If an error occurs while executing the Promise body, the Promise will be rejected automatically with the error text if it's in a synchronous Promise. Otherwise, the error won't be caught.
+If an error occurs while executing the Promise body, the Promise will be rejected automatically with the error text and a trace back.
 
 ## Chaining
 
@@ -122,31 +122,20 @@ Promise.async(function(resolve)
 end)
 ```
 
-`Promise.async` uses `Promise.new` internally, except it wraps the Promise executor with <ApiLink to="Promise.spawn" />.
+`Promise.async` uses `Promise.new` internally, except it allows yielding while `Promise.new` does not.
 
-`Promise.async` is sugar for:
+`Promise.async` attaches a one-time listener to the next `RunService.Heartbeat` event to fire off the rest of your Promise executor, ensuring it always waits at least one step.
 
-```lua
-Promise.new(function(resolve, reject, onCancel)
-  Promise.spawn(function()
-    -- ...
-  end)
-end)
-```
-
-### Promise.spawn
-`Promise.spawn` attaches a one-time listener to the next `RunService.Heartbeat` event to fire off the rest of your Promise executor, ensuring it always waits at least one step.
-
-The reason `Promise.spawn` includes this wait time is to ensure that your Promises have consistent timing. Otherwise, your Promise would run synchronously up to the first yield, and asynchronously afterwards. This can often lead to undesirable results. Additionally, Promises that never yield can resolve completely synchronously, and this can lead to predictable, but often unexpected timing issues. Thus, we use `Promise.spawn` so there is always a guaranteed yield before execution.
+The reason `Promise.async` includes this wait time is to ensure that your Promises have consistent timing. Otherwise, your Promise would run synchronously up to the first yield, and asynchronously afterwards. This can often lead to undesirable results. Additionally, Promise executors that only sometimes yield can lead to unexpected timing issues. Thus, we use `Promise.async` so there is always a guaranteed yield before execution.
 
 ::: danger Don't use regular spawn
-`spawn` might seem like a tempting alternative to `Promise.spawn` here, but you should **never** use it!
+Using `spawn` inside `Promise.new` might seem like a tempting alternative to `Promise.async` here, but you should **never** use it!
 
 `spawn` (and `wait`, for that matter) do not resume threads at a consistent interval. If Roblox has resumed too many threads in a single Lua step, it will begin throttling and your thread that was meant to be resumed on the next frame could actually be resumed several seconds later. The unexpected delay caused by this behavior will cause cascading timing issues in your game and could lead to some potentially ugly bugs.
 :::
 
 ### When to use `Promise.new`
-In some cases, it is desirable for a Promise to execute completely synchronously. If you don't need to yield in your Promise executor, and you are aware of the timing implications of a completely synchronous Promise, then it is acceptable to use `Promise.new`.
+In some cases, it is desirable for a Promise to execute completely synchronously. If you don't need to yield in your Promise executor, then you should use `Promise.new`.
 
 For example, an example of a situation where it might be appropriate to use Promise.new is when resolving after an event is fired.
 
@@ -168,7 +157,7 @@ If you attach a `:andThen` or `:catch` handler to a Promise after it's been canc
 ::: warning
 If you cancel a Promise immediately after creating it without yielding in between, the fate of the Promise is dependent on if the Promise handler yields or not. If the Promise handler resolves without yielding, then the Promise will already be settled by the time you are able to cancel it, thus any consumers of the Promise will have already been called and cancellation is not possible.
 
-If the Promise does yield, then cancelling it immediately *will* prevent its resolution. This is always the case when using `Promise.async`/`Promise.spawn`.
+If the Promise does yield, then cancelling it immediately *will* prevent its resolution. This is always the case when using `Promise.async`.
 :::
 
 Attempting to cancel an already-settled Promise is ignored.

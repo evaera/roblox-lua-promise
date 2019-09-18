@@ -3,7 +3,6 @@
 ]]
 
 local RunService = game:GetService("RunService")
-local PROMISE_DEBUG = false
 
 --[[
 	Packs a number of arguments into a table and returns its length.
@@ -16,30 +15,24 @@ local function pack(...)
 	return len, { ... }
 end
 
---[[
-	wpcallPacked is a version of xpcall that:
-	* Returns the length of the result first
-	* Returns the result packed into a table
-	* Passes extra arguments through to the passed function; xpcall doesn't
-	* Issues a warning if PROMISE_DEBUG is enabled
-]]
-local function wpcallPacked(f, ...)
-	local argsLength, args = pack(...)
+local function packResult(...)
+	local result = (...)
 
-	local body = function()
-		return f(unpack(args, 1, argsLength))
+	return result, pack(select(2, ...))
+end
+
+local function ppcall(callback, ...)
+	local co = coroutine.create(callback)
+
+	local ok, len, result = packResult(coroutine.resume(co, ...))
+
+	if ok and coroutine.status(co) ~= "dead" then
+		error("Yielding inside Promise.new is not allowed! Use Promise.async or create a new thread in the Promise executor!", 2)
+	elseif not ok then
+		result[1] = debug.traceback(result[1], 2)
 	end
 
-	local resultLength, result = pack(xpcall(body, debug.traceback))
-
-	-- If promise debugging is on, warn whenever a pcall fails.
-	-- This is useful for debugging issues within the Promise implementation
-	-- itself.
-	if PROMISE_DEBUG and not result[1] then
-		warn(result[2])
-	end
-
-	return resultLength, result
+	return ok, len, result
 end
 
 --[[
@@ -48,13 +41,12 @@ end
 ]]
 local function createAdvancer(callback, resolve, reject)
 	return function(...)
-		local resultLength, result = wpcallPacked(callback, ...)
-		local ok = result[1]
+		local ok, resultLength, result = ppcall(callback, ...)
 
 		if ok then
-			resolve(unpack(result, 2, resultLength))
+			resolve(unpack(result, 1, resultLength))
 		else
-			reject(unpack(result, 2, resultLength))
+			reject(unpack(result, 1, resultLength))
 		end
 	end
 end
@@ -183,9 +175,8 @@ function Promise.new(callback, parent)
 		return self._status == Promise.Status.Cancelled
 	end
 
-	local _, result = wpcallPacked(callback, resolve, reject, onCancel)
-	local ok = result[1]
-	local err = result[2]
+	local ok, _, result = ppcall(callback, resolve, reject, onCancel)
+	local err = result[1]
 
 	if not ok and self._status == Promise.Status.Started then
 		reject(err)
@@ -195,25 +186,20 @@ function Promise.new(callback, parent)
 end
 
 --[[
-	Promise.new, except Promise.spawn is implicit.
+	Promise.new, except pcall on a new thread is automatic.
 ]]
 function Promise.async(callback)
-	return Promise.new(function(...)
-		return Promise.spawn(callback, ...)
-	end)
-end
+	local traceback = debug.traceback()
+	return Promise.new(function(resolve, reject, onCancel)
+		local connection
+		connection = RunService.Heartbeat:Connect(function()
+			connection:Disconnect()
+			local ok, err = pcall(callback, resolve, reject, onCancel)
 
---[[
-	Spawns a thread with predictable timing.
-]]
-function Promise.spawn(callback, ...)
-	local args = { ... }
-	local length = select("#", ...)
-
-	local connection
-	connection = RunService.Heartbeat:Connect(function()
-		connection:Disconnect()
-		callback(unpack(args, 1, length))
+			if not ok then
+				reject(err .. "\n" .. traceback)
+			end
+		end)
 	end)
 end
 
@@ -661,8 +647,10 @@ function Promise.prototype:_finalize()
 	end
 
 	-- Allow family to be buried
-	self._parent = nil
-	self._consumers = nil
+	if not Promise.TEST then
+		self._parent = nil
+		self._consumers = nil
+	end
 end
 
 return Promise

@@ -1,3 +1,10 @@
+# 2.3.0
+
+- Remove `Promise.spawn` from the public API.
+- `Promise.async` still inherits the behavior from `Promise.spawn`.
+- `Promise.async` now wraps the callback in `pcall` and rejects if an error occurred.
+- `Promise.new` has now has an explicit error message when attempting to yield inside of it.
+
 # 2.2.0 
 
 - `Promise.promisify` now uses `coroutine.wrap` instead of `Promise.spawn`

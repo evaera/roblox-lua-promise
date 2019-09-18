@@ -76,12 +76,12 @@ docs:
     - name: async
       tags: [ 'constructor' ]
       desc: |
-        The same as [[Promise.new]], except it implicitly uses [[Promise.spawn]] internally. Use this if you want to yield inside your Promise body.
+        The same as [[Promise.new]], except it allows yielding. Use this if you want to yield inside your Promise body.
         
         If your Promise body does not need to yield, such as when attaching `resolve` to an event listener, you should use [[Promise.new]] instead.
         
         ::: tip
-        Promises created with [[Promise.async]] don't begin executing until the next `RunService.Heartbeat` event, even if the executor function doesn't yield itself. <a href="/roblox-lua-promise/lib/Details.html#yielding-in-promise-executor">Learn more</a>
+        Promises created with [[Promise.async]] don't begin executing until the next `RunService.Heartbeat` event, even if the executor function doesn't yield itself. This is to ensure that Promises produced from a function are either always synchronous or always asynchronous. <a href="/roblox-lua-promise/lib/Details.html#yielding-in-promise-executor">Learn more</a>
         :::
         
         ```lua
@@ -192,16 +192,6 @@ docs:
       returns: 
         - type: boolean
           desc: "`true` if the given `object` is a Promise."
-    - name: spawn
-      desc: Spawns a thread with predictable timing. The callback will be called on the next `RunService.Heartbeat` event.
-      static: true
-      params:
-        - name: callback
-          type:
-            kind: function
-            params: "...: ...any?"
-        - name: "..."
-          type: "...any?"
 
     # Instance methods
     - name: andThen

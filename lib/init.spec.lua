@@ -1,5 +1,6 @@
 return function()
 	local Promise = require(script.Parent)
+	Promise.TEST = true
 
 	local function pack(...)
 		local len = select("#", ...)
@@ -71,7 +72,6 @@ return function()
 			expect(callCount).to.equal(1)
 			expect(promise:getStatus()).to.equal(Promise.Status.Rejected)
 			expect(promise._values[1]:find("hahah")).to.be.ok()
-
 
 			-- Loosely check for the pieces of the stack trace we expect
 			expect(promise._values[1]:find("init.spec")).to.be.ok()
