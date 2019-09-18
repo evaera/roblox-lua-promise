@@ -89,21 +89,6 @@ Promise.Status = {
 	The callback will receive 'resolve' and 'reject' methods, used to start
 	invoking the promise chain.
 
-	For example:
-
-		local function get(url)
-			return Promise.new(function(resolve, reject)
-				spawn(function()
-					resolve(HttpService:GetAsync(url))
-				end)
-			end)
-		end
-
-		get("https://google.com")
-			:andThen(function(stuff)
-				print("Got some stuff!", stuff)
-			end)
-
 	Second parameter, parent, is used internally for tracking the "parent" in a
 	promise chain. External code shouldn't need to worry about this.
 ]]
@@ -615,7 +600,9 @@ function Promise.prototype:_reject(...)
 
 		local err = tostring((...))
 
-		spawn(function()
+		coroutine.wrap(function()
+			RunService.Heartbeat:Wait()
+
 			-- Someone observed the error, hooray!
 			if not self._unhandledRejection then
 				return
@@ -627,7 +614,7 @@ function Promise.prototype:_reject(...)
 				self._source
 			)
 			warn(message)
-		end)
+		end)()
 	end
 
 	self:_finalize()

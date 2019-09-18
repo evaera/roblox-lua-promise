@@ -1,3 +1,7 @@
+# 2.3.1
+
+- Make unhandled rejection warning trigger on next Heartbeat
+
 # 2.3.0
 
 - Remove `Promise.spawn` from the public API.
