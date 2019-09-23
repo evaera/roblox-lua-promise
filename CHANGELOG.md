@@ -1,3 +1,7 @@
+# 2.4.0
+
+- `Promise.is` now only checks if the object is "andThennable" (has an `andThen` method).
+
 # 2.3.1
 
 - Make unhandled rejection warning trigger on next Heartbeat

@@ -186,7 +186,7 @@ docs:
       params: "promises: array<Promise<T>>"
       returns: Promise<T>
     - name: is
-      desc: Returns whether the given object is a Promise.
+      desc: Returns whether the given object is a Promise. This only checks if the object is a table and has an `andThen` method.
       static: true
       params: "object: any"
       returns: 
