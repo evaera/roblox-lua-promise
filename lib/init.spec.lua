@@ -550,6 +550,15 @@ return function()
 			expect(first).to.equal("foo")
 			expect(second).to.equal("bar")
 		end)
+
+		it("should error if a non-array table is passed in", function()
+			local ok, err = pcall(function()
+				Promise.all(Promise.new(function() end))
+			end)
+
+			expect(ok).to.be.ok()
+			expect(err:find("Non%-promise")).to.be.ok()
+		end)
 	end)
 
 	describe("Promise.race", function()
@@ -580,6 +589,15 @@ return function()
 			expect(promise._values[1]).to.equal(2)
 			expect(promises[1]:getStatus()).to.equal(Promise.Status.Cancelled)
 			expect(promises[2]:getStatus()).to.equal(Promise.Status.Resolved)
+		end)
+
+		it("should error if a non-array table is passed in", function()
+			local ok, err = pcall(function()
+				Promise.race(Promise.new(function() end))
+			end)
+
+			expect(ok).to.be.ok()
+			expect(err:find("Non%-promise")).to.be.ok()
 		end)
 	end)
 

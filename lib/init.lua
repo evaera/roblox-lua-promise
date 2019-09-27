@@ -211,17 +211,17 @@ function Promise.all(promises)
 		error("Please pass a list of promises to Promise.all", 2)
 	end
 
+	-- We need to check that each value is a promise here so that we can produce
+	-- a proper error rather than a rejected promise with our error.
+	for i, promise in pairs(promises) do
+		if not Promise.is(promise) then
+			error(("Non-promise value passed into Promise.all at index %s"):format(tostring(i)), 2)
+		end
+	end
+
 	-- If there are no values then return an already resolved promise.
 	if #promises == 0 then
 		return Promise.resolve({})
-	end
-
-	-- We need to check that each value is a promise here so that we can produce
-	-- a proper error rather than a rejected promise with our error.
-	for i = 1, #promises do
-		if not Promise.is(promises[i]) then
-			error(("Non-promise value passed into Promise.all at index #%d"):format(i), 2)
-		end
 	end
 
 	return Promise.new(function(resolve, reject)
@@ -264,8 +264,8 @@ end
 function Promise.race(promises)
 	assert(type(promises) == "table", "Please pass a list of promises to Promise.race")
 
-	for i, promise in ipairs(promises) do
-		assert(Promise.is(promise), ("Non-promise value passed into Promise.race at index #%d"):format(i))
+	for i, promise in pairs(promises) do
+		assert(Promise.is(promise), ("Non-promise value passed into Promise.race at index %s"):format(tostring(i)))
 	end
 
 	return Promise.new(function(resolve, reject, onCancel)
