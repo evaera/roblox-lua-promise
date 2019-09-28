@@ -35,7 +35,10 @@ end
 	Handles errors if they happen.
 ]]
 local function ppcall(yieldError, callback, ...)
-	local co = coroutine.create(callback)
+	-- Wrapped because C functions can't be passed to coroutine.create!
+	local co = coroutine.create(function(...)
+		return callback(...)
+	end)
 
 	local ok, len, result = packResult(coroutine.resume(co, ...))
 
