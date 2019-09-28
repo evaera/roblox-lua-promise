@@ -227,10 +227,12 @@ function Promise.all(promises)
 	return Promise.new(function(resolve, reject)
 		-- An array to contain our resolved values from the given promises.
 		local resolvedValues = {}
+		local newPromises = {}
 
 		-- Keep a count of resolved promises because just checking the resolved
 		-- values length wouldn't account for promises that resolve with nil.
 		local resolvedCount = 0
+		local finalized = false
 
 		-- Called when a single value is resolved and resolves if all are done.
 		local function resolveOne(i, ...)
@@ -245,13 +247,25 @@ function Promise.all(promises)
 		-- We can assume the values inside `promises` are all promises since we
 		-- checked above.
 		for i = 1, #promises do
-			promises[i]:andThen(
-				function(...)
-					resolveOne(i, ...)
-				end,
-				function(...)
-					reject(...)
-				end
+			if finalized then
+				break
+			end
+
+			table.insert(
+				newPromises,
+				promises[i]:andThen(
+					function(...)
+						resolveOne(i, ...)
+					end,
+					function(...)
+						for _, promise in ipairs(newPromises) do
+							promise:cancel()
+						end
+						finalized = true
+
+						reject(...)
+					end
+				)
 			)
 		end
 	end)
@@ -269,9 +283,11 @@ function Promise.race(promises)
 	end
 
 	return Promise.new(function(resolve, reject, onCancel)
+		local newPromises = {}
+
 		local function finalize(callback)
 			return function (...)
-				for _, promise in ipairs(promises) do
+				for _, promise in ipairs(newPromises) do
 					promise:cancel()
 				end
 
@@ -279,10 +295,15 @@ function Promise.race(promises)
 			end
 		end
 
-		onCancel(finalize(reject))
+		if onCancel(finalize(reject)) then
+			return
+		end
 
 		for _, promise in ipairs(promises) do
-			promise:andThen(finalize(resolve), finalize(reject))
+			table.insert(
+				newPromises,
+				promise:andThen(finalize(resolve), finalize(reject))
+			)
 		end
 	end)
 end

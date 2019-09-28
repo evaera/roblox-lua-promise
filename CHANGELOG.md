@@ -1,3 +1,7 @@
+# 2.4.1
+
+- Fix issue with Promise.race/all always cancelling instead of only cancelling if the Promise has no other consumers
+
 # 2.4.0
 
 - `Promise.is` now only checks if the object is "andThennable" (has an `andThen` method).

@@ -480,8 +480,8 @@ return function()
 
 			expect(combinedPromise:getStatus()).to.equal(Promise.Status.Started)
 
-			resolveB("foo", "bar")
 			rejectA("baz", "qux")
+			resolveB("foo", "bar")
 
 			local resultLength, result = pack(combinedPromise:_unwrap())
 			local success, first, second = unpack(result, 1, resultLength)
@@ -490,6 +490,7 @@ return function()
 			expect(success).to.equal(false)
 			expect(first).to.equal("baz")
 			expect(second).to.equal("qux")
+			expect(b:getStatus()).to.equal(Promise.Status.Cancelled)
 		end)
 
 		it("should not resolve if resolved after rejecting", function()
@@ -574,10 +575,11 @@ return function()
 		end)
 
 		it("should cancel other promises", function()
+			local promise = Promise.new(function() end)
+			promise:andThen(function() end)
 			local promises = {
-				Promise.new(function(resolve)
-					-- resolve(1)
-				end),
+				promise,
+				Promise.new(function() end),
 				Promise.new(function(resolve)
 					resolve(2)
 				end)
@@ -587,8 +589,9 @@ return function()
 
 			expect(promise:getStatus()).to.equal(Promise.Status.Resolved)
 			expect(promise._values[1]).to.equal(2)
-			expect(promises[1]:getStatus()).to.equal(Promise.Status.Cancelled)
-			expect(promises[2]:getStatus()).to.equal(Promise.Status.Resolved)
+			expect(promises[1]:getStatus()).to.equal(Promise.Status.Started)
+			expect(promises[2]:getStatus()).to.equal(Promise.Status.Cancelled)
+			expect(promises[3]:getStatus()).to.equal(Promise.Status.Resolved)
 		end)
 
 		it("should error if a non-array table is passed in", function()

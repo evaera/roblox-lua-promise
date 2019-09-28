@@ -174,6 +174,8 @@ docs:
           * is resolved after all input promises resolve.
           * is rejected if ANY input promises reject.
         Note: Only the first return value from each promise will be present in the resulting array.
+
+        After any input Promise rejects, all other input Promises that are still pending will be cancelled if they have no other consumers.
       static: true
       params: "promises: array<Promise<T>>"
       returns: Promise<array<T>>
@@ -181,7 +183,7 @@ docs:
       desc: |
         Accepts an array of Promises and returns a new promise that is resolved or rejected as soon as any Promise in the array resolves or rejects.
 
-        All other Promises that don't win the race will be cancelled.
+        All other Promises that don't win the race will be cancelled if they have no other consumers.
       static: true
       params: "promises: array<Promise<T>>"
       returns: Promise<T>
