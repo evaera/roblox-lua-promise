@@ -144,7 +144,7 @@ docs:
         ```        
       static: true
       params:
-        - name: function
+        - name: callback
           type:
             kind: function
             params: "...: ...any?"
@@ -170,6 +170,37 @@ docs:
       static: true
       params: "value: ...any"
       returns: Promise<...any>
+    - name: try
+      desc: |
+        Begins a Promise chain, calling a synchronous function and returning a Promise resolving with its return value. If the function errors, the returned Promise will be rejected with the error.
+
+        `Promise.try` is similar to [[Promise.promisify]], except the callback is executed instantly, and unlike `promisify`, yielding is not allowed with `try`.
+
+        ```lua
+        Promise.try(function()
+          return math.random(1, 2) == 1 and "ok" or error("Oh an error!")
+        end)
+          :andThen(function(text)
+            print(text)
+          end)
+          :catch(function(err)
+            warn("Something went wrong")
+          end)
+        ```
+      static: true
+      params:
+        - name: callback
+          type:
+            kind: function
+            params: "...: ...any?"
+            returns: "...any?"
+        - name: "..."
+          type: "...any?"
+          desc: Arguments for the callback
+      returns:
+        - type: "Promise<...any?>"
+          desc: The return value of the passed callback.
+        
     - name: all
       desc: |
         Accepts an array of Promises and returns a new promise that:

@@ -248,6 +248,13 @@ function Promise.reject(...)
 end
 
 --[[
+	Begins a Promise chain, turning synchronous errors into rejections.
+]]
+function Promise.try(...)
+	return Promise.resolve():andThenCall(...)
+end
+
+--[[
 	Returns a new promise that:
 		* is resolved when all input promises resolve
 		* is rejected if ANY input promises reject

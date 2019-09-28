@@ -685,4 +685,17 @@ return function()
 			expect(finalValue).to.equal(1)
 		end)
 	end)
+
+	describe("Promise.try", function()
+		it("should catch synchronous errors", function()
+			local errorText
+			Promise.try(function()
+				error('errortext')
+			end):catch(function(e)
+				errorText = e
+			end)
+
+			expect(errorText:find("errortext")).to.be.ok()
+		end)
+	end)
 end

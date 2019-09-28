@@ -7,6 +7,7 @@
 - Promise.Status members are now strings instead of symbols, and indexing a non-existent value will error.
 - Improve stack traces
 - Promise.promisify will now turn errors into rejections even if they occur after a yield.
+- Add Promise.try
 
 # 2.4.0
 
