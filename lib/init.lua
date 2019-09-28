@@ -15,12 +15,20 @@ local function pack(...)
 	return len, { ... }
 end
 
+--[[
+	Returns first value (success), and packs all following values.
+]]
 local function packResult(...)
 	local result = (...)
 
 	return result, pack(select(2, ...))
 end
 
+--[[
+	Calls a non-yielding function in a new coroutine.
+
+	Handles errors if they happen.
+]]
 local function ppcall(callback, ...)
 	local co = coroutine.create(callback)
 
