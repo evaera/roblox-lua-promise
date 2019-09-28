@@ -1,6 +1,10 @@
-# 2.4.1
+# Next
 
+- Add Promise.tap
+- Fix bug with C functions not working when passed to andThen
 - Fix issue with Promise.race/all always cancelling instead of only cancelling if the Promise has no other consumers
+- Make error checking more robust across many methods.
+- Promise.Status members are now strings instead of symbols, and indexing a non-existent value will error.
 
 # 2.4.0
 

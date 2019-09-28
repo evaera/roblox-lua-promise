@@ -71,28 +71,20 @@ local function isEmpty(t)
 	return next(t) == nil
 end
 
-local function createSymbol(name)
-	assert(type(name) == "string", "createSymbol requires `name` to be a string.")
-
-	local symbol = newproxy(true)
-
-	getmetatable(symbol).__tostring = function()
-		return ("Symbol(%s)"):format(name)
-	end
-
-	return symbol
-end
-
 local Promise = {}
 Promise.prototype = {}
 Promise.__index = Promise.prototype
 
-Promise.Status = {
-	Started = createSymbol("Started"),
-	Resolved = createSymbol("Resolved"),
-	Rejected = createSymbol("Rejected"),
-	Cancelled = createSymbol("Cancelled"),
-}
+Promise.Status = setmetatable({
+	Started = "Started",
+	Resolved = "Resolved",
+	Rejected = "Rejected",
+	Cancelled = "Cancelled",
+}, {
+	__index = function(_, k)
+		error(("%s is not in Promise.Status!"):format(k), 2)
+	end
+})
 
 --[[
 	Constructs a new Promise with the given initializing callback.

@@ -8,6 +8,14 @@ return function()
 		return len, { ... }
 	end
 
+	describe("Promise.Status", function()
+		it("should error if indexing nil value", function()
+			expect(function()
+				local _ = Promise.Status.wrong
+			end).to.throw()
+		end)
+	end)
+
 	describe("Promise.new", function()
 		it("should instantiate with a callback", function()
 			local promise = Promise.new(function() end)
