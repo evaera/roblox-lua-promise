@@ -5,6 +5,8 @@
 - Fix issue with Promise.race/all always cancelling instead of only cancelling if the Promise has no other consumers
 - Make error checking more robust across many methods.
 - Promise.Status members are now strings instead of symbols, and indexing a non-existent value will error.
+- Improve stack traces
+- Promise.promisify will now turn errors into rejections even if they occur after a yield.
 
 # 2.4.0
 

@@ -368,10 +368,16 @@ end
 ]]
 function Promise.promisify(callback)
 	return function(...)
+		local traceback = debug.traceback()
 		local length, values = pack(...)
-		return Promise.new(function(resolve)
+		return Promise.new(function(resolve, reject)
 			coroutine.wrap(function()
-				resolve(callback(unpack(values, 1, length)))
+				local ok, resultLength, resultValues = packResult(pcall(callback, unpack(values, 1, length)))
+				if ok then
+					resolve(unpack(resultValues, 1, resultLength))
+				else
+					reject((resultValues[1] or "error") .. "\n" .. traceback)
+				end
 			end)()
 		end)
 	end

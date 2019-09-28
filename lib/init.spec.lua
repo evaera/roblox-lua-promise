@@ -624,6 +624,21 @@ return function()
 			expect(status).to.equal(Promise.Status.Resolved)
 			expect(result).to.equal(2)
 		end)
+
+		it("should catch errors after a yield", function()
+			local bindable = Instance.new("BindableEvent")
+			local test = Promise.promisify(function ()
+				bindable.Event:Wait()
+				error('errortext')
+			end)
+
+			local promise = test()
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Started)
+			bindable:Fire()
+			expect(promise:getStatus()).to.equal(Promise.Status.Rejected)
+			expect(promise._values[1]:find("errortext")).to.be.ok()
+		end)
 	end)
 
 	describe("Promise.tap", function()

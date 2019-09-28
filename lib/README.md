@@ -129,6 +129,8 @@ docs:
       desc: |
         Wraps a function that yields into one that returns a Promise.
 
+        Any errors that occur while executing the function will be turned into rejections.
+
         ```lua
         local sleep = Promise.promisify(wait)
 
