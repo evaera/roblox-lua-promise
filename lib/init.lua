@@ -2,6 +2,11 @@
 	An implementation of Promises similar to Promise/A+.
 ]]
 
+local ERROR_YIELD_NEW = "Yielding inside Promise.new is not allowed! Use Promise.async or create a new thread in the Promise executor!"
+local ERROR_YIELD_THEN = "Yielding inside andThen/catch is not allowed! Instead, return a new Promise from andThen/catch."
+local ERROR_NON_PROMISE_IN_LIST = "Non-promise value passed into %s at index %s"
+local ERROR_NON_LIST = "Please pass a list of promises to %s"
+
 local RunService = game:GetService("RunService")
 
 --[[
@@ -29,13 +34,13 @@ end
 
 	Handles errors if they happen.
 ]]
-local function ppcall(callback, ...)
+local function ppcall(yieldError, callback, ...)
 	local co = coroutine.create(callback)
 
 	local ok, len, result = packResult(coroutine.resume(co, ...))
 
 	if ok and coroutine.status(co) ~= "dead" then
-		error("Yielding inside Promise.new is not allowed! Use Promise.async or create a new thread in the Promise executor!", 2)
+		error(yieldError, 2)
 	elseif not ok then
 		result[1] = debug.traceback(result[1], 2)
 	end
@@ -49,7 +54,7 @@ end
 ]]
 local function createAdvancer(callback, resolve, reject)
 	return function(...)
-		local ok, resultLength, result = ppcall(callback, ...)
+		local ok, resultLength, result = ppcall(ERROR_YIELD_THEN, callback, ...)
 
 		if ok then
 			resolve(unpack(result, 1, resultLength))
@@ -163,7 +168,7 @@ function Promise.new(callback, parent)
 		return self._status == Promise.Status.Cancelled
 	end
 
-	local ok, _, result = ppcall(callback, resolve, reject, onCancel)
+	local ok, _, result = ppcall(ERROR_YIELD_NEW, callback, resolve, reject, onCancel)
 	local err = result[1]
 
 	if not ok and self._status == Promise.Status.Started then
@@ -216,14 +221,14 @@ end
 ]]
 function Promise.all(promises)
 	if type(promises) ~= "table" then
-		error("Please pass a list of promises to Promise.all", 2)
+		error(ERROR_NON_LIST:format("Promise.all"), 2)
 	end
 
 	-- We need to check that each value is a promise here so that we can produce
 	-- a proper error rather than a rejected promise with our error.
 	for i, promise in pairs(promises) do
 		if not Promise.is(promise) then
-			error(("Non-promise value passed into Promise.all at index %s"):format(tostring(i)), 2)
+			error((ERROR_NON_PROMISE_IN_LIST):format("Promise.all", tostring(i)), 2)
 		end
 	end
 
@@ -284,10 +289,10 @@ end
 	cancelling the others.
 ]]
 function Promise.race(promises)
-	assert(type(promises) == "table", "Please pass a list of promises to Promise.race")
+	assert(type(promises) == "table", ERROR_NON_LIST:format("Promise.race"))
 
 	for i, promise in pairs(promises) do
-		assert(Promise.is(promise), ("Non-promise value passed into Promise.race at index %s"):format(tostring(i)))
+		assert(Promise.is(promise), (ERROR_NON_PROMISE_IN_LIST):format("Promise.race", tostring(i)))
 	end
 
 	return Promise.new(function(resolve, reject, onCancel)
