@@ -90,11 +90,12 @@ return function()
 
 	describe("Promise.resolve", function()
 		it("should immediately resolve with a value", function()
-			local promise = Promise.resolve(5)
+			local promise = Promise.resolve(5, 6)
 
 			expect(promise).to.be.ok()
 			expect(promise:getStatus()).to.equal(Promise.Status.Resolved)
 			expect(promise._values[1]).to.equal(5)
+			expect(promise._values[2]).to.equal(6)
 		end)
 
 		it("should chain onto passed promises", function()
@@ -110,11 +111,12 @@ return function()
 
 	describe("Promise.reject", function()
 		it("should immediately reject with a value", function()
-			local promise = Promise.reject(6)
+			local promise = Promise.reject(6, 7)
 
 			expect(promise).to.be.ok()
 			expect(promise:getStatus()).to.equal(Promise.Status.Rejected)
 			expect(promise._values[1]).to.equal(6)
+			expect(promise._values[2]).to.equal(7)
 		end)
 
 		it("should pass a promise as-is as an error", function()

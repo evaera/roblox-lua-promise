@@ -163,13 +163,13 @@ docs:
     - name: resolve
       desc: Creates an immediately resolved Promise with the given value.
       static: true
-      params: "value: T"
-      returns: Promise<T>
+      params: "value: ...any"
+      returns: Promise<...any>
     - name: reject
       desc: Creates an immediately rejected Promise with the given value.
       static: true
-      params: "value: T"
-      returns: Promise<T>
+      params: "value: ...any"
+      returns: Promise<...any>
     - name: all
       desc: |
         Accepts an array of Promises and returns a new promise that:

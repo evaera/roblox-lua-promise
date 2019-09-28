@@ -230,18 +230,20 @@ end
 --[[
 	Create a promise that represents the immediately resolved value.
 ]]
-function Promise.resolve(value)
+function Promise.resolve(...)
+	local length, values = pack(...)
 	return Promise.new(function(resolve)
-		resolve(value)
+		resolve(unpack(values, 1, length))
 	end)
 end
 
 --[[
 	Create a promise that represents the immediately rejected value.
 ]]
-function Promise.reject(value)
+function Promise.reject(...)
+	local length, values = pack(...)
 	return Promise.new(function(_, reject)
-		reject(value)
+		reject(unpack(values, 1, length))
 	end)
 end
 
