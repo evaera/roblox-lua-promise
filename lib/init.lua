@@ -6,6 +6,7 @@ local ERROR_YIELD_NEW = "Yielding inside Promise.new is not allowed! Use Promise
 local ERROR_YIELD_THEN = "Yielding inside andThen/catch is not allowed! Instead, return a new Promise from andThen/catch."
 local ERROR_NON_PROMISE_IN_LIST = "Non-promise value passed into %s at index %s"
 local ERROR_NON_LIST = "Please pass a list of promises to %s"
+local ERROR_NON_FUNCTION = "Please pass a handler function to %s!"
 
 local RunService = game:GetService("RunService")
 
@@ -44,8 +45,6 @@ local function ppcall(yieldError, callback, ...)
 
 	if ok and coroutine.status(co) ~= "dead" then
 		error(yieldError, 2)
-	elseif not ok then
-		result[1] = debug.traceback(result[1], 2)
 	end
 
 	return ok, len, result
@@ -55,14 +54,14 @@ end
 	Creates a function that invokes a callback with correct error handling and
 	resolution mechanisms.
 ]]
-local function createAdvancer(callback, resolve, reject)
+local function createAdvancer(traceback, callback, resolve, reject)
 	return function(...)
 		local ok, resultLength, result = ppcall(ERROR_YIELD_THEN, callback, ...)
 
 		if ok then
 			resolve(unpack(result, 1, resultLength))
 		else
-			reject(unpack(result, 1, resultLength))
+			reject(result[1], traceback)
 		end
 	end
 end
@@ -108,6 +107,9 @@ function Promise.new(callback, parent)
 		_source = debug.traceback(),
 
 		_status = Promise.Status.Started,
+
+		-- Will be set to the Lua error string if it occurs while executing.
+		_error = nil,
 
 		-- A table containing a list of all results, whether success or failure.
 		-- Only valid if _status is set to something besides Started
@@ -163,14 +165,44 @@ function Promise.new(callback, parent)
 		return self._status == Promise.Status.Cancelled
 	end
 
-	local ok, _, result = ppcall(ERROR_YIELD_NEW, callback, resolve, reject, onCancel)
-	local err = result[1]
+	local ok, _, result = ppcall(
+		ERROR_YIELD_NEW,
+		callback,
+		resolve,
+		reject,
+		onCancel
+	)
 
-	if not ok and self._status == Promise.Status.Started then
-		reject(err)
+	if not ok then
+		self._error = result[1] or "error"
+		reject((result[1] or "error") .. "\n" .. self._source)
 	end
 
 	return self
+end
+
+function Promise._newWithSelf(executor, ...)
+	local args
+	local promise = Promise.new(function(...)
+		args = {...}
+	end, ...)
+
+	executor(promise, unpack(args))
+
+	return promise
+end
+
+function Promise._new(traceback, executor, ...)
+	return Promise._newWithSelf(function(self, resolve, reject)
+		self._source = traceback
+
+		executor(resolve, function(err, traceback)
+			err = err or "error"
+			traceback = traceback or ""
+			self._error = err
+			reject(err .. "\n" .. traceback)
+		end)
+	end, ...)
 end
 
 --[[
@@ -178,17 +210,21 @@ end
 ]]
 function Promise.async(callback)
 	local traceback = debug.traceback()
-	return Promise.new(function(resolve, reject, onCancel)
+	local promise
+	promise = Promise.new(function(resolve, reject, onCancel)
 		local connection
 		connection = RunService.Heartbeat:Connect(function()
 			connection:Disconnect()
 			local ok, err = pcall(callback, resolve, reject, onCancel)
 
 			if not ok then
+				promise._error = err or "error"
 				reject(err .. "\n" .. traceback)
 			end
 		end)
 	end)
+
+	return promise
 end
 
 --[[
@@ -350,22 +386,32 @@ end
 
 	The given callbacks are invoked depending on that result.
 ]]
-function Promise.prototype:andThen(successHandler, failureHandler)
+function Promise.prototype:_andThen(traceback, successHandler, failureHandler)
 	self._unhandledRejection = false
 
 	-- Create a new promise to follow this part of the chain
-	return Promise.new(function(resolve, reject)
+	return Promise._new(traceback, function(resolve, reject)
 		-- Our default callbacks just pass values onto the next promise.
 		-- This lets success and failure cascade correctly!
 
 		local successCallback = resolve
 		if successHandler then
-			successCallback = createAdvancer(successHandler, resolve, reject)
+			successCallback = createAdvancer(
+				traceback,
+				successHandler,
+				resolve,
+				reject
+			)
 		end
 
 		local failureCallback = reject
 		if failureHandler then
-			failureCallback = createAdvancer(failureHandler, resolve, reject)
+			failureCallback = createAdvancer(
+				traceback,
+				failureHandler,
+				resolve,
+				reject
+			)
 		end
 
 		if self._status == Promise.Status.Started then
@@ -386,11 +432,28 @@ function Promise.prototype:andThen(successHandler, failureHandler)
 	end, self)
 end
 
+function Promise.prototype:andThen(successHandler, failureHandler)
+	assert(
+		successHandler == nil or type(successHandler) == "function",
+		ERROR_NON_FUNCTION:format("Promise:andThen")
+	)
+	assert(
+		failureHandler == nil or type(failureHandler) == "function",
+		ERROR_NON_FUNCTION:format("Promise:andThen")
+	)
+
+	return self:_andThen(debug.traceback(), successHandler, failureHandler)
+end
+
 --[[
 	Used to catch any errors that may have occurred in the promise.
 ]]
 function Promise.prototype:catch(failureCallback)
-	return self:andThen(nil, failureCallback)
+	assert(
+		failureCallback == nil or type(failureCallback) == "function",
+		ERROR_NON_FUNCTION:format("Promise:catch")
+	)
+	return self:_andThen(debug.traceback(), nil, failureCallback)
 end
 
 --[[
@@ -398,7 +461,8 @@ end
 	value returned from the handler.
 ]]
 function Promise.prototype:tap(tapCallback)
-	return self:andThen(function(...)
+	assert(type(tapCallback) == "function", ERROR_NON_FUNCTION:format("Promise:tap"))
+	return self:_andThen(debug.traceback(), function(...)
 		local callbackReturn = tapCallback(...)
 
 		if Promise.is(callbackReturn) then
@@ -416,8 +480,9 @@ end
 	Calls a callback on `andThen` with specific arguments.
 ]]
 function Promise.prototype:andThenCall(callback, ...)
+	assert(type(callback) == "function", ERROR_NON_FUNCTION:format("Promise:andThenCall"))
 	local length, values = pack(...)
-	return self:andThen(function()
+	return self:_andThen(debug.traceback(), function()
 		return callback(unpack(values, 1, length))
 	end)
 end
@@ -468,14 +533,19 @@ end
 	Used to set a handler for when the promise resolves, rejects, or is
 	cancelled. Returns a new promise chained from this promise.
 ]]
-function Promise.prototype:finally(finallyHandler)
+function Promise.prototype:_finally(traceback, finallyHandler)
 	self._unhandledRejection = false
 
 	-- Return a promise chained off of this promise
-	return Promise.new(function(resolve, reject)
+	return Promise._new(traceback, function(resolve, reject)
 		local finallyCallback = resolve
 		if finallyHandler then
-			finallyCallback = createAdvancer(finallyHandler, resolve, reject)
+			finallyCallback = createAdvancer(
+				traceback,
+				finallyHandler,
+				resolve,
+				reject
+			)
 		end
 
 		if self._status == Promise.Status.Started then
@@ -488,12 +558,21 @@ function Promise.prototype:finally(finallyHandler)
 	end, self)
 end
 
+function Promise.prototype:finally(finallyHandler)
+	assert(
+		finallyHandler == nil or type(finallyHandler) == "function",
+		ERROR_NON_FUNCTION:format("Promise:finally")
+	)
+	return self:_finally(debug.traceback(), finallyHandler)
+end
+
 --[[
 	Calls a callback on `finally` with specific arguments.
 ]]
 function Promise.prototype:finallyCall(callback, ...)
+	assert(type(callback) == "function", ERROR_NON_FUNCTION:format("Promise:finallyCall"))
 	local length, values = pack(...)
-	return self:finally(function()
+	return self:_finally(debug.traceback(), function()
 		return callback(unpack(values, 1, length))
 	end)
 end
@@ -590,11 +669,17 @@ function Promise.prototype:_resolve(...)
 			warn(message)
 		end
 
-		local promise = (...):andThen(
+		local chainedPromise = ...
+
+		local promise = chainedPromise:andThen(
 			function(...)
 				self:_resolve(...)
 			end,
 			function(...)
+				-- The handler errored. Replace the inner stack trace with our outer stack trace.
+				if chainedPromise._error then
+					return self:_reject((chainedPromise._error or "") .. "\n" .. self._source)
+				end
 				self:_reject(...)
 			end
 		)
@@ -652,10 +737,15 @@ function Promise.prototype:_reject(...)
 			end
 
 			-- Build a reasonable message
-			local message = ("Unhandled promise rejection:\n\n%s\n\n%s"):format(
-				err,
-				self._source
-			)
+			local message
+			if self._error then
+				message = ("Unhandled promise rejection:\n\n%s"):format(err)
+			else
+				message = ("Unhandled promise rejection:\n\n%s\n\n%s"):format(
+					err,
+					self._source
+				)
+			end
 			warn(message)
 		end)()
 	end
@@ -674,6 +764,10 @@ function Promise.prototype:_finalize()
 		-- resolved values, or rejected errors. If the developer needs the values,
 		-- they should use :andThen or :catch explicitly.
 		callback(self._status)
+	end
+
+	if self._parent and self._error == nil then
+		self._error = self._parent._error
 	end
 
 	-- Allow family to be buried
