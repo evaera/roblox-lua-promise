@@ -246,6 +246,27 @@ docs:
               params: "...: ...any?"
               returns: Promise<T>
           returns: Promise<T>
+
+    - name: tap
+      desc: |
+        Similar to [[Promise.andThen]], except the return value is the same as the value passed to the handler. In other words, you can insert a `:tap` into a Promise chain without affecting the value that downstream Promises receive.
+
+        ```lua
+          getTheValue()
+            :tap(print)
+            :andThen(function(theValue)
+              print("Got", theValue, "even though print returns nil!")
+            end)
+        ```
+
+        If you return a Promise from the tap handler callback, its value will be discarded but `tap` will still wait until it resolves before passing the original value through.
+      params: 
+        - name: tapHandler
+          type:
+            kind: function
+            params: "...: ...any?"
+            returns: ...any?
+      returns: Promise<...any?>
     
     - name: finally
       desc: |

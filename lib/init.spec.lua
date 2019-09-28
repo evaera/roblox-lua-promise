@@ -617,4 +617,47 @@ return function()
 			expect(result).to.equal(2)
 		end)
 	end)
+
+	describe("Promise.tap", function()
+		it("should thread through values", function()
+			local first, second
+
+			Promise.resolve(1)
+				:andThen(function(v)
+					return v + 1
+				end)
+				:tap(function(v)
+					first = v
+					return v + 1
+				end)
+				:andThen(function(v)
+					second = v
+				end)
+
+			expect(first).to.equal(2)
+			expect(second).to.equal(2)
+		end)
+
+		it("should chain onto promises", function()
+			local resolveInner, finalValue
+
+			local promise = Promise.resolve(1)
+				:tap(function()
+					return Promise.new(function(resolve)
+						resolveInner = resolve
+					end)
+				end)
+				:andThen(function(v)
+					finalValue = v
+				end)
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Started)
+			expect(finalValue).to.never.be.ok()
+
+			resolveInner(1)
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Resolved)
+			expect(finalValue).to.equal(1)
+		end)
+	end)
 end

@@ -402,6 +402,25 @@ function Promise.prototype:catch(failureCallback)
 end
 
 --[[
+	Like andThen, but the value passed into the handler is also the
+	value returned from the handler.
+]]
+function Promise.prototype:tap(tapCallback)
+	return self:andThen(function(...)
+		local callbackReturn = tapCallback(...)
+
+		if Promise.is(callbackReturn) then
+			local length, values = pack(...)
+			return callbackReturn:andThen(function()
+				return unpack(values, 1, length)
+			end)
+		end
+
+		return ...
+	end)
+end
+
+--[[
 	Calls a callback on `andThen` with specific arguments.
 ]]
 function Promise.prototype:andThenCall(callback, ...)
