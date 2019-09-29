@@ -420,6 +420,10 @@ docs:
             return "some", "values"
           end)
         ```
+
+        ::: warning
+        Promises are eager, so if you pass a Promise to `andThenReturn`, it will begin executing before `andThenReturn` is reached in the chain. Likewise, if you pass a Promise created from [[Promise.reject]] into `andThenReturn`, it's possible that this will trigger the unhandled rejection warning. If you need to return a Promise, it's usually best practice to use [[Promise.andThen]].
+        :::
       params:
         - name: "..."
           type: "...any?"
