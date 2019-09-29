@@ -220,6 +220,18 @@ docs:
       static: true
       params: "promises: array<Promise<T>>"
       returns: Promise<T>
+    - name: delay
+      desc: |
+        Returns a Promise that resolves after `seconds` seconds have passed. The Promise resolves with the actual amount of time that was waited.
+
+        This function is **not** a wrapper around `wait`. `Promise.delay` uses a custom scheduler which provides more accurate timing. As an optimization, cancelling this Promise instantly removes the task from the scheduler.
+
+        ::: warning
+          Passing `NaN`, infinity, or a number less than 1/60 is equivalent to passing 1/60.
+        :::
+      params: "seconds: number"
+      returns: Promise<number>
+      static: true
     - name: is
       desc: Returns whether the given object is a Promise. This only checks if the object is a table and has an `andThen` method.
       static: true
@@ -473,12 +485,27 @@ docs:
           desc: Values to return from the function.
       returns: Promise<...any?>
 
+    - name: timeout
+      params: "seconds: number, rejectionValue: any?"
+      desc: |
+        Returns a new Promise that resolves if the chained Promise resolves within `seconds` seconds, or rejects if execution time exceeds `seconds`. The chained Promise will be cancelled if the timeout is reached.
+
+        Sugar for:
+
+        ```lua
+        Promise.race({
+          Promise.delay(seconds):andThen(function()
+            return Promise.reject(rejectionValue == nil and "Timed out" or rejectionValue)
+          end),
+          promise
+        })
+        ```
 
     - name: cancel
       desc: |
         Cancels this promise, preventing the promise from resolving or rejecting. Does not do anything if the promise is already settled.
 
-        Cancellations will propagate upwards through chained promises.
+        Cancellations will propagate upwards and downwards through chained promises.
 
         Promises will only be cancelled if all of their consumers are also cancelled. This is to say that if you call `andThen` twice on the same promise, and you cancel only one of the child promises, it will not cancel the parent promise until the other child promise is also cancelled.
 

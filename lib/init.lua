@@ -392,6 +392,79 @@ function Promise.promisify(callback)
 	end
 end
 
+--[[
+	Creates a Promise that resolves after given number of seconds.
+]]
+do
+	local connection
+	local queue = {}
+
+	local function enqueue(callback, seconds)
+		table.insert(queue, {
+			callback = callback,
+			startTime = tick(),
+			endTime = tick() + math.max(seconds, 1/60)
+		})
+
+		table.sort(queue, function(a, b)
+			return a.endTime < b.endTime
+		end)
+
+		if not connection then
+			connection = RunService.Heartbeat:Connect(function()
+				while #queue > 0 and queue[1].endTime <= tick() do
+					local item = table.remove(queue, 1)
+
+					item.callback(tick() - item.startTime)
+				end
+
+				if #queue == 0 then
+					connection:Disconnect()
+					connection = nil
+				end
+			end)
+		end
+	end
+
+	local function dequeue(callback)
+		for i, item in ipairs(queue) do
+			if item.callback == callback then
+				table.remove(queue, i)
+				break
+			end
+		end
+	end
+
+	function Promise.delay(seconds)
+		assert(type(seconds) == "number", "Bad argument #1 to Promise.delay, must be a number.")
+		-- If seconds is -INF, INF, or NaN, assume seconds is 0.
+		-- This mirrors the behavior of wait()
+		if seconds < 0 or seconds == math.huge or seconds ~= seconds then
+			seconds = 0
+		end
+
+		return Promise.new(function(resolve, _, onCancel)
+			enqueue(resolve, seconds)
+
+			onCancel(function()
+				dequeue(resolve)
+			end)
+		end)
+	end
+end
+
+--[[
+	Rejects the promise after `seconds` seconds.
+]]
+function Promise.prototype:timeout(seconds, timeoutValue)
+	return Promise.race({
+		Promise.delay(seconds):andThen(function()
+			return Promise.reject(timeoutValue == nil and "Timed out" or timeoutValue)
+		end),
+		self
+	})
+end
+
 function Promise.prototype:getStatus()
 	return self._status
 end

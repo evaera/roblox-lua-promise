@@ -10,6 +10,7 @@
 - Add Promise.try
 - Add `done`, `doneCall`, `doneReturn`
 - Add `andThenReturn`, `finallyReturn`
+- Add `Promise.delay`, `promise:timeout`
 
 # 2.4.0
 
