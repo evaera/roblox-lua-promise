@@ -582,6 +582,33 @@ return function()
 			expect(ok).to.be.ok()
 			expect(err:find("Non%-promise")).to.be.ok()
 		end)
+
+		it("should cancel pending promises if one rejects", function()
+			local p = Promise.new(function() end)
+			expect(Promise.all({
+				Promise.resolve(),
+				Promise.reject(),
+				p
+			}):getStatus()).to.equal(Promise.Status.Rejected)
+			expect(p:getStatus()).to.equal(Promise.Status.Cancelled)
+		end)
+
+		it("should cancel promises if it is cancelled", function()
+			local p = Promise.new(function() end)
+			p:andThen(function() end)
+
+			local promises = {
+				Promise.new(function() end),
+				Promise.new(function() end),
+				p
+			}
+
+			Promise.all(promises):cancel()
+
+			expect(promises[1]:getStatus()).to.equal(Promise.Status.Cancelled)
+			expect(promises[2]:getStatus()).to.equal(Promise.Status.Cancelled)
+			expect(promises[3]:getStatus()).to.equal(Promise.Status.Started)
+		end)
 	end)
 
 	describe("Promise.race", function()
@@ -614,6 +641,14 @@ return function()
 			expect(promises[1]:getStatus()).to.equal(Promise.Status.Started)
 			expect(promises[2]:getStatus()).to.equal(Promise.Status.Cancelled)
 			expect(promises[3]:getStatus()).to.equal(Promise.Status.Resolved)
+
+			local p = Promise.new(function() end)
+			expect(Promise.race({
+				Promise.reject(),
+				Promise.resolve(),
+				p
+			}):getStatus()).to.equal(Promise.Status.Rejected)
+			expect(p:getStatus()).to.equal(Promise.Status.Cancelled)
 		end)
 
 		it("should error if a non-array table is passed in", function()
@@ -623,6 +658,23 @@ return function()
 
 			expect(ok).to.be.ok()
 			expect(err:find("Non%-promise")).to.be.ok()
+		end)
+
+		it("should cancel promises if it is cancelled", function()
+			local p = Promise.new(function() end)
+			p:andThen(function() end)
+
+			local promises = {
+				Promise.new(function() end),
+				Promise.new(function() end),
+				p
+			}
+
+			Promise.race(promises):cancel()
+
+			expect(promises[1]:getStatus()).to.equal(Promise.Status.Cancelled)
+			expect(promises[2]:getStatus()).to.equal(Promise.Status.Cancelled)
+			expect(promises[3]:getStatus()).to.equal(Promise.Status.Started)
 		end)
 	end)
 
@@ -788,6 +840,163 @@ return function()
 
 			expect(never).to.never.be.ok()
 			expect(always).to.be.ok()
+		end)
+	end)
+
+	describe("Promise.some", function()
+		it("should resolve once the goal is reached", function()
+			local p = Promise.some({
+				Promise.resolve(1),
+				Promise.reject(),
+				Promise.resolve(2)
+			}, 2)
+			expect(p:getStatus()).to.equal(Promise.Status.Resolved)
+			expect(p._values[1][1]).to.equal(1)
+			expect(p._values[1][2]).to.equal(2)
+		end)
+
+		it("should error if the goal can't be reached", function()
+			expect(Promise.some({
+				Promise.resolve(),
+				Promise.reject()
+			}, 2):getStatus()).to.equal(Promise.Status.Rejected)
+
+			local reject
+			local p = Promise.some({
+				Promise.resolve(),
+				Promise.new(function(_, r) reject = r end)
+			}, 2)
+
+			expect(p:getStatus()).to.equal(Promise.Status.Started)
+			reject("foo")
+			expect(p:getStatus()).to.equal(Promise.Status.Rejected)
+			expect(p._values[1]).to.equal("foo")
+		end)
+
+		it("should cancel pending Promises once the goal is reached", function()
+			local resolve
+			local pending1 = Promise.new(function() end)
+			local pending2 = Promise.new(function(r) resolve = r end)
+
+			local some = Promise.some({
+				pending1,
+				pending2,
+				Promise.resolve()
+			}, 2)
+
+			expect(some:getStatus()).to.equal(Promise.Status.Started)
+			expect(pending1:getStatus()).to.equal(Promise.Status.Started)
+			expect(pending2:getStatus()).to.equal(Promise.Status.Started)
+
+			resolve()
+
+			expect(some:getStatus()).to.equal(Promise.Status.Resolved)
+			expect(pending1:getStatus()).to.equal(Promise.Status.Cancelled)
+			expect(pending2:getStatus()).to.equal(Promise.Status.Resolved)
+		end)
+
+		it("should error if passed a non-number", function()
+			expect(function()
+				Promise.some({}, "non-number")
+			end).to.throw()
+		end)
+
+		it("should return an empty array if amount is 0", function()
+			local p = Promise.some({
+				Promise.resolve(2)
+			}, 0)
+
+			expect(p:getStatus()).to.equal(Promise.Status.Resolved)
+			expect(#p._values[1]).to.equal(0)
+		end)
+
+		it("should not return extra values", function()
+			local p = Promise.some({
+				Promise.resolve(1),
+				Promise.resolve(2),
+				Promise.resolve(3),
+				Promise.resolve(4),
+			}, 2)
+
+			expect(p:getStatus()).to.equal(Promise.Status.Resolved)
+			expect(#p._values[1]).to.equal(2)
+			expect(p._values[1][1]).to.equal(1)
+			expect(p._values[1][2]).to.equal(2)
+		end)
+
+		it("should cancel promises if it is cancelled", function()
+			local p = Promise.new(function() end)
+			p:andThen(function() end)
+
+			local promises = {
+				Promise.new(function() end),
+				Promise.new(function() end),
+				p
+			}
+
+			Promise.some(promises, 3):cancel()
+
+			expect(promises[1]:getStatus()).to.equal(Promise.Status.Cancelled)
+			expect(promises[2]:getStatus()).to.equal(Promise.Status.Cancelled)
+			expect(promises[3]:getStatus()).to.equal(Promise.Status.Started)
+		end)
+
+		describe("Promise.any", function()
+			it("should return the value directly", function()
+				local p = Promise.any({
+					Promise.reject(),
+					Promise.reject(),
+					Promise.resolve(1)
+				})
+
+				expect(p:getStatus()).to.equal(Promise.Status.Resolved)
+				expect(p._values[1]).to.equal(1)
+			end)
+
+			it("should error if all are rejected", function()
+				expect(Promise.any({
+					Promise.reject(),
+					Promise.reject(),
+					Promise.reject(),
+				}):getStatus()).to.equal(Promise.Status.Rejected)
+			end)
+		end)
+	end)
+
+	describe("Promise.allSettled", function()
+		it("should resolve with an array of PromiseStatuses", function()
+			local reject
+			local p = Promise.allSettled({
+				Promise.resolve(),
+				Promise.reject(),
+				Promise.resolve(),
+				Promise.new(function(_, r) reject = r end)
+			})
+
+			expect(p:getStatus()).to.equal(Promise.Status.Started)
+			reject()
+			expect(p:getStatus()).to.equal(Promise.Status.Resolved)
+			expect(p._values[1][1]).to.equal(Promise.Status.Resolved)
+			expect(p._values[1][2]).to.equal(Promise.Status.Rejected)
+			expect(p._values[1][3]).to.equal(Promise.Status.Resolved)
+			expect(p._values[1][4]).to.equal(Promise.Status.Rejected)
+		end)
+
+		it("should cancel promises if it is cancelled", function()
+			local p = Promise.new(function() end)
+			p:andThen(function() end)
+
+			local promises = {
+				Promise.new(function() end),
+				Promise.new(function() end),
+				p
+			}
+
+			Promise.allSettled(promises):cancel()
+
+			expect(promises[1]:getStatus()).to.equal(Promise.Status.Cancelled)
+			expect(promises[2]:getStatus()).to.equal(Promise.Status.Cancelled)
+			expect(promises[3]:getStatus()).to.equal(Promise.Status.Started)
 		end)
 	end)
 end

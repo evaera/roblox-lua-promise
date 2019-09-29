@@ -259,16 +259,121 @@ end
 		* is resolved when all input promises resolve
 		* is rejected if ANY input promises reject
 ]]
-function Promise.all(promises)
+function Promise._all(traceback, promises, amount)
 	if type(promises) ~= "table" then
-		error(ERROR_NON_LIST:format("Promise.all"), 2)
+		error(ERROR_NON_LIST:format("Promise.all"), 3)
 	end
 
 	-- We need to check that each value is a promise here so that we can produce
 	-- a proper error rather than a rejected promise with our error.
 	for i, promise in pairs(promises) do
 		if not Promise.is(promise) then
-			error((ERROR_NON_PROMISE_IN_LIST):format("Promise.all", tostring(i)), 2)
+			error((ERROR_NON_PROMISE_IN_LIST):format("Promise.all", tostring(i)), 3)
+		end
+	end
+
+	-- If there are no values then return an already resolved promise.
+	if #promises == 0 or amount == 0 then
+		return Promise.resolve({})
+	end
+
+	return Promise._newWithSelf(function(self, resolve, reject, onCancel)
+		self._source = traceback
+
+		-- An array to contain our resolved values from the given promises.
+		local resolvedValues = {}
+		local newPromises = {}
+
+		-- Keep a count of resolved promises because just checking the resolved
+		-- values length wouldn't account for promises that resolve with nil.
+		local resolvedCount = 0
+		local rejectedCount = 0
+		local done = false
+
+		local function cancel()
+			for _, promise in ipairs(newPromises) do
+				promise:cancel()
+			end
+		end
+
+		-- Called when a single value is resolved and resolves if all are done.
+		local function resolveOne(i, ...)
+			if done then
+				return
+			end
+
+			resolvedCount = resolvedCount + 1
+
+			if amount == nil then
+				resolvedValues[i] = ...
+			else
+				resolvedValues[resolvedCount] = ...
+			end
+
+			if resolvedCount >= (amount or #promises) then
+				done = true
+				resolve(resolvedValues)
+				cancel()
+			end
+		end
+
+		onCancel(cancel)
+
+		-- We can assume the values inside `promises` are all promises since we
+		-- checked above.
+		for i = 1, #promises do
+			table.insert(
+				newPromises,
+				promises[i]:andThen(
+					function(...)
+						resolveOne(i, ...)
+					end,
+					function(...)
+						rejectedCount = rejectedCount + 1
+
+						if amount == nil or #promises - rejectedCount < amount then
+							cancel()
+							done = true
+
+							reject(...)
+						end
+					end
+				)
+			)
+		end
+
+		if done then
+			cancel()
+		end
+	end)
+end
+
+function Promise.all(promises)
+	return Promise._all(debug.traceback(), promises)
+end
+
+function Promise.some(promises, amount)
+	assert(type(amount) == "number", "Bad argument #2 to Promise.some: must be a number")
+
+	return Promise._all(debug.traceback(), promises, amount)
+end
+
+function Promise.any(promises)
+	return Promise._all(debug.traceback(), promises, 1):andThen(function(values)
+		return values[1]
+	end)
+end
+
+function Promise.allSettled(promises)
+	if type(promises) ~= "table" then
+		error(ERROR_NON_LIST:format("Promise.allSettled"), 2)
+	end
+
+	-- We need to check that each value is a promise here so that we can produce
+	-- a proper error rather than a rejected promise with our error.
+	for i, promise in pairs(promises) do
+		if not Promise.is(promise) then
+			error((ERROR_NON_PROMISE_IN_LIST):format("Promise.allSettled", tostring(i)), 2)
 		end
 	end
 
@@ -277,46 +382,40 @@ function Promise.all(promises)
 		return Promise.resolve({})
 	end
 
-	return Promise.new(function(resolve, reject)
+	return Promise.new(function(resolve, _, onCancel)
 		-- An array to contain our resolved values from the given promises.
-		local resolvedValues = {}
+		local fates = {}
 		local newPromises = {}
 
 		-- Keep a count of resolved promises because just checking the resolved
 		-- values length wouldn't account for promises that resolve with nil.
-		local resolvedCount = 0
-		local finalized = false
+		local finishedCount = 0
 
 		-- Called when a single value is resolved and resolves if all are done.
 		local function resolveOne(i, ...)
-			resolvedValues[i] = ...
-			resolvedCount = resolvedCount + 1
+			finishedCount = finishedCount + 1
 
-			if resolvedCount == #promises then
-				resolve(resolvedValues)
+			fates[i] = ...
+
+			if finishedCount >= #promises then
+				resolve(fates)
 			end
 		end
+
+		onCancel(function()
+			for _, promise in ipairs(newPromises) do
+				promise:cancel()
+			end
+		end)
 
 		-- We can assume the values inside `promises` are all promises since we
 		-- checked above.
 		for i = 1, #promises do
-			if finalized then
-				break
-			end
-
 			table.insert(
 				newPromises,
-				promises[i]:andThen(
+				promises[i]:finally(
 					function(...)
 						resolveOne(i, ...)
-					end,
-					function(...)
-						for _, promise in ipairs(newPromises) do
-							promise:cancel()
-						end
-						finalized = true
-
-						reject(...)
 					end
 				)
 			)
@@ -337,13 +436,18 @@ function Promise.race(promises)
 
 	return Promise.new(function(resolve, reject, onCancel)
 		local newPromises = {}
+		local finished = false
+
+		local function cancel()
+			for _, promise in ipairs(newPromises) do
+				promise:cancel()
+			end
+		end
 
 		local function finalize(callback)
 			return function (...)
-				for _, promise in ipairs(newPromises) do
-					promise:cancel()
-				end
-
+				cancel()
+				finished = true
 				return callback(...)
 			end
 		end
@@ -357,6 +461,10 @@ function Promise.race(promises)
 				newPromises,
 				promise:andThen(finalize(resolve), finalize(reject))
 			)
+		end
+
+		if finished then
+			cancel()
 		end
 	end)
 end

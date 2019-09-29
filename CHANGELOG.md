@@ -11,6 +11,9 @@
 - Add `done`, `doneCall`, `doneReturn`
 - Add `andThenReturn`, `finallyReturn`
 - Add `Promise.delay`, `promise:timeout`
+- Add `Promise.some`, `Promise.any`
+- Add `Promise.allSettled`
+- `Promise.all` and `Promise.race` are now cancellable.
 
 # 2.4.0
 

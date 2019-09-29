@@ -174,7 +174,7 @@ docs:
       desc: |
         Begins a Promise chain, calling a synchronous function and returning a Promise resolving with its return value. If the function errors, the returned Promise will be rejected with the error.
 
-        `Promise.try` is similar to [[Promise.promisify]], except the callback is executed instantly, and unlike `promisify`, yielding is not allowed with `try`.
+        `Promise.try` is similar to [[Promise.promisify]], except the callback is invoked immediately instead of returning a new function, and unlike `promisify`, yielding is not allowed with `try`.
 
         ```lua
         Promise.try(function()
@@ -212,6 +212,14 @@ docs:
       static: true
       params: "promises: array<Promise<T>>"
       returns: Promise<array<T>>
+
+    - name: allSettled
+      desc: |
+        Accepts an array of Promises and returns a new Promise that resolves with an array of in-place PromiseStatuses when all input Promises have settled. This is equivalent to mapping `promise:finally` over the array of Promises.
+      static: true
+      params: "promises: array<Promise<T>>"
+      returns: Promise<array<PromiseStatus>>
+
     - name: race
       desc: |
         Accepts an array of Promises and returns a new promise that is resolved or rejected as soon as any Promise in the array resolves or rejects.
@@ -220,6 +228,26 @@ docs:
       static: true
       params: "promises: array<Promise<T>>"
       returns: Promise<T>
+
+    - name: some
+      desc: |
+        Accepts an array of Promises and returns a Promise that is resolved as soon as `count` Promises are resolved from the input array. The resolved array values are in the order that the Promises resolved in. When this Promise resolves, all other pending Promises are cancelled if they have no other consumers.
+
+        `count` 0 results in an empty array. The resultant array will never have more than `count` elements.
+      static: true
+      params: "promises: array<Promise<T>>, count: number"
+      returns: Promise<array<T>>
+    
+    - name: any
+      desc: |
+        Accepts an array of Promises and returns a Promise that is resolved as soon as *any* of the input Promises resolves. It will reject only if *all* input Promises reject. As soon as one Promises resolves, all other pending Promises are cancelled if they have no other consumers.
+
+        Resolves directly with the value of the first resolved Promise. This is essentially [[Promise.some]] with `1` count, except the Promise resolves with the value directly instead of an array with one element.
+
+      static: true
+      params: "promises: array<Promise<T>>"
+      returns: Promise<T>
+
     - name: delay
       desc: |
         Returns a Promise that resolves after `seconds` seconds have passed. The Promise resolves with the actual amount of time that was waited.
