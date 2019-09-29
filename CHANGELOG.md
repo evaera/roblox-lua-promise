@@ -1,4 +1,4 @@
-# Next
+# 2.5.0
 
 - Add Promise.tap
 - Fix bug with C functions not working when passed to andThen
