@@ -503,6 +503,16 @@ function Promise.prototype:andThenCall(callback, ...)
 end
 
 --[[
+	Shorthand for an andThen handler that returns the given value.
+]]
+function Promise.prototype:andThenReturn(...)
+	local length, values = pack(...)
+	return self:_andThen(debug.traceback(), function()
+		return unpack(values, 1, length)
+	end)
+end
+
+--[[
 	Cancels the promise, disallowing it from rejecting or resolving, and calls
 	the cancellation hook if provided.
 ]]
@@ -548,8 +558,10 @@ end
 	Used to set a handler for when the promise resolves, rejects, or is
 	cancelled. Returns a new promise chained from this promise.
 ]]
-function Promise.prototype:_finally(traceback, finallyHandler)
-	self._unhandledRejection = false
+function Promise.prototype:_finally(traceback, finallyHandler, onlyOk)
+	if not onlyOk then
+		self._unhandledRejection = false
+	end
 
 	-- Return a promise chained off of this promise
 	return Promise._new(traceback, function(resolve, reject)
@@ -561,6 +573,17 @@ function Promise.prototype:_finally(traceback, finallyHandler)
 				resolve,
 				reject
 			)
+		end
+
+		if onlyOk then
+			local callback = finallyCallback
+			finallyCallback = function(...)
+				if self._status == Promise.Status.Rejected then
+					return resolve(self)
+				end
+
+				return callback(...)
+			end
 		end
 
 		if self._status == Promise.Status.Started then
@@ -590,6 +613,48 @@ function Promise.prototype:finallyCall(callback, ...)
 	return self:_finally(debug.traceback(), function()
 		return callback(unpack(values, 1, length))
 	end)
+end
+
+--[[
+	Shorthand for a finally handler that returns the given value.
+]]
+function Promise.prototype:finallyReturn(...)
+	local length, values = pack(...)
+	return self:_finally(debug.traceback(), function()
+		return unpack(values, 1, length)
+	end)
+end
+
+--[[
+	Similar to finally, except rejections are propagated through it.
+]]
+function Promise.prototype:done(finallyHandler)
+	assert(
+		finallyHandler == nil or type(finallyHandler) == "function",
+		ERROR_NON_FUNCTION:format("Promise:finallyO")
+	)
+	return self:_finally(debug.traceback(), finallyHandler, true)
+end
+
+--[[
+	Calls a callback on `done` with specific arguments.
+]]
+function Promise.prototype:doneCall(callback, ...)
+	assert(type(callback) == "function", ERROR_NON_FUNCTION:format("Promise:doneCall"))
+	local length, values = pack(...)
+	return self:_finally(debug.traceback(), function()
+		return callback(unpack(values, 1, length))
+	end, true)
+end
+
+--[[
+	Shorthand for a done handler that returns the given value.
+]]
+function Promise.prototype:doneReturn(...)
+	local length, values = pack(...)
+	return self:_finally(debug.traceback(), function()
+		return unpack(values, 1, length)
+	end, true)
 end
 
 --[[

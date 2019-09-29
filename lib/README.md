@@ -322,6 +322,31 @@ docs:
               returns: Promise<T>
           returns: Promise<T>
 
+    - name: done
+      desc: |
+        Set a handler that will be called only if the Promise resolves or is cancelled. This method is similar to `finally`, except it doesn't catch rejections.
+
+        ::: warning
+        If this Promise is cancelled, any Promises chained off of it with `andThen` won't run. Only Promises chained with `done` and `finally` will run in the case of cancellation.
+        :::
+
+        Returns a new promise chained from this promise.
+      params:
+        - name: doneHandler
+          type:
+            kind: function
+            params: "status: PromiseStatus"
+            returns: ...any? 
+      returns: Promise<...any?> 
+      overloads:
+        - params:
+          - name: doneHandler
+            type:
+              kind: function
+              params: "status: PromiseStatus"
+              returns: Promise<T>
+          returns: Promise<T>
+
     - name: andThenCall
       desc: |
         Attaches an `andThen` handler to this Promise that calls the given callback with the predefined arguments. The resolved value is discarded.
@@ -363,6 +388,87 @@ docs:
           type: "...any?"
           desc: Arguments which will be passed to the callback.
       returns: Promise
+
+    - name: doneCall
+      desc: |
+        Same as `andThenCall`, except for `done`.
+
+        Attaches a `done` handler to this Promise that calls the given callback with the predefined arguments.
+      params:
+        - name: callback
+          type:
+            kind: function
+            params: "...: ...any?"
+            returns: "any"
+        - name: "..."
+          type: "...any?"
+          desc: Arguments which will be passed to the callback.
+      returns: Promise
+
+    - name: andThenReturn
+      desc: |
+        Attaches an `andThen` handler to this Promise that discards the resolved value and returns the given value from it.
+
+        ```lua
+          promise:andThenReturn("some", "values")
+        ```
+
+        This is sugar for
+
+        ```lua
+          promise:andThen(function()
+            return "some", "values"
+          end)
+        ```
+      params:
+        - name: "..."
+          type: "...any?"
+          desc: Values to return from the function.
+      returns: Promise<...any?>
+
+    - name: finallyReturn
+      desc: |
+        Attaches a `finally` handler to this Promise that discards the resolved value and returns the given value from it.
+
+        ```lua
+          promise:finallyReturn("some", "values")
+        ```
+
+        This is sugar for
+
+        ```lua
+          promise:finally(function()
+            return "some", "values"
+          end)
+        ```
+      params:
+        - name: "..."
+          type: "...any?"
+          desc: Values to return from the function.
+      returns: Promise<...any?>
+
+    - name: doneReturn
+      desc: |
+        Attaches a `done` handler to this Promise that discards the resolved value and returns the given value from it.
+
+        ```lua
+          promise:doneReturn("some", "values")
+        ```
+
+        This is sugar for
+
+        ```lua
+          promise:done(function()
+            return "some", "values"
+          end)
+        ```
+    
+      params:
+        - name: "..."
+          type: "...any?"
+          desc: Values to return from the function.
+      returns: Promise<...any?>
+
 
     - name: cancel
       desc: |

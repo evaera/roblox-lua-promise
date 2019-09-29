@@ -8,6 +8,8 @@
 - Improve stack traces
 - Promise.promisify will now turn errors into rejections even if they occur after a yield.
 - Add Promise.try
+- Add `done`, `doneCall`, `doneReturn`
+- Add `andThenReturn`, `finallyReturn`
 
 # 2.4.0
 

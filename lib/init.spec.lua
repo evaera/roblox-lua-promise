@@ -416,6 +416,18 @@ return function()
 			expect(p2._parent).to.equal(p1)
 			expect(p1._consumers[p2]).to.equal(true)
 		end)
+
+		it("should forward return values", function()
+			local value
+
+			Promise.resolve():finally(function()
+				return 1
+			end):andThen(function(v)
+				value = v
+			end)
+
+			expect(value).to.equal(1)
+		end)
 	end)
 
 	describe("Promise.all", function()
@@ -696,6 +708,86 @@ return function()
 			end)
 
 			expect(errorText:find("errortext")).to.be.ok()
+		end)
+	end)
+
+	describe("Promise:andThenReturn", function()
+		it("should return the given values", function()
+			local value1, value2
+
+			Promise.resolve():andThenReturn(1, 2):andThen(function(one, two)
+				value1 = one
+				value2 = two
+			end)
+
+			expect(value1).to.equal(1)
+			expect(value2).to.equal(2)
+		end)
+	end)
+
+	describe("Promise:doneReturn", function()
+		it("should return the given values", function()
+			local value1, value2
+
+			Promise.resolve():doneReturn(1, 2):andThen(function(one, two)
+				value1 = one
+				value2 = two
+			end)
+
+			expect(value1).to.equal(1)
+			expect(value2).to.equal(2)
+		end)
+	end)
+
+	describe("Promise:andThenCall", function()
+		it("should call the given function with arguments", function()
+			local value1, value2
+			Promise.resolve():andThenCall(function(a, b)
+				value1 = a
+				value2 = b
+			end, 3, 4)
+
+			expect(value1).to.equal(3)
+			expect(value2).to.equal(4)
+		end)
+	end)
+
+	describe("Promise:doneCall", function()
+		it("should call the given function with arguments", function()
+			local value1, value2
+			Promise.resolve():doneCall(function(a, b)
+				value1 = a
+				value2 = b
+			end, 3, 4)
+
+			expect(value1).to.equal(3)
+			expect(value2).to.equal(4)
+		end)
+	end)
+
+	describe("Promise:done", function()
+		it("should trigger on resolve or cancel", function()
+			local promise = Promise.new(function() end)
+			local value
+
+			local p = promise:done(function()
+				value = true
+			end)
+
+			expect(value).to.never.be.ok()
+			promise:cancel()
+			expect(p:getStatus()).to.equal(Promise.Status.Cancelled)
+			expect(value).to.equal(true)
+
+			local never, always
+			Promise.reject():done(function()
+				never = true
+			end):finally(function()
+				always = true
+			end)
+
+			expect(never).to.never.be.ok()
+			expect(always).to.be.ok()
 		end)
 	end)
 end
