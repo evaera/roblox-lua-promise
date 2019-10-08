@@ -2,13 +2,13 @@
 	An implementation of Promises similar to Promise/A+.
 ]]
 
+local RunService = game:GetService("RunService")
+
 local ERROR_YIELD_NEW = "Yielding inside Promise.new is not allowed! Use Promise.async or create a new thread in the Promise executor!"
 local ERROR_YIELD_THEN = "Yielding inside andThen/catch is not allowed! Instead, return a new Promise from andThen/catch."
 local ERROR_NON_PROMISE_IN_LIST = "Non-promise value passed into %s at index %s"
 local ERROR_NON_LIST = "Please pass a list of promises to %s"
 local ERROR_NON_FUNCTION = "Please pass a handler function to %s!"
-
-local RunService = game:GetService("RunService")
 
 --[[
 	Packs a number of arguments into a table and returns its length.
@@ -18,7 +18,7 @@ local RunService = game:GetService("RunService")
 local function pack(...)
 	local len = select("#", ...)
 
-	return len, { ... }
+	return len, {...}
 end
 
 --[[
@@ -70,20 +70,22 @@ local function isEmpty(t)
 	return next(t) == nil
 end
 
-local Promise = {}
-Promise.prototype = {}
-Promise.__index = Promise.prototype
+local Promise = {
+	prototype = {},
 
-Promise.Status = setmetatable({
-	Started = "Started",
-	Resolved = "Resolved",
-	Rejected = "Rejected",
-	Cancelled = "Cancelled",
-}, {
-	__index = function(_, k)
-		error(("%s is not in Promise.Status!"):format(k), 2)
-	end
-})
+	Status = setmetatable({
+		Started = "Started",
+		Resolved = "Resolved",
+		Rejected = "Rejected",
+		Cancelled = "Cancelled",
+	}, {
+		__index = function(_, k)
+			error(("%s is not in Promise.Status!"):format(k), 2)
+		end,
+	}),
+}
+
+Promise.__index = Promise.prototype
 
 --[[
 	Constructs a new Promise with the given initializing callback.
@@ -134,9 +136,7 @@ function Promise.new(callback, parent)
 		-- cancellation propagation.
 		_parent = parent,
 
-		_consumers = setmetatable({}, {
-			__mode = "k";
-		}),
+		_consumers = setmetatable({}, {__mode = "k"}),
 	}
 
 	if parent and parent._status == Promise.Status.Started then
@@ -268,7 +268,7 @@ function Promise._all(traceback, promises, amount)
 	-- a proper error rather than a rejected promise with our error.
 	for i, promise in pairs(promises) do
 		if not Promise.is(promise) then
-			error((ERROR_NON_PROMISE_IN_LIST):format("Promise.all", tostring(i)), 3)
+			error(ERROR_NON_PROMISE_IN_LIST:format("Promise.all", tostring(i)), 3)
 		end
 	end
 
@@ -373,7 +373,7 @@ function Promise.allSettled(promises)
 	-- a proper error rather than a rejected promise with our error.
 	for i, promise in pairs(promises) do
 		if not Promise.is(promise) then
-			error((ERROR_NON_PROMISE_IN_LIST):format("Promise.allSettled", tostring(i)), 2)
+			error(ERROR_NON_PROMISE_IN_LIST:format("Promise.allSettled", tostring(i)), 2)
 		end
 	end
 
@@ -431,7 +431,7 @@ function Promise.race(promises)
 	assert(type(promises) == "table", ERROR_NON_LIST:format("Promise.race"))
 
 	for i, promise in pairs(promises) do
-		assert(Promise.is(promise), (ERROR_NON_PROMISE_IN_LIST):format("Promise.race", tostring(i)))
+		assert(Promise.is(promise), ERROR_NON_PROMISE_IN_LIST:format("Promise.race", tostring(i)))
 	end
 
 	return Promise.new(function(resolve, reject, onCancel)
@@ -445,7 +445,7 @@ function Promise.race(promises)
 		end
 
 		local function finalize(callback)
-			return function (...)
+			return function(...)
 				cancel()
 				finished = true
 				return callback(...)
@@ -511,7 +511,7 @@ do
 		table.insert(queue, {
 			callback = callback,
 			startTime = tick(),
-			endTime = tick() + math.max(seconds, 1/60)
+			endTime = tick() + math.max(seconds, 1/60),
 		})
 
 		table.sort(queue, function(a, b)
@@ -569,7 +569,7 @@ function Promise.prototype:timeout(seconds, timeoutValue)
 		Promise.delay(seconds):andThen(function()
 			return Promise.reject(timeoutValue == nil and "Timed out" or timeoutValue)
 		end),
-		self
+		self,
 	})
 end
 
@@ -1007,6 +1007,7 @@ function Promise.prototype:_reject(...)
 					self._source
 				)
 			end
+
 			warn(message)
 		end)()
 	end
