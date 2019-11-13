@@ -84,7 +84,6 @@ return function()
 			-- Loosely check for the pieces of the stack trace we expect
 			expect(promise._values[1]:find("init.spec")).to.be.ok()
 			expect(promise._values[1]:find("new")).to.be.ok()
-			expect(promise._values[1]:find("Stack Begin")).to.be.ok()
 		end)
 	end)
 
@@ -285,6 +284,21 @@ return function()
 			expect(chained).never.to.equal(promise)
 			expect(chained:getStatus()).to.equal(Promise.Status.Resolved)
 			expect(#chained._values).to.equal(0)
+		end)
+
+		it("should propagate errors through multiple levels", function()
+			local x, y, z
+			Promise.new(function(resolve, reject)
+				reject(1, 2, 3)
+			end)
+			:andThen(function() end)
+			:catch(function(a, b, c)
+				x, y, z = a, b, c
+			end)
+
+			expect(x).to.equal(1)
+			expect(y).to.equal(2)
+			expect(z).to.equal(3)
 		end)
 	end)
 

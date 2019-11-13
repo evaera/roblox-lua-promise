@@ -1,3 +1,7 @@
+# 2.5.1
+
+- Fix issue with rejecting with non-string not propagating correctly.
+
 # 2.5.0
 
 - Add Promise.tap

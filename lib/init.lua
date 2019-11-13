@@ -61,7 +61,7 @@ local function createAdvancer(traceback, callback, resolve, reject)
 		if ok then
 			resolve(unpack(result, 1, resultLength))
 		else
-			reject(result[1], traceback)
+			reject(result[1] .. "\n" .. traceback)
 		end
 	end
 end
@@ -193,15 +193,10 @@ function Promise._newWithSelf(executor, ...)
 end
 
 function Promise._new(traceback, executor, ...)
-	return Promise._newWithSelf(function(self, resolve, reject)
+	return Promise._newWithSelf(function(self, ...)
 		self._source = traceback
 
-		executor(resolve, function(err, traceback)
-			err = err or "error"
-			traceback = traceback or ""
-			self._error = err
-			reject(err .. "\n" .. traceback)
-		end)
+		executor(...)
 	end, ...)
 end
 
