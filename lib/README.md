@@ -532,6 +532,7 @@ docs:
           promise
         })
         ```
+      returns: Promise<T>
 
     - name: cancel
       desc: |
