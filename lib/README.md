@@ -543,6 +543,7 @@ docs:
         Promises will only be cancelled if all of their consumers are also cancelled. This is to say that if you call `andThen` twice on the same promise, and you cancel only one of the child promises, it will not cancel the parent promise until the other child promise is also cancelled.
 
     - name: await
+      tags: [ 'yields' ]
       desc: |
         Yields the current thread until the given Promise completes. Returns true if the Promise resolved, followed by the values that the promise resolved or rejected with.
 
@@ -556,17 +557,25 @@ docs:
           type: ...any?
     
     - name: awaitStatus
+      tags: [ 'yields' ]
       desc: Yields the current thread until the given Promise completes. Returns the Promise's status, followed by the values that the promise resolved or rejected with.
       returns:
         - type: PromiseStatus
           desc: The Promise's status.
         - type: ...any?
           desc: The values that the Promise resolved or rejected with.
-    - name: awaitValue
+    - name: expect
+      tags: [ 'yields' ]
       desc: |
         Yields the current thread until the given Promise completes. Returns the the values that the promise resolved with.
+
+        This is essentially sugar for:
+
+        ```lua
+        select(2, assert(promise:await()))
+        ```
         
-        Errors if the Promise rejects or gets cancelled.
+        **Errors** if the Promise rejects or gets cancelled.
       returns:
         - type: ...any?
           desc: The values that the Promise resolved with.

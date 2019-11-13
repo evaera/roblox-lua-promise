@@ -875,7 +875,7 @@ end
 	Calls await and only returns if the Promise resolves.
 	Throws if the Promise rejects or gets cancelled.
 ]]
-function Promise.prototype:awaitValue(...)
+function Promise.prototype:expect(...)
 	local length, result = pack(self:awaitStatus(...))
 	local status = table.remove(result, 1)
 
@@ -886,6 +886,8 @@ function Promise.prototype:awaitValue(...)
 
 	return unpack(result, 1, length - 1)
 end
+
+Promise.prototype.awaitValue = Promise.prototype.expect
 
 --[[
 	Intended for use in tests.
