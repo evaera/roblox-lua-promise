@@ -206,7 +206,7 @@ end
 function Promise.async(callback)
 	local traceback = debug.traceback()
 	local promise
-	promise = Promise.new(function(resolve, reject, onCancel)
+	promise = Promise._new(traceback, function(resolve, reject, onCancel)
 		local connection
 		connection = RunService.Heartbeat:Connect(function()
 			connection:Disconnect()
@@ -227,7 +227,7 @@ end
 ]]
 function Promise.resolve(...)
 	local length, values = pack(...)
-	return Promise.new(function(resolve)
+	return Promise._new(debug.traceback(), function(resolve)
 		resolve(unpack(values, 1, length))
 	end)
 end
@@ -237,7 +237,7 @@ end
 ]]
 function Promise.reject(...)
 	local length, values = pack(...)
-	return Promise.new(function(_, reject)
+	return Promise._new(debug.traceback(), function(_, reject)
 		reject(unpack(values, 1, length))
 	end)
 end
@@ -377,7 +377,7 @@ function Promise.allSettled(promises)
 		return Promise.resolve({})
 	end
 
-	return Promise.new(function(resolve, _, onCancel)
+	return Promise._new(debug.traceback(), function(resolve, _, onCancel)
 		-- An array to contain our resolved values from the given promises.
 		local fates = {}
 		local newPromises = {}
@@ -429,7 +429,7 @@ function Promise.race(promises)
 		assert(Promise.is(promise), (ERROR_NON_PROMISE_IN_LIST):format("Promise.race", tostring(i)))
 	end
 
-	return Promise.new(function(resolve, reject, onCancel)
+	return Promise._new(debug.traceback(), function(resolve, reject, onCancel)
 		local newPromises = {}
 		local finished = false
 
@@ -482,7 +482,7 @@ function Promise.promisify(callback)
 	return function(...)
 		local traceback = debug.traceback()
 		local length, values = pack(...)
-		return Promise.new(function(resolve, reject)
+		return Promise._new(traceback, function(resolve, reject)
 			coroutine.wrap(function()
 				local ok, resultLength, resultValues = packResult(pcall(callback, unpack(values, 1, length)))
 				if ok then
@@ -546,7 +546,7 @@ do
 			seconds = 0
 		end
 
-		return Promise.new(function(resolve, _, onCancel)
+		return Promise._new(debug.traceback(), function(resolve, _, onCancel)
 			enqueue(resolve, seconds)
 
 			onCancel(function()

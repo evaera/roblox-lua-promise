@@ -2,9 +2,9 @@
 	"name": "lua-promise",
 	"tree": {
 		"$className": "DataModel",
-		"ReplicatedStorage": {
-			"$className": "ReplicatedStorage",
-			"Promise": {
+		"ServerScriptService": {
+			"$className": "ServerScriptService",
+			"Lib": {
 				"$path": "lib"
 			}
 		}
