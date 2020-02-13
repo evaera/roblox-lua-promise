@@ -35,7 +35,7 @@ end
 
 	Handles errors if they happen.
 ]]
-local function ppcall(yieldError, callback, ...)
+local function runExecutor(yieldError, traceback, callback, ...)
 	-- Wrapped because C functions can't be passed to coroutine.create!
 	local co = coroutine.create(function(...)
 		return callback(...)
@@ -44,7 +44,7 @@ local function ppcall(yieldError, callback, ...)
 	local ok, len, result = packResult(coroutine.resume(co, ...))
 
 	if ok and coroutine.status(co) ~= "dead" then
-		error(yieldError, 2)
+		error(yieldError .. "\n" .. traceback, 2)
 	end
 
 	return ok, len, result
@@ -56,7 +56,7 @@ end
 ]]
 local function createAdvancer(traceback, callback, resolve, reject)
 	return function(...)
-		local ok, resultLength, result = ppcall(ERROR_YIELD_THEN, callback, ...)
+		local ok, resultLength, result = runExecutor(ERROR_YIELD_THEN, traceback, callback, ...)
 
 		if ok then
 			resolve(unpack(result, 1, resultLength))
@@ -165,8 +165,9 @@ function Promise.new(callback, parent)
 		return self._status == Promise.Status.Cancelled
 	end
 
-	local ok, _, result = ppcall(
+	local ok, _, result = runExecutor(
 		ERROR_YIELD_NEW,
+		self._source,
 		callback,
 		resolve,
 		reject,
