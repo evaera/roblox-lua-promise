@@ -22,8 +22,8 @@ end
 --[[
 	Returns first value (success), and packs all following values.
 ]]
-local function packResult(...)
-	return ..., pack(select(2, ...))
+local function packResult(success, ...)
+	return success, select("#", ...), { ... }
 end
 
 --[[
