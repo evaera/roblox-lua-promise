@@ -258,7 +258,7 @@ function Promise._all(traceback, promises, amount)
 
 	-- We need to check that each value is a promise here so that we can produce
 	-- a proper error rather than a rejected promise with our error.
-	for i, promise in ipairs(promises) do
+	for i, promise in pairs(promises) do
 		if not Promise.is(promise) then
 			error((ERROR_NON_PROMISE_IN_LIST):format("Promise.all", tostring(i)), 3)
 		end
@@ -363,7 +363,7 @@ function Promise.allSettled(promises)
 
 	-- We need to check that each value is a promise here so that we can produce
 	-- a proper error rather than a rejected promise with our error.
-	for i, promise in ipairs(promises) do
+	for i, promise in pairs(promises) do
 		if not Promise.is(promise) then
 			error((ERROR_NON_PROMISE_IN_LIST):format("Promise.allSettled", tostring(i)), 2)
 		end
@@ -422,7 +422,7 @@ end
 function Promise.race(promises)
 	assert(type(promises) == "table", ERROR_NON_LIST:format("Promise.race"))
 
-	for i, promise in ipairs(promises) do
+	for i, promise in pairs(promises) do
 		assert(Promise.is(promise), (ERROR_NON_PROMISE_IN_LIST):format("Promise.race", tostring(i)))
 	end
 
