@@ -8,6 +8,10 @@ local ERROR_NON_PROMISE_IN_LIST = "Non-promise value passed into %s at index %s"
 local ERROR_NON_LIST = "Please pass a list of promises to %s"
 local ERROR_NON_FUNCTION = "Please pass a handler function to %s!"
 
+local MODE_KEY_METATABLE = {
+	__mode = "k";
+}
+
 local RunService = game:GetService("RunService")
 
 --[[
@@ -130,9 +134,7 @@ function Promise.new(callback, parent)
 		-- cancellation propagation.
 		_parent = parent,
 
-		_consumers = setmetatable({}, {
-			__mode = "k";
-		}),
+		_consumers = setmetatable({}, MODE_KEY_METATABLE),
 	}
 
 	if parent and parent._status == Promise.Status.Started then
