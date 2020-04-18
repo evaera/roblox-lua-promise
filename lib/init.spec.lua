@@ -699,9 +699,11 @@ return function()
 			end
 
 			local promisified = Promise.promisify(test)
-			local status, result = promisified(1):awaitStatus()
+			local promise = promisified(1)
+			local success, result = promise:_unwrap()
 
-			expect(status).to.equal(Promise.Status.Resolved)
+			expect(success).to.equal(true)
+			expect(promise:getStatus()).to.equal(Promise.Status.Resolved)
 			expect(result).to.equal(2)
 		end)
 
