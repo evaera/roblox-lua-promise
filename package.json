@@ -8,8 +8,8 @@
   },
   "dependencies": {
     "gh-pages": "^2.1.1",
-    "vuepress": "^1.0.3",
-    "vuepress-plugin-api-docs-generator": "^1.0.16"
+    "vuepress": "^1.4.1",
+    "vuepress-plugin-api-docs-generator": "^1.0.17"
   },
   "devDependencies": {},
   "scripts": {
