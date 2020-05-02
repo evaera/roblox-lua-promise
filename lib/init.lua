@@ -471,7 +471,11 @@ function Promise.is(object)
 		return false
 	end
 
-	return type(object.andThen) == "function"
+	local ok, isPromise = pcall(function()
+		return type(object.andThen) == "function"
+	end)
+
+	return ok and isPromise
 end
 
 --[[
