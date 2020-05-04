@@ -1,3 +1,7 @@
+# Next
+
+- Change Promise.is to be safe when dealing with tables that have an `__index` metamethod that creates an error.
+
 # 2.5.1
 
 - Fix issue with rejecting with non-string not propagating correctly.
