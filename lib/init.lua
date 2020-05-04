@@ -471,7 +471,20 @@ function Promise.is(object)
 		return false
 	end
 
-	return type(object.andThen) == "function"
+	local objectMetatable = getmetatable(object)
+
+	if objectMetatable == Promise then
+		-- The Promise came from this library.
+		return true
+	elseif objectMetatable == nil then
+		-- No metatable, but we should still chain onto tables with andThen methods
+		return type(object.andThen) == "function"
+	elseif type(objectMetatable) == "table" and type(rawget(objectMetatable, "andThen")) == "function" then
+		-- Maybe this came from a different or older Promise library.
+		return true
+	end
+
+	return false
 end
 
 --[[
