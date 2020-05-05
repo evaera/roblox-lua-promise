@@ -2,6 +2,24 @@ return function()
 	local Promise = require(script.Parent)
 	Promise.TEST = true
 
+	local timeEvent = Instance.new("BindableEvent")
+	Promise._timeEvent = timeEvent.Event
+
+	local advanceTime do
+		local injectedPromiseTime = 0
+
+		Promise._getTime = function()
+			return injectedPromiseTime
+		end
+
+		function advanceTime(delta)
+			delta = delta or (1/60)
+
+			injectedPromiseTime = injectedPromiseTime + delta
+			timeEvent:Fire(delta)
+		end
+	end
+
 	local function pack(...)
 		local len = select("#", ...)
 
@@ -79,11 +97,95 @@ return function()
 			expect(promise).to.be.ok()
 			expect(callCount).to.equal(1)
 			expect(promise:getStatus()).to.equal(Promise.Status.Rejected)
-			expect(promise._values[1]:find("hahah")).to.be.ok()
+			expect(tostring(promise._values[1]):find("hahah")).to.be.ok()
 
 			-- Loosely check for the pieces of the stack trace we expect
-			expect(promise._values[1]:find("init.spec")).to.be.ok()
-			expect(promise._values[1]:find("new")).to.be.ok()
+			expect(tostring(promise._values[1]):find("init.spec")).to.be.ok()
+			expect(tostring(promise._values[1]):find("runExecutor")).to.be.ok()
+		end)
+
+		it("should work with C functions", function()
+			expect(function()
+				Promise.new(tick):andThen(tick)
+			end).to.never.throw()
+		end)
+
+		it("should have a nice tostring", function()
+			expect(tostring(Promise.resolve()):gmatch("Promise(Resolved)")).to.be.ok()
+		end)
+
+		it("should allow yielding", function()
+			local bindable = Instance.new("BindableEvent")
+			local promise = Promise.new(function(resolve)
+				bindable.Event:Wait()
+				resolve(5)
+			end)
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Started)
+			bindable:Fire()
+			expect(promise:getStatus()).to.equal(Promise.Status.Resolved)
+			expect(promise._values[1]).to.equal(5)
+		end)
+
+		it("should preserve stack traces of resolve-chained promises", function()
+			local function nestedCall(text)
+				error(text)
+			end
+
+			local promise = Promise.new(function(resolve)
+				resolve(Promise.new(function()
+					nestedCall("sample text")
+				end))
+			end)
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Rejected)
+
+			local trace = tostring(promise._values[1])
+			expect(trace:find("sample text")).to.be.ok()
+			expect(trace:find("nestedCall")).to.be.ok()
+			expect(trace:find("runExecutor")).to.be.ok()
+			expect(trace:find("runPlanNode")).to.be.ok()
+			expect(trace:find("...Rejected because it was chained to the following Promise, which encountered an error:")).to.be.ok()
+		end)
+	end)
+
+	describe("Promise.defer", function()
+		it("should execute after the time event", function()
+			local callCount = 0
+			local promise = Promise.defer(function(resolve, reject, onCancel, nothing)
+				expect(type(resolve)).to.equal("function")
+				expect(type(reject)).to.equal("function")
+				expect(type(onCancel)).to.equal("function")
+				expect(type(nothing)).to.equal("nil")
+
+				callCount = callCount + 1
+
+				resolve("foo")
+			end)
+
+			expect(callCount).to.equal(0)
+			expect(promise:getStatus()).to.equal(Promise.Status.Started)
+
+			advanceTime()
+			expect(callCount).to.equal(1)
+			expect(promise:getStatus()).to.equal(Promise.Status.Resolved)
+
+			advanceTime()
+			expect(callCount).to.equal(1)
+		end)
+	end)
+
+	describe("Promise.delay", function()
+		it("Should schedule promise resolution", function()
+			local promise = Promise.delay(1)
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Started)
+
+			advanceTime()
+			expect(promise:getStatus()).to.equal(Promise.Status.Started)
+
+			advanceTime(1)
+			expect(promise:getStatus()).to.equal(Promise.Status.Resolved)
 		end)
 	end)
 
@@ -132,6 +234,19 @@ return function()
 	end)
 
 	describe("Promise:andThen", function()
+		it("should allow yielding", function()
+			local bindable = Instance.new("BindableEvent")
+			local promise = Promise.resolve():andThen(function()
+				bindable.Event:Wait()
+				return 5
+			end)
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Started)
+			bindable:Fire()
+			expect(promise:getStatus()).to.equal(Promise.Status.Resolved)
+			expect(promise._values[1]).to.equal(5)
+		end)
+
 		it("should chain onto resolved promises", function()
 			local args
 			local argsLength
@@ -198,6 +313,24 @@ return function()
 			expect(chained).never.to.equal(promise)
 			expect(chained:getStatus()).to.equal(Promise.Status.Resolved)
 			expect(#chained._values).to.equal(0)
+		end)
+
+		it("should reject on error in callback", function()
+			local callCount = 0
+
+			local promise = Promise.resolve(1):andThen(function()
+				callCount = callCount + 1
+				error("hahah")
+			end)
+
+			expect(promise).to.be.ok()
+			expect(callCount).to.equal(1)
+			expect(promise:getStatus()).to.equal(Promise.Status.Rejected)
+			expect(tostring(promise._values[1]):find("hahah")).to.be.ok()
+
+			-- Loosely check for the pieces of the stack trace we expect
+			expect(tostring(promise._values[1]):find("init.spec")).to.be.ok()
+			expect(tostring(promise._values[1]):find("runExecutor")).to.be.ok()
 		end)
 
 		it("should chain onto asynchronously resolved promises", function()
@@ -717,7 +850,7 @@ return function()
 			expect(promise:getStatus()).to.equal(Promise.Status.Started)
 			bindable:Fire()
 			expect(promise:getStatus()).to.equal(Promise.Status.Rejected)
-			expect(promise._values[1]:find("errortext")).to.be.ok()
+			expect(tostring(promise._values[1]):find("errortext")).to.be.ok()
 		end)
 	end)
 
@@ -770,10 +903,23 @@ return function()
 			Promise.try(function()
 				error('errortext')
 			end):catch(function(e)
-				errorText = e
+				errorText = tostring(e)
 			end)
 
 			expect(errorText:find("errortext")).to.be.ok()
+		end)
+
+		it("should catch asynchronous errors", function()
+			local bindable = Instance.new("BindableEvent")
+			local promise = Promise.try(function()
+				bindable.Event:Wait()
+				error('errortext')
+			end)
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Started)
+			bindable:Fire()
+			expect(promise:getStatus()).to.equal(Promise.Status.Rejected)
+			expect(tostring(promise._values[1]):find("errortext")).to.be.ok()
 		end)
 	end)
 

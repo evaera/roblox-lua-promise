@@ -4,7 +4,7 @@ docs:
   desc: A Promise is an object that represents a value that will exist in the future, but doesn't right now. Promises allow you to then attach callbacks that can run once the value becomes available (known as *resolving*), or if an error has occurred (known as *rejecting*).
 
   types:
-    - name: PromiseStatus
+    - name: Status
       desc: An enum value used to represent the Promise's status.
       kind: enum
       type:
@@ -30,11 +30,9 @@ docs:
       desc: |
         Construct a new Promise that will be resolved or rejected with the given callbacks.
 
-        ::: tip
-          If your Promise executor needs to yield, it is recommended to use [[Promise.async]] instead. You cannot directly yield inside the `executor` function of [[Promise.new]].
-        :::
-
         If you `resolve` with a Promise, it will be chained onto.
+
+        You can safely yield within the executor function and it will not block the creating thread.
         
         You may register an optional cancellation hook by using the `onCancel` argument.
           * This should be used to abort any ongoing operations leading up to the promise being settled. 
@@ -73,20 +71,16 @@ docs:
                     - type: boolean
                       desc: "Returns `true` if the Promise was already cancelled at the time of calling `onCancel`."
       returns: Promise
-    - name: async
+    - name: defer
       tags: [ 'constructor' ]
       desc: |
-        The same as [[Promise.new]], except it allows yielding. Use this if you want to yield inside your Promise body.
-        
-        If your Promise body does not need to yield, such as when attaching `resolve` to an event listener, you should use [[Promise.new]] instead.
-        
-        ::: tip
-        Promises created with [[Promise.async]] don't begin executing until the next `RunService.Heartbeat` event, even if the executor function doesn't yield itself. This is to ensure that Promises produced from a function are either always synchronous or always asynchronous. <a href="/roblox-lua-promise/lib/Details.html#yielding-in-promise-executor">Learn more</a>
-        :::
+        The same as [[Promise.new]], except execution begins after the next `Heartbeat` event.
+
+        This is a spiritual replacement for `spawn`, but it does not suffer from the same [issues](https://eryn.io/gist/3db84579866c099cdd5bb2ff37947cec) as `spawn`.
         
         ```lua
         local function waitForChild(instance, childName, timeout)
-          return Promise.async(function(resolve, reject)
+          return Promise.defer(function(resolve, reject)
             local child = instance:WaitForChild(childName, timeout)
 
             ;(child and resolve or reject)(child)
@@ -96,7 +90,7 @@ docs:
         
       static: true
       params:
-        - name: asyncExecutor
+        - name: deferExecutor
           type:
             kind: function
             params:
@@ -172,9 +166,9 @@ docs:
       returns: Promise<...any>
     - name: try
       desc: |
-        Begins a Promise chain, calling a synchronous function and returning a Promise resolving with its return value. If the function errors, the returned Promise will be rejected with the error.
+        Begins a Promise chain, calling a function and returning a Promise resolving with its return value. If the function errors, the returned Promise will be rejected with the error.
 
-        `Promise.try` is similar to [[Promise.promisify]], except the callback is invoked immediately instead of returning a new function, and unlike `promisify`, yielding is not allowed with `try`.
+        `Promise.try` is similar to [[Promise.promisify]], except the callback is invoked immediately instead of returning a new function.
 
         ```lua
         Promise.try(function()
