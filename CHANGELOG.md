@@ -1,9 +1,11 @@
 # Next
 - Runtime errors are now represented by objects. You must call tostring on rejection values before assuming they are strings (this was always good practice, but is required now).
+- Yielding is now allowed in Promise.new, andThen, and Promise.try executors.
 - Errors now have much better stack traces due to using xpcall internally instead of pcall.
 - Stack traces now be more direct and not include as many internal calls within the Promise library.
 - Chained promises from resolve() or returning from andThen now have improved rejection messages for debugging.
-- Yielding is now allowed in Promise.new and andThen executors.
+- Promises now have a __tostring metamethod, which returns `Promise(Resolved)` or whatever the current status is.
+- Promise.async has been renamed to Promise.defer (Promise.async references same function for compatibility)
 - Improve test coverage for asynchronous and time-driven functions
 
 # 2.5.1
