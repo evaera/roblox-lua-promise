@@ -5,7 +5,7 @@ module.exports = {
   base: '/roblox-lua-promise/',
 
   plugins: [
-    ['api-docs-generator', {
+    ['vuepress-plugin-api-docs-generator', {
       defaults: {
         returns: ['void'],
         property_tags: [{
@@ -33,9 +33,7 @@ module.exports = {
 
   themeConfig: {
     activeHeaderLinks: false,
-    searchOptions: {
-      placeholder: 'Press S to search...'
-    },
+    searchPlaceholder: 'Press S to search...',
     nav: [
       { text: 'API Reference', link: '/lib/' },
       { text: 'GitHub', link: 'https://github.com/evaera/roblox-lua-promise' }
