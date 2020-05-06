@@ -1,6 +1,7 @@
 # Next
 
 - Runtime errors are now represented by objects. You must call tostring on rejection values before assuming they are strings (this was always good practice, but is required now).
+- New Promise Error class is exposed at `Promise.Error`, which includes helpful static methods like `Promise.Error.is`.
 - Yielding is now allowed in Promise.new, andThen, and Promise.try executors.
 - Errors now have much better stack traces due to using xpcall internally instead of pcall.
 - Stack traces now be more direct and not include as many internal calls within the Promise library.
@@ -10,6 +11,9 @@
 - Improve test coverage for asynchronous and time-driven functions
 - Change Promise.is to be safe when dealing with tables that have an `__index` metamethod that creates an error.
 - Let Promise:expect() throw rejection objects
+- Add Promise:now() (#23)
+- Promise:timeout() now rejects with a `Promise.Error(Promise.Error.Kind.TimedOut)` object. (Formerly rejected with the string "Timed out")
+- Attaching a handler to a cancelled Promise now rejects with a `Promise.Error(Promise.Error.Kind.AlreadyCancelled)`. (Formerly rejected with the string "Promise is cancelled")
 
 # 2.5.1
 

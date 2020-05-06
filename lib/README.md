@@ -512,16 +512,18 @@ docs:
       returns: Promise<...any?>
 
     - name: timeout
-      params: "seconds: number, rejectionValue: any?"
+      params: "seconds: number, rejectionValue: T?"
       desc: |
         Returns a new Promise that resolves if the chained Promise resolves within `seconds` seconds, or rejects if execution time exceeds `seconds`. The chained Promise will be cancelled if the timeout is reached.
+
+        Rejects with `rejectionValue` if it is non-nil. If a `rejectionValue` is not given, it will reject with a `Promise.Error(Promise.Error.Kind.TimedOut)`. This can be checked with [[Error.isKind]].
 
         Sugar for:
 
         ```lua
         Promise.race({
           Promise.delay(seconds):andThen(function()
-            return Promise.reject(rejectionValue == nil and "Timed out" or rejectionValue)
+            return Promise.reject(rejectionValue == nil and Promise.Error.new({ kind = Promise.Error.Kind.TimedOut }) or rejectionValue)
           end),
           promise
         })
@@ -535,6 +537,22 @@ docs:
         Cancellations will propagate upwards and downwards through chained promises.
 
         Promises will only be cancelled if all of their consumers are also cancelled. This is to say that if you call `andThen` twice on the same promise, and you cancel only one of the child promises, it will not cancel the parent promise until the other child promise is also cancelled.
+
+    - name: now
+      desc: |
+        Chains a Promise from this one that is resolved if this Promise is already resolved, and rejected if it is not resolved at the time of calling `:now()`. This can be used to ensure your `andThen` handler occurs on the same frame as the root Promise execution.
+
+        ```lua
+          doSomething()
+            :now()
+            :andThen(function(value)
+              print("Got", value, "synchronously.")
+            end)
+        ```
+
+        If this Promise is still running, Rejected, or Cancelled, the Promise returned from `:now()` will reject with the `rejectionValue` if passed, or a `Promise.Error(Promise.Error.Kind.NotResolvedInTime)`. This can be checked with [[Error.isKind]].
+      params: "rejectionValue: T?"
+      returns: Promise<T>
 
     - name: await
       tags: [ 'yields' ]

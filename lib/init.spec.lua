@@ -1203,4 +1203,27 @@ return function()
 			expect(value).to.equal(rejectionValue)
 		end)
 	end)
+
+	describe("Promise:now", function()
+		it("should resolve if the Promise is resolved", function()
+			local success, value = Promise.resolve("foo"):now():_unwrap()
+
+			expect(success).to.equal(true)
+			expect(value).to.equal("foo")
+		end)
+
+		it("should reject if the Promise is not resolved", function()
+			local success, value = Promise.new(function() end):now():_unwrap()
+
+			expect(success).to.equal(false)
+			expect(Promise.Error.isKind(value, "NotResolvedInTime")).to.equal(true)
+		end)
+
+		it("should reject with a custom rejection value", function()
+			local success, value = Promise.new(function() end):now("foo"):_unwrap()
+
+			expect(success).to.equal(false)
+			expect(value).to.equal("foo")
+		end)
+	end)
 end

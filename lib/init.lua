@@ -13,59 +13,104 @@ local MODE_KEY_METATABLE = {
 local RunService = game:GetService("RunService")
 
 --[[
+	Creates an enum dictionary with some metamethods to prevent common mistakes.
+]]
+local function makeEnum(enumName, members)
+	local enum = {}
+
+	for _, memberName in ipairs(members) do
+		enum[memberName] = memberName
+	end
+
+	return setmetatable(enum, {
+		__index = function(_, k)
+			error(("%s is not in %s!"):format(k, enumName), 2)
+		end,
+		__newindex = function()
+			error(("Creating new members in %s is not allowed!"):format(enumName), 2)
+		end
+	})
+end
+
+--[[
 	An object to represent runtime errors that occur during execution.
 	Promises that experience an error like this will be rejected with
 	an instance of this object.
 ]]
-local RuntimeError = {}
-RuntimeError.__index = RuntimeError
+local Error do
+	Error = {
+		Kind = makeEnum("Promise.Error.Kind", {
+			"ExecutionError",
+			"AlreadyCancelled",
+			"NotResolvedInTime",
+			"TimedOut"
+		})
+	}
+	Error.__index = Error
 
-function RuntimeError.new(options, parent)
-	options = options or {}
-	return setmetatable({
-		error = tostring(options.error) or "[This error has no error text.]",
-		trace = options.trace,
-		context = options.context,
-		parent = parent,
-		createdTick = tick(),
-		createdTrace = debug.traceback()
-	}, RuntimeError)
-end
+	function Error.new(options, parent)
+		options = options or {}
+		return setmetatable({
+			error = tostring(options.error) or "[This error has no error text.]",
+			trace = options.trace,
+			context = options.context,
+			kind = options.kind,
+			parent = parent,
+			createdTick = tick(),
+			createdTrace = debug.traceback()
+		}, Error)
+	end
 
-function RuntimeError.is(anything)
-	if type(anything) == "table" then
-		local metatable = getmetatable(anything)
+	function Error.is(anything)
+		if type(anything) == "table" then
+			local metatable = getmetatable(anything)
 
-		if type(metatable) == "table" then
-			return rawget(anything, "error") ~= nil and type(rawget(metatable, "extend")) == "function"
+			if type(metatable) == "table" then
+				return rawget(anything, "error") ~= nil and type(rawget(metatable, "extend")) == "function"
+			end
 		end
+
+		return false
 	end
 
-	return false
-end
+	function Error.isKind(anything, kind)
+		assert(kind ~= nil, "Argument #2 to Promise.Error.isKind must not be nil")
 
-function RuntimeError:extend(options)
-	return RuntimeError.new(options, self)
-end
-
-function RuntimeError:getErrorChain()
-	local runtimeErrors = { self }
-
-	while runtimeErrors[#runtimeErrors].parent do
-		table.insert(runtimeErrors, runtimeErrors[#runtimeErrors].parent)
+		return Error.is(anything) and anything.kind == kind
 	end
 
-	return runtimeErrors
-end
+	function Error:extend(options)
+		options = options or {}
 
-function RuntimeError:__tostring()
-	local errorStrings = {}
+		options.kind = options.kind or self.kind
 
-	for _, runtimeError in ipairs(self:getErrorChain()) do
-		table.insert(errorStrings, table.concat({runtimeError.trace or runtimeError.error, runtimeError.context}, "\n"))
+		return Error.new(options, self)
 	end
 
-	return table.concat(errorStrings, "\n")
+	function Error:getErrorChain()
+		local runtimeErrors = { self }
+
+		while runtimeErrors[#runtimeErrors].parent do
+			table.insert(runtimeErrors, runtimeErrors[#runtimeErrors].parent)
+		end
+
+		return runtimeErrors
+	end
+
+	function Error:__tostring()
+		local errorStrings = {
+			("-- Promise.Error(%s) --"):format(self.kind or "?"),
+		}
+
+		for _, runtimeError in ipairs(self:getErrorChain()) do
+			table.insert(errorStrings, table.concat({
+				runtimeError.trace or runtimeError.error,
+				runtimeError.context
+			}, "\n"))
+		end
+
+		return table.concat(errorStrings, "\n")
+	end
 end
 
 --[[
@@ -87,8 +132,9 @@ end
 
 local function makeErrorHandler(traceback)
 	return function(err)
-		return RuntimeError.new({
+		return Error.new({
 			error = err,
+			kind = Error.Kind.ExecutionError,
 			trace = debug.traceback(err, 2),
 			context = "Promise created at:\n\n" .. traceback
 		})
@@ -123,23 +169,13 @@ local function isEmpty(t)
 end
 
 local Promise = {
-	RuntimeError = RuntimeError,
+	Error = Error,
+	Status = makeEnum("Promise.Status", {"Started", "Resolved", "Rejected", "Cancelled"}),
 	_timeEvent = RunService.Heartbeat,
 	_getTime = tick,
 }
 Promise.prototype = {}
 Promise.__index = Promise.prototype
-
-Promise.Status = setmetatable({
-	Started = "Started",
-	Resolved = "Resolved",
-	Rejected = "Rejected",
-	Cancelled = "Cancelled",
-}, {
-	__index = function(_, k)
-		error(("%s is not in Promise.Status!"):format(k), 2)
-	end
-})
 
 --[[
 	Constructs a new Promise with the given initializing callback.
@@ -654,10 +690,19 @@ end
 --[[
 	Rejects the promise after `seconds` seconds.
 ]]
-function Promise.prototype:timeout(seconds, timeoutValue)
+function Promise.prototype:timeout(seconds, rejectionValue)
+	local traceback = debug.traceback(nil, 2)
+
 	return Promise.race({
 		Promise.delay(seconds):andThen(function()
-			return Promise.reject(timeoutValue == nil and "Timed out" or timeoutValue)
+			return Promise.reject(rejectionValue == nil and Error.new({
+				kind = Error.Kind.TimedOut,
+				error = "Timed out",
+				context = ("Timeout of %d seconds exceeded.\n:timeout() called at:\n\n%s"):format(
+					seconds,
+					traceback
+				)
+			}) or rejectionValue)
 		end),
 		self
 	})
@@ -713,7 +758,11 @@ function Promise.prototype:_andThen(traceback, successHandler, failureHandler)
 		elseif self._status == Promise.Status.Cancelled then
 			-- We don't want to call the success handler or the failure handler,
 			-- we just reject this promise outright.
-			reject("Promise is cancelled")
+			reject(Error.new({
+				error = "Promise is cancelled",
+				kind = Error.Kind.AlreadyCancelled,
+				context = "Promise created at\n\n" .. traceback
+			}))
 		end
 	end, self)
 end
@@ -1035,13 +1084,14 @@ function Promise.prototype:_resolve(...)
 
 				-- Backwards compatibility < v2
 				if chainedPromise._error then
-					maybeRuntimeError = RuntimeError.new({
+					maybeRuntimeError = Error.new({
 						error = chainedPromise._error,
+						kind = Error.Kind.ExecutionError,
 						context = "[No stack trace available as this Promise originated from an older version of the Promise library (< v2)]"
 					})
 				end
 
-				if RuntimeError.is(maybeRuntimeError) then
+				if Error.isKind(maybeRuntimeError, Error.Kind.ExecutionError) then
 					return self:_reject(maybeRuntimeError:extend({
 						error = "This Promise was chained to a Promise that errored.",
 						trace = "",
@@ -1142,6 +1192,25 @@ function Promise.prototype:_finalize()
 	if not Promise.TEST then
 		self._parent = nil
 		self._consumers = nil
+	end
+end
+
+--[[
+	Chains a Promise from this one that is resolved if this Promise is
+	resolved, and rejected if it is not resolved.
+]]
+function Promise.prototype:now(rejectionValue)
+	local traceback = debug.traceback(nil, 2)
+	if self:getStatus() == Promise.Status.Resolved then
+		return self:_andThen(traceback, function(...)
+			return ...
+		end)
+	else
+		return Promise.reject(rejectionValue == nil and Error.new({
+			kind = Error.Kind.NotResolvedInTime,
+			error = "This Promise was not resolved in time for :now()",
+			context = ":now() was called at:\n\n" .. traceback
+		}) or rejectionValue)
 	end
 end
 
