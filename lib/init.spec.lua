@@ -1161,4 +1161,32 @@ return function()
 			expect(promises[3]:getStatus()).to.equal(Promise.Status.Started)
 		end)
 	end)
+
+	describe("Promise:await", function()
+		it("should return the correct values", function()
+			local promise = Promise.resolve(5, 6, nil, 7)
+
+			local a, b, c, d, e = promise:await()
+
+			expect(a).to.equal(true)
+			expect(b).to.equal(5)
+			expect(c).to.equal(6)
+			expect(d).to.equal(nil)
+			expect(e).to.equal(7)
+		end)
+	end)
+
+	describe("Promise:expect", function()
+		it("should throw the correct values", function()
+			local rejectionValue = {}
+			local promise = Promise.reject(rejectionValue)
+
+			local success, value = pcall(function()
+				promise:expect()
+			end)
+
+			expect(success).to.equal(false)
+			expect(value).to.equal(rejectionValue)
+		end)
+	end)
 end

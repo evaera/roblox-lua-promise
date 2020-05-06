@@ -932,13 +932,13 @@ end
 --[[
 	Calls awaitStatus internally, returns (isResolved, values...)
 ]]
-function Promise.prototype:await(...)
-	return awaitHelper(self:awaitStatus(...))
+function Promise.prototype:await()
+	return awaitHelper(self:awaitStatus())
 end
 
 local function expectHelper(status, ...)
 	if status ~= Promise.Status.Resolved then
-		error((...) == nil and "" or tostring((...)), 3)
+		error((...) == nil and "Expected Promise rejected with no value." or (...), 3)
 	end
 
 	return ...
@@ -948,8 +948,8 @@ end
 	Calls await and only returns if the Promise resolves.
 	Throws if the Promise rejects or gets cancelled.
 ]]
-function Promise.prototype:expect(...)
-	return expectHelper(self:awaitStatus(...))
+function Promise.prototype:expect()
+	return expectHelper(self:awaitStatus())
 end
 
 -- Backwards compatibility

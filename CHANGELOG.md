@@ -9,6 +9,7 @@
 - Promise.async has been renamed to Promise.defer (Promise.async references same function for compatibility)
 - Improve test coverage for asynchronous and time-driven functions
 - Change Promise.is to be safe when dealing with tables that have an `__index` metamethod that creates an error.
+- Let Promise:expect() throw rejection objects
 
 # 2.5.1
 
