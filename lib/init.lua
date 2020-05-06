@@ -17,29 +17,55 @@ local RunService = game:GetService("RunService")
 	Promises that experience an error like this will be rejected with
 	an instance of this object.
 ]]
-local PromiseRuntimeError = {}
-PromiseRuntimeError.__index = PromiseRuntimeError
+local RuntimeError = {}
+RuntimeError.__index = RuntimeError
 
-function PromiseRuntimeError.new(errorString)
+function RuntimeError.new(options, parent)
+	options = options or {}
 	return setmetatable({
-		errorString = tostring(errorString) or "[This error has no error text.]"
-	}, PromiseRuntimeError)
+		error = tostring(options.error) or "[This error has no error text.]",
+		trace = options.trace,
+		context = options.context,
+		parent = parent,
+		createdTick = tick(),
+		createdTrace = debug.traceback()
+	}, RuntimeError)
 end
 
-function PromiseRuntimeError.is(anything)
+function RuntimeError.is(anything)
 	if type(anything) == "table" then
-		return rawget(anything, "errorString") ~= nil
+		local metatable = getmetatable(anything)
+
+		if type(metatable) == "table" then
+			return rawget(anything, "error") ~= nil and type(rawget(metatable, "extend")) == "function"
+		end
 	end
 
 	return false
 end
 
-function PromiseRuntimeError:extend(errorString)
-	return PromiseRuntimeError.new(("%s\n%s"):format(tostring(errorString), self.errorString))
+function RuntimeError:extend(options)
+	return RuntimeError.new(options, self)
 end
 
-function PromiseRuntimeError:__tostring()
-	return self.errorString
+function RuntimeError:getErrorChain()
+	local runtimeErrors = { self }
+
+	while runtimeErrors[#runtimeErrors].parent do
+		table.insert(runtimeErrors, runtimeErrors[#runtimeErrors].parent)
+	end
+
+	return runtimeErrors
+end
+
+function RuntimeError:__tostring()
+	local errorStrings = {}
+
+	for _, runtimeError in ipairs(self:getErrorChain()) do
+		table.insert(errorStrings, table.concat({runtimeError.trace or runtimeError.error, runtimeError.context}, "\n"))
+	end
+
+	return table.concat(errorStrings, "\n")
 end
 
 --[[
@@ -61,7 +87,11 @@ end
 
 local function makeErrorHandler(traceback)
 	return function(err)
-		return debug.traceback(err, 2) 	.. "\nPromise created at:\n\n" .. traceback
+		return RuntimeError.new({
+			error = err,
+			trace = debug.traceback(err, 2),
+			context = "Promise created at:\n\n" .. traceback
+		})
 	end
 end
 
@@ -83,7 +113,7 @@ local function createAdvancer(traceback, callback, resolve, reject)
 		if ok then
 			resolve(unpack(result, 1, resultLength))
 		else
-			reject(PromiseRuntimeError.new(result[1]))
+			reject(result[1])
 		end
 	end
 end
@@ -93,8 +123,9 @@ local function isEmpty(t)
 end
 
 local Promise = {
+	RuntimeError = RuntimeError,
 	_timeEvent = RunService.Heartbeat,
-	_getTime = tick
+	_getTime = tick,
 }
 Promise.prototype = {}
 Promise.__index = Promise.prototype
@@ -197,7 +228,7 @@ function Promise._new(traceback, callback, parent)
 		)
 
 		if not ok then
-			reject(PromiseRuntimeError.new(result[1]))
+			reject(result[1])
 		end
 	end)()
 
@@ -225,7 +256,7 @@ function Promise.defer(callback)
 			local ok, _, result = runExecutor(traceback, callback, resolve, reject, onCancel)
 
 			if not ok then
-				reject(PromiseRuntimeError.new(result))
+				reject(result[1])
 			end
 		end)
 	end)
@@ -1000,19 +1031,24 @@ function Promise.prototype:_resolve(...)
 				self:_resolve(...)
 			end,
 			function(...)
-				local runtimeError = chainedPromise._values[1]
+				local maybeRuntimeError = chainedPromise._values[1]
 
-				-- Backwards compatibility <v2
+				-- Backwards compatibility < v2
 				if chainedPromise._error then
-					runtimeError = PromiseRuntimeError.new(chainedPromise._error)
+					maybeRuntimeError = RuntimeError.new({
+						error = chainedPromise._error,
+						context = "[No stack trace available as this Promise originated from an older version of the Promise library (< v2)]"
+					})
 				end
 
-				if PromiseRuntimeError.is(runtimeError) then
-					return self:_reject(runtimeError:extend(
-						("The Promise at:\n\n%s\n...Rejected because it was chained to the following Promise, which encountered an error:\n"):format(
-							self._source
-						)
-					))
+				if RuntimeError.is(maybeRuntimeError) then
+					return self:_reject(maybeRuntimeError:extend({
+						error = "This Promise was chained to a Promise that errored.",
+						trace = "",
+						context = ("The Promise at:\n\n%s\n...Rejected because it was chained to the following Promise, which encountered an error:\n"):format(
+								self._source
+							)
+					}))
 				end
 
 				self:_reject(...)

@@ -147,6 +147,20 @@ return function()
 			expect(trace:find("runPlanNode")).to.be.ok()
 			expect(trace:find("...Rejected because it was chained to the following Promise, which encountered an error:")).to.be.ok()
 		end)
+
+		it("should report errors from Promises with _error (< v2)", function()
+			local oldPromise = Promise.reject()
+			oldPromise._error = "Sample error"
+
+			local newPromise = Promise.resolve():andThenReturn(oldPromise)
+
+			expect(newPromise:getStatus()).to.equal(Promise.Status.Rejected)
+
+			local trace = tostring(newPromise._values[1])
+			expect(trace:find("Sample error")).to.be.ok()
+			expect(trace:find("...Rejected because it was chained to the following Promise, which encountered an error:")).to.be.ok()
+			expect(trace:find("%[No stack trace available")).to.be.ok()
+		end)
 	end)
 
 	describe("Promise.defer", function()
