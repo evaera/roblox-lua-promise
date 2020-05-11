@@ -131,11 +131,20 @@ end
 
 
 local function makeErrorHandler(traceback)
+	assert(traceback ~= nil)
+
 	return function(err)
+		-- If the error object is already a table, forward it directly.
+		-- Should we extend the error here and add our own trace?
+
+		if type(err) == "table" then
+			return err
+		end
+
 		return Error.new({
 			error = err,
 			kind = Error.Kind.ExecutionError,
-			trace = debug.traceback(err, 2),
+			trace = debug.traceback(tostring(err), 2),
 			context = "Promise created at:\n\n" .. traceback
 		})
 	end

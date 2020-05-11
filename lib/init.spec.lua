@@ -925,6 +925,16 @@ return function()
 			expect(errorText:find("errortext")).to.be.ok()
 		end)
 
+		it("should reject with error objects", function()
+			local object = {}
+			local success, value = Promise.try(function()
+				error(object)
+			end):_unwrap()
+
+			expect(success).to.equal(false)
+			expect(value).to.equal(object)
+		end)
+
 		it("should catch asynchronous errors", function()
 			local bindable = Instance.new("BindableEvent")
 			local promise = Promise.try(function()
