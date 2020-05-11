@@ -1167,7 +1167,7 @@ function Promise.prototype:_reject(...)
 			end
 
 			-- Build a reasonable message
-			local message = ("Unhandled promise rejection:\n\n%s\n\n%s"):format(
+			local message = ("Unhandled Promise rejection:\n\n%s\n\n%s"):format(
 				err,
 				self._source
 			)
