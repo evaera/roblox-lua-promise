@@ -629,9 +629,10 @@ do
 				first = node
 				connection = Promise._timeEvent:Connect(function()
 					local currentTime = Promise._getTime()
-
 					while first.endTime <= currentTime do
-						first.resolve(currentTime - first.startTime)
+						-- Don't use currentTime here, as this is the time when we started resolving,
+						-- not necessarily the time *right now*.
+						first.resolve(Promise._getTime() - first.startTime)
 						first = first.next
 						if first == nil then
 							connection:Disconnect()
@@ -639,7 +640,6 @@ do
 							break
 						end
 						first.previous = nil
-						currentTime = Promise._getTime()
 					end
 				end)
 			else -- first is non-nil
