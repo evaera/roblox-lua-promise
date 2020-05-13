@@ -1236,4 +1236,178 @@ return function()
 			expect(value).to.equal("foo")
 		end)
 	end)
+
+	describe("Promise.each", function()
+		it("should iterate", function()
+			local ok, result = Promise.each({
+				"foo", "bar", "baz", "qux"
+			}, function(...)
+				return {...}
+			end):_unwrap()
+
+			expect(ok).to.equal(true)
+			expect(result[1][1]).to.equal("foo")
+			expect(result[1][2]).to.equal(1)
+			expect(result[2][1]).to.equal("bar")
+			expect(result[2][2]).to.equal(2)
+			expect(result[3][1]).to.equal("baz")
+			expect(result[3][2]).to.equal(3)
+			expect(result[4][1]).to.equal("qux")
+			expect(result[4][2]).to.equal(4)
+		end)
+
+		it("should iterate serially", function()
+			local resolves = {}
+			local callCounts = {}
+
+			local promise = Promise.each({
+				"foo", "bar", "baz"
+			}, function(value, index)
+				callCounts[index] = (callCounts[index] or 0) + 1
+
+				return Promise.new(function(resolve)
+					table.insert(resolves, function()
+						resolve(value:upper())
+					end)
+				end)
+			end)
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Started)
+			expect(#resolves).to.equal(1)
+			expect(callCounts[1]).to.equal(1)
+			expect(callCounts[2]).to.never.be.ok()
+
+			table.remove(resolves, 1)()
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Started)
+			expect(#resolves).to.equal(1)
+			expect(callCounts[1]).to.equal(1)
+			expect(callCounts[2]).to.equal(1)
+			expect(callCounts[3]).to.never.be.ok()
+
+			table.remove(resolves, 1)()
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Started)
+			expect(callCounts[1]).to.equal(1)
+			expect(callCounts[2]).to.equal(1)
+			expect(callCounts[3]).to.equal(1)
+
+			table.remove(resolves, 1)()
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Resolved)
+			expect(type(promise._values[1])).to.equal("table")
+			expect(type(promise._values[2])).to.equal("nil")
+
+			local result = promise._values[1]
+
+			expect(result[1]).to.equal("FOO")
+			expect(result[2]).to.equal("BAR")
+			expect(result[3]).to.equal("BAZ")
+		end)
+
+		it("should reject with the value if the predicate promise rejects", function()
+			local promise = Promise.each({1, 2, 3}, function()
+				return Promise.reject("foobar")
+			end)
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Rejected)
+			expect(promise._values[1]).to.equal("foobar")
+		end)
+
+		it("should allow Promises to be in the list and wait when it gets to them", function()
+			local innerResolve
+			local innerPromise = Promise.new(function(resolve)
+				innerResolve = resolve
+			end)
+
+			local promise = Promise.each({
+				innerPromise
+			}, function(value)
+				return value * 2
+			end)
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Started)
+
+			innerResolve(2)
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Resolved)
+			expect(promise._values[1][1]).to.equal(4)
+		end)
+
+		it("should reject with the value if a Promise from the list rejects", function()
+			local called = false
+			local promise = Promise.each({1, 2, Promise.reject("foobar")}, function(value)
+				called = true
+				return "never"
+			end)
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Rejected)
+			expect(promise._values[1]).to.equal("foobar")
+			expect(called).to.equal(false)
+		end)
+
+		it("should reject immediately if there's a cancelled Promise in the list initially", function()
+			local cancelled = Promise.new(function() end)
+			cancelled:cancel()
+
+			local called = false
+			local promise = Promise.each({1, 2, cancelled}, function()
+				called = true
+			end)
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Rejected)
+			expect(called).to.equal(false)
+			expect(promise._values[1].kind).to.equal(Promise.Error.Kind.AlreadyCancelled)
+		end)
+
+		it("should stop iteration if Promise.each is cancelled", function()
+			local callCounts = {}
+
+			local promise = Promise.each({
+				"foo", "bar", "baz"
+			}, function(value, index)
+				callCounts[index] = (callCounts[index] or 0) + 1
+
+				return Promise.new(function()
+
+				end)
+			end)
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Started)
+			expect(callCounts[1]).to.equal(1)
+			expect(callCounts[2]).to.never.be.ok()
+
+			promise:cancel()
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Cancelled)
+			expect(callCounts[1]).to.equal(1)
+			expect(callCounts[2]).to.never.be.ok()
+		end)
+
+		it("should cancel the Promise returned from the predicate if Promise.each is cancelled", function()
+			local innerPromise
+
+			local promise = Promise.each({
+				"foo", "bar", "baz"
+			}, function(value, index)
+				innerPromise = Promise.new(function()
+				end)
+				return innerPromise
+			end)
+
+			promise:cancel()
+
+			expect(innerPromise:getStatus()).to.equal(Promise.Status.Cancelled)
+		end)
+
+		it("should cancel Promises in the list if Promise.each is cancelled", function()
+			local innerPromise = Promise.new(function() end)
+
+			local promise = Promise.each({innerPromise}, function() end)
+
+			promise:cancel()
+
+			expect(innerPromise:getStatus()).to.equal(Promise.Status.Cancelled)
+		end)
+	end)
 end

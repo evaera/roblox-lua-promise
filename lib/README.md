@@ -273,6 +273,37 @@ docs:
       params: "promises: array<Promise<T>>"
       returns: Promise<T>
 
+    - name: each
+      desc: |
+        Iterates serially over the given an array of values, calling the predicate callback on each value before continuing.
+        
+        If the predicate returns a Promise, we wait for that Promise to resolve before moving on to the next item
+        in the array.
+        
+        If the Promise a predicate returns rejects, the Promise from `Promise.each` is also rejected with the same value.
+
+        If the array of values contains a Promise, when we get to that point in the list, we wait for the Promise to resolve before calling the predicate with the value.
+        
+        If a Promise in the array of values is already Rejected when `Promise.each` is called, `Promise.each` rejects with that value immediately (the predicate callback will never be called even once). If a Promise in the list is already Cancelled when `Promise.each` is called, `Promise.each` rejects with `Promise.Error(Promise.Error.Kind.AlreadyCancelled`). If a Promise in the array of values is Started at first, but later rejects, `Promise.each` will reject with that value and iteration will not continue once iteration encounters that value.
+
+        Returns a Promise containing an array of the returned/resolved values from the predicate for each item in the array of values. 
+
+        If this Promise returned from `Promise.each` rejects or is cancelled for any reason, the following are true:
+        - Iteration will not continue.
+        - Any Promises within the array of values will now be cancelled if they have no other consumers.
+        - The Promise returned from the currently active predicate will be cancelled if it hasn't resolved yet.
+      params:
+        - name: list
+          type: "array<T | Promise<T>>"
+        - name: predicate
+          desc: The callback to call for each value in the list.
+          type:
+            kind: function
+            params: "value: T, index: number"
+            returns: U | Promise<U>
+      returns: Promise<array<U>>
+      static: true
+
     - name: delay
       desc: |
         Returns a Promise that resolves after `seconds` seconds have passed. The Promise resolves with the actual amount of time that was waited.
