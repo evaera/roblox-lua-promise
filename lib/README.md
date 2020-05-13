@@ -26,15 +26,27 @@ docs:
 
   functions:
     - name: new
-      tags: [ 'constructor' ]
       desc: |
         Construct a new Promise that will be resolved or rejected with the given callbacks.
 
         If you `resolve` with a Promise, it will be chained onto.
 
         You can safely yield within the executor function and it will not block the creating thread.
+
+        ```lua
+        local myFunction()
+          return Promise.new(function(resolve, reject, onCancel)
+            wait(1)
+            resolve("Hello world!")
+          end)
+        end
+
+        myFunction():andThen(print)
+        ```
+
+        Errors that occur during execution will be caught and turned into a rejection automatically. If `error()` is called with a table, that table will be the rejection value. Otherwise, string errors will be converted into `Promise.Error(Promise.Error.Kind.ExecutionError)` objects for tracking debug information.
         
-        You may register an optional cancellation hook by using the `onCancel` argument.
+        You may register an optional cancellation hook by using the `onCancel` argument:
           * This should be used to abort any ongoing operations leading up to the promise being settled. 
           * Call the `onCancel` function with a function callback as its only argument to set a hook which will in turn be called when/if the promise is cancelled.
           * `onCancel` returns `true` if the Promise was already cancelled when you called `onCancel`.
@@ -72,7 +84,7 @@ docs:
                       desc: "Returns `true` if the Promise was already cancelled at the time of calling `onCancel`."
       returns: Promise
     - name: defer
-      tags: [ 'constructor' ]
+      since: 2.0.0
       desc: |
         The same as [[Promise.new]], except execution begins after the next `Heartbeat` event.
 
@@ -119,11 +131,48 @@ docs:
                       desc: "Returns `true` if the Promise was already cancelled at the time of calling `onCancel`."
       returns: Promise
 
+    - name: try
+      desc: |
+        Begins a Promise chain, calling a function and returning a Promise resolving with its return value. If the function errors, the returned Promise will be rejected with the error. You can safely yield within the Promise.try callback.
+
+        ::: tip
+        `Promise.try` is similar to [[Promise.promisify]], except the callback is invoked immediately instead of returning a new function.
+        :::
+
+        ```lua
+        Promise.try(function()
+          return math.random(1, 2) == 1 and "ok" or error("Oh an error!")
+        end)
+          :andThen(function(text)
+            print(text)
+          end)
+          :catch(function(err)
+            warn("Something went wrong")
+          end)
+        ```
+      static: true
+      params:
+        - name: callback
+          type:
+            kind: function
+            params: "...: ...any?"
+            returns: "...any?"
+        - name: "..."
+          type: "...any?"
+          desc: Arguments for the callback
+      returns:
+        - type: "Promise<...any?>"
+          desc: The return value of the passed callback.
+
     - name: promisify
       desc: |
         Wraps a function that yields into one that returns a Promise.
 
         Any errors that occur while executing the function will be turned into rejections.
+
+        ::: tip
+        `Promise.promisify` is similar to [[Promise.try]], except the callback is returned as a callable function instead of being invoked immediately.
+        :::
 
         ```lua
         local sleep = Promise.promisify(wait)
@@ -160,46 +209,22 @@ docs:
       params: "value: ...any"
       returns: Promise<...any>
     - name: reject
-      desc: Creates an immediately rejected Promise with the given value.
+      desc: |
+        Creates an immediately rejected Promise with the given value.
+
+        ::: tip
+        Someone needs to consume this rejection (i.e. `:catch()` it), otherwise it will emit an unhandled Promise rejection warning on the next frame. Thus, you should not create and store rejected Promises for later use. Only create them on-demand as needed.
+        :::
       static: true
       params: "value: ...any"
       returns: Promise<...any>
-    - name: try
-      desc: |
-        Begins a Promise chain, calling a function and returning a Promise resolving with its return value. If the function errors, the returned Promise will be rejected with the error.
-
-        `Promise.try` is similar to [[Promise.promisify]], except the callback is invoked immediately instead of returning a new function.
-
-        ```lua
-        Promise.try(function()
-          return math.random(1, 2) == 1 and "ok" or error("Oh an error!")
-        end)
-          :andThen(function(text)
-            print(text)
-          end)
-          :catch(function(err)
-            warn("Something went wrong")
-          end)
-        ```
-      static: true
-      params:
-        - name: callback
-          type:
-            kind: function
-            params: "...: ...any?"
-            returns: "...any?"
-        - name: "..."
-          type: "...any?"
-          desc: Arguments for the callback
-      returns:
-        - type: "Promise<...any?>"
-          desc: The return value of the passed callback.
         
     - name: all
       desc: |
         Accepts an array of Promises and returns a new promise that:
           * is resolved after all input promises resolve.
-          * is rejected if ANY input promises reject.
+          * is rejected if *any* input promises reject.
+        
         Note: Only the first return value from each promise will be present in the resulting array.
 
         After any input Promise rejects, all other input Promises that are still pending will be cancelled if they have no other consumers.
@@ -217,6 +242,12 @@ docs:
     - name: race
       desc: |
         Accepts an array of Promises and returns a new promise that is resolved or rejected as soon as any Promise in the array resolves or rejects.
+
+        ::: warning
+        If the first Promise to settle from the array settles with a rejection, the resulting Promise from `race` will reject.
+
+        If you instead want to tolerate rejections, and only care about at least one Promise resolving, you should use [[Promise.any]] or [[Promise.some]] instead.
+        :::
 
         All other Promises that don't win the race will be cancelled if they have no other consumers.
       static: true
@@ -255,7 +286,7 @@ docs:
       returns: Promise<number>
       static: true
     - name: is
-      desc: Returns whether the given object is a Promise. This only checks if the object is a table and has an `andThen` method.
+      desc: Checks whether the given object is a Promise via duck typing. This only checks if the object is a table and has an `andThen` method.
       static: true
       params: "object: any"
       returns: 
@@ -266,6 +297,10 @@ docs:
     - name: andThen
       desc: |
         Chains onto an existing Promise and returns a new Promise.
+
+        ::: warning
+        Within the failure handler, you should never assume that the rejection value is a string. Some rejections within the Promise library are represented by [[Error]] objects. If you want to treat it as a string for debugging, you should call `tostring` on it first.
+        :::
 
         Return a Promise from the success or failure handler and it will be chained onto.
       params:
@@ -297,7 +332,12 @@ docs:
           returns: Promise<T>
     
     - name: catch
-      desc: Shorthand for `Promise:andThen(nil, failureHandler)`.
+      desc: |
+        Shorthand for `Promise:andThen(nil, failureHandler)`.
+
+        ::: warning
+        Within the failure handler, you should never assume that the rejection value is a string. Some rejections within the Promise library are represented by [[Error]] objects. If you want to treat it as a string for debugging, you should call `tostring` on it first.
+        :::
       params: 
         - name: failureHandler
           type:
@@ -340,6 +380,10 @@ docs:
         Set a handler that will be called regardless of the promise's fate. The handler is called when the promise is resolved, rejected, *or* cancelled.
 
         Returns a new promise chained from this promise.
+
+        ::: warning
+        If the Promise is cancelled, any Promises chained off of it with `andThen` won't run. Only Promises chained with `finally` or `done` will run in the case of cancellation.
+        :::
       params:
         - name: finallyHandler
           type:
@@ -550,7 +594,7 @@ docs:
             end)
         ```
 
-        If this Promise is still running, Rejected, or Cancelled, the Promise returned from `:now()` will reject with the `rejectionValue` if passed, or a `Promise.Error(Promise.Error.Kind.NotResolvedInTime)`. This can be checked with [[Error.isKind]].
+        If this Promise is still running, Rejected, or Cancelled, the Promise returned from `:now()` will reject with the `rejectionValue` if passed, otherwise with a `Promise.Error(Promise.Error.Kind.NotResolvedInTime)`. This can be checked with [[Error.isKind]].
       params: "rejectionValue: T?"
       returns: Promise<T>
 
