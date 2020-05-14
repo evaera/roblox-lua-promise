@@ -273,12 +273,57 @@ docs:
       params: "promises: array<Promise<T>>"
       returns: Promise<T>
 
+    - name: delay
+      desc: |
+        Returns a Promise that resolves after `seconds` seconds have passed. The Promise resolves with the actual amount of time that was waited.
+
+        This function is **not** a wrapper around `wait`. `Promise.delay` uses a custom scheduler which provides more accurate timing. As an optimization, cancelling this Promise instantly removes the task from the scheduler.
+
+        ::: warning
+          Passing `NaN`, infinity, or a number less than 1/60 is equivalent to passing 1/60.
+        :::
+      params: "seconds: number"
+      returns: Promise<number>
+      static: true
+
     - name: each
       desc: |
         Iterates serially over the given an array of values, calling the predicate callback on each value before continuing.
         
         If the predicate returns a Promise, we wait for that Promise to resolve before moving on to the next item
         in the array.
+
+        ::: tip
+        `Promise.each` is similar to `Promise.all`, except the Promises are ran in order instead of all at once.
+
+        But because Promises are eager, by the time they are created, they're already running. Thus, we need a way to defer creation of each Promise until a later time.
+
+        The predicate function exists as a way for us to operate on our data instead of creating a new closure for each Promise. If you would prefer, you can pass in an array of functions, and in the predicate, call the function and return its return value.
+        :::
+
+        ```lua
+        Promise.each({
+          "foo",
+          "bar",
+          "baz",
+          "qux"
+        }, function(value, index)
+          return Promise.delay(1):andThen(function()
+            print(("%d) Got %s!"):format(index, value))
+          end)
+        end)
+
+        --[[
+          (1 second passes)
+          > 1) Got foo!
+          (1 second passes)
+          > 2) Got bar!
+          (1 second passes)
+          > 3) Got baz!
+          (1 second passes)
+          > 4) Got qux!
+        ]]
+        ```
         
         If the Promise a predicate returns rejects, the Promise from `Promise.each` is also rejected with the same value.
 
@@ -304,18 +349,6 @@ docs:
       returns: Promise<array<U>>
       static: true
 
-    - name: delay
-      desc: |
-        Returns a Promise that resolves after `seconds` seconds have passed. The Promise resolves with the actual amount of time that was waited.
-
-        This function is **not** a wrapper around `wait`. `Promise.delay` uses a custom scheduler which provides more accurate timing. As an optimization, cancelling this Promise instantly removes the task from the scheduler.
-
-        ::: warning
-          Passing `NaN`, infinity, or a number less than 1/60 is equivalent to passing 1/60.
-        :::
-      params: "seconds: number"
-      returns: Promise<number>
-      static: true
     - name: is
       desc: Checks whether the given object is a Promise via duck typing. This only checks if the object is a table and has an `andThen` method.
       static: true
