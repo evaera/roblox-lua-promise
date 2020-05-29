@@ -349,6 +349,26 @@ docs:
       returns: Promise<array<U>>
       static: true
 
+    - name: retry
+      desc: |
+        Repeatedly calls a Promise-returning function up to `times` number of times, until the returned Promise resolves.
+
+        If the amount of retries is exceeded, the function will return the latest rejected Promise.
+      params:
+        - name: callback
+          type:
+            kind: function
+            params: "...: P"
+            returns: Promise<T>
+        - name: times
+          type: number
+        - name: "..."
+          type: "P"
+          optional: true
+
+      returns: Promise<T>
+      static: true
+
     - name: is
       desc: Checks whether the given object is a Promise via duck typing. This only checks if the object is a table and has an `andThen` method.
       static: true

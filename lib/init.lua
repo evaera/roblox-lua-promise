@@ -1323,4 +1323,22 @@ function Promise.prototype:now(rejectionValue)
 	end
 end
 
+--[[
+	Retries a Promise-returning callback N times until it succeeds.
+]]
+function Promise.retry(callback, times, ...)
+	assert(type(callback) == "function", "Parameter #1 to Promise.retry must be a function")
+	assert(type(times) == "number", "Parameter #2 to Promise.retry must be a number")
+
+  local args, length = {...}, select("#", ...)
+
+  return Promise.resolve(callback(...)):catch(function(...)
+    if times > 0 then
+      return Promise.retry(callback, times - 1, unpack(args, 1, length))
+    else
+      return Promise.reject(...)
+    end
+  end)
+end
+
 return Promise

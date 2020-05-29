@@ -1410,4 +1410,35 @@ return function()
 			expect(innerPromise:getStatus()).to.equal(Promise.Status.Cancelled)
 		end)
 	end)
+
+	describe("Promise.retry", function()
+		it("should retry N times", function()
+			local counter = 0
+
+			local promise = Promise.retry(function(parameter)
+				expect(parameter).to.equal("foo")
+
+				counter = counter + 1
+
+				if counter == 5 then
+					return Promise.resolve("ok")
+				end
+
+				return Promise.reject("fail")
+			end, 5, "foo")
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Resolved)
+			expect(promise._values[1]).to.equal("ok")
+		end)
+
+		it("should reject if threshold is exceeded", function()
+			local promise = Promise.retry(function()
+				return Promise.reject("fail")
+			end, 5)
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Rejected)
+			expect(promise._values[1]).to.equal("fail")
+		end)
+	end)
+
 end
