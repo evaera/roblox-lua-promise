@@ -369,6 +369,48 @@ docs:
       returns: Promise<T>
       static: true
 
+    - name: fromEvent
+      desc: |
+        Converts an event into a Promise which resolves the next time the event fires.
+
+        The optional `predicate` callback, if passed, will receive the event arguments and should return `true` or `false`, based on if this fired event should resolve the Promise or not. If `true`, the Promise resolves. If `false`, nothing happens and the predicate will be rerun the next time the event fires.
+
+        The Promise will resolve with the event arguments.
+
+        ::: tip
+        This function will work given any object with a `Connect` method. This includes all Roblox events.
+        :::
+
+        ```lua
+        -- Creates a Promise which only resolves when `somePart` is touched by a part named `"Something specific"`.
+        return Promise.fromEvent(somePart.Touched, function(part)
+          return part.Name == "Something specific"
+        end)
+        ```
+      params:
+        - name: event
+          type:
+            kind: interface
+            type:
+              Connect:
+                type:
+                  kind: function
+                  params:
+                    - name: callback
+                      type:
+                        kind: function
+                        params: "...: P"
+                desc: Any object with a `Connect` method. This includes all Roblox events.
+        - name: predicate
+          optional: true
+          type:
+            kind: function
+            params: "...: P"
+            returns: boolean
+            desc: A function which determines if the Promise should resolve with the given value, or wait for the next event to check again.
+      returns: Promise<P>
+      static: true
+
     - name: is
       desc: Checks whether the given object is a Promise via duck typing. This only checks if the object is a table and has an `andThen` method.
       static: true

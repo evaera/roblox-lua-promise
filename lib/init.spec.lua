@@ -1441,4 +1441,37 @@ return function()
 		end)
 	end)
 
+	describe("Promise.fromEvent", function()
+		it("should convert a Promise into an event", function()
+			local event = Instance.new("BindableEvent")
+
+			local promise = Promise.fromEvent(event.Event)
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Started)
+
+			event:Fire("foo")
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Resolved)
+			expect(promise._values[1]).to.equal("foo")
+		end)
+
+		it("should convert a Promise into an event with the predicate", function()
+			local event = Instance.new("BindableEvent")
+
+			local promise = Promise.fromEvent(event.Event, function(param)
+				return param == "foo"
+			end)
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Started)
+
+			event:Fire("bar")
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Started)
+
+			event:Fire("foo")
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Resolved)
+			expect(promise._values[1]).to.equal("foo")
+		end)
+	end)
 end
