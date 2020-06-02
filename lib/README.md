@@ -84,7 +84,7 @@ docs:
                       desc: "Returns `true` if the Promise was already cancelled at the time of calling `onCancel`."
       returns: Promise
     - name: defer
-      since: 2.0.0
+      since: 3.0.0
       desc: |
         The same as [[Promise.new]], except execution begins after the next `Heartbeat` event.
 
@@ -287,7 +287,7 @@ docs:
       static: true
 
     - name: each
-      since: 2.0.0
+      since: 3.0.0
       desc: |
         Iterates serially over the given an array of values, calling the predicate callback on each value before continuing.
         
@@ -351,7 +351,7 @@ docs:
       static: true
 
     - name: retry
-      since: 2.0.0
+      since: 3.0.0
       desc: |
         Repeatedly calls a Promise-returning function up to `times` number of times, until the returned Promise resolves.
 
@@ -372,7 +372,7 @@ docs:
       static: true
 
     - name: fromEvent
-      since: 2.0.0
+      since: 3.0.0
       desc: |
         Converts an event into a Promise which resolves the next time the event fires.
 

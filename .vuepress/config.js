@@ -44,7 +44,8 @@ module.exports = {
       '/lib/WhyUsePromises',
       '/lib/Tour',
       '/lib/Examples',
-      '/lib/',
+      '/CHANGELOG',
+      '/lib/'
     ]
   }
 }
