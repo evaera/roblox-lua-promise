@@ -21,7 +21,7 @@ This Promise implementation attempts to satisfy these traits:
 * Predictable timing
 
 ## Example
-`Promise.async` returns synchronously.
+`Promise.new` returns synchronously.
 
 ```lua
 local HttpService = game:GetService("HttpService")
@@ -29,7 +29,7 @@ local HttpService = game:GetService("HttpService")
 -- A light wrapper around HttpService
 -- Ideally, you do this once per project per async method that you use.
 local function httpGet(url)
-	return Promise.async(function(resolve, reject)
+	return Promise.new(function(resolve, reject)
 		local ok, result = pcall(HttpService.GetAsync, HttpService, url)
 
 		if ok then
