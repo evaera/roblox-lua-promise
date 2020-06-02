@@ -22,7 +22,7 @@ This function demonstrates how to convert a function that yields into a function
 
 ```lua
 local function isPlayerInGroup(player, groupId)
-	return Promise.async(function(resolve)
+	return Promise.new(function(resolve)
 		resolve(player:IsInGroup(groupId))
 	end)
 end

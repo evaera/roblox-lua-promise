@@ -1,12 +1,36 @@
-# Next
+# Changelog
 
-- Change Promise.is to be safe when dealing with tables that have an `__index` metamethod that creates an error.
+## [3.0.0] - 2020-06-02
+### Changed
+- Runtime errors are now represented by objects. You must call tostring on rejection values before assuming they are strings (this was always good practice, but is required now).
+- Yielding is now allowed in `Promise.new`, `andThen`, and `Promise.try` executors.
+- Errors now have much better stack traces due to using `xpcall` internally instead of `pcall`.
+- Stack traces will now be more direct and not include as many internal calls within the Promise library.
+- Chained promises from `resolve()` or returning from andThen now have improved rejection messages for debugging.
+- `Promise.async` has been renamed to `Promise.defer` (`Promise.async` references same function for compatibility)
+- Promises now have a `__tostring` metamethod, which returns `Promise(Resolved)` or whatever the current status is.
+- `Promise:timeout()` now rejects with a `Promise.Error(Promise.Error.Kind.TimedOut)` object. (Formerly rejected with the string `"Timed out"`)
+- Attaching a handler to a cancelled Promise now rejects with a `Promise.Error(Promise.Error.Kind.AlreadyCancelled)`. (Formerly rejected with the string `"Promise is cancelled"`)
+- Let `Promise:expect()` throw rejection objects
 
-# 2.5.1
+### Added
+
+- New Promise Error class is exposed at `Promise.Error`, which includes helpful static methods like `Promise.Error.is`.
+- Added `Promise:now()` (#23)
+- Added `Promise.each` (#21)
+- Added `Promise.retry` (#16)
+- Added `Promise.fromEvent` (#14)
+- Improved test coverage for asynchronous and time-driven functions
+
+### Fixed
+- Changed `Promise.is` to be safe when dealing with tables that have an `__index` metamethod that creates an error.
+- `Promise.delay` resolve value (time passed) is now more accurate (previously passed time based on when we started resuming threads instead of the current time. This is a very minor difference.)
+
+## [2.5.1]
 
 - Fix issue with rejecting with non-string not propagating correctly.
 
-# 2.5.0
+## [2.5.0]
 
 - Add Promise.tap
 - Fix bug with C functions not working when passed to andThen
@@ -23,31 +47,31 @@
 - Add `Promise.allSettled`
 - `Promise.all` and `Promise.race` are now cancellable.
 
-# 2.4.0
+## [2.4.0]
 
 - `Promise.is` now only checks if the object is "andThennable" (has an `andThen` method).
 
-# 2.3.1
+## [2.3.1]
 
 - Make unhandled rejection warning trigger on next Heartbeat
 
-# 2.3.0
+## [2.3.0]
 
 - Remove `Promise.spawn` from the public API.
 - `Promise.async` still inherits the behavior from `Promise.spawn`.
 - `Promise.async` now wraps the callback in `pcall` and rejects if an error occurred.
 - `Promise.new` has now has an explicit error message when attempting to yield inside of it.
 
-# 2.2.0 
+## [2.2.0]
 
 - `Promise.promisify` now uses `coroutine.wrap` instead of `Promise.spawn`
 
-# 2.1.0
+## [2.1.0]
 
 - Add `finallyCall`, `andThenCall`
 - Add `awaitValue`
 
-# 2.0.0
+## [2.0.0]
 
 - Add Promise.race
 - Add Promise.async

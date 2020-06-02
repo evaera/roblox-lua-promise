@@ -2,6 +2,24 @@ return function()
 	local Promise = require(script.Parent)
 	Promise.TEST = true
 
+	local timeEvent = Instance.new("BindableEvent")
+	Promise._timeEvent = timeEvent.Event
+
+	local advanceTime do
+		local injectedPromiseTime = 0
+
+		Promise._getTime = function()
+			return injectedPromiseTime
+		end
+
+		function advanceTime(delta)
+			delta = delta or (1/60)
+
+			injectedPromiseTime = injectedPromiseTime + delta
+			timeEvent:Fire(delta)
+		end
+	end
+
 	local function pack(...)
 		local len = select("#", ...)
 
@@ -79,11 +97,109 @@ return function()
 			expect(promise).to.be.ok()
 			expect(callCount).to.equal(1)
 			expect(promise:getStatus()).to.equal(Promise.Status.Rejected)
-			expect(promise._values[1]:find("hahah")).to.be.ok()
+			expect(tostring(promise._values[1]):find("hahah")).to.be.ok()
 
 			-- Loosely check for the pieces of the stack trace we expect
-			expect(promise._values[1]:find("init.spec")).to.be.ok()
-			expect(promise._values[1]:find("new")).to.be.ok()
+			expect(tostring(promise._values[1]):find("init.spec")).to.be.ok()
+			expect(tostring(promise._values[1]):find("runExecutor")).to.be.ok()
+		end)
+
+		it("should work with C functions", function()
+			expect(function()
+				Promise.new(tick):andThen(tick)
+			end).to.never.throw()
+		end)
+
+		it("should have a nice tostring", function()
+			expect(tostring(Promise.resolve()):gmatch("Promise(Resolved)")).to.be.ok()
+		end)
+
+		it("should allow yielding", function()
+			local bindable = Instance.new("BindableEvent")
+			local promise = Promise.new(function(resolve)
+				bindable.Event:Wait()
+				resolve(5)
+			end)
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Started)
+			bindable:Fire()
+			expect(promise:getStatus()).to.equal(Promise.Status.Resolved)
+			expect(promise._values[1]).to.equal(5)
+		end)
+
+		it("should preserve stack traces of resolve-chained promises", function()
+			local function nestedCall(text)
+				error(text)
+			end
+
+			local promise = Promise.new(function(resolve)
+				resolve(Promise.new(function()
+					nestedCall("sample text")
+				end))
+			end)
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Rejected)
+
+			local trace = tostring(promise._values[1])
+			expect(trace:find("sample text")).to.be.ok()
+			expect(trace:find("nestedCall")).to.be.ok()
+			expect(trace:find("runExecutor")).to.be.ok()
+			expect(trace:find("runPlanNode")).to.be.ok()
+			expect(trace:find("...Rejected because it was chained to the following Promise, which encountered an error:")).to.be.ok()
+		end)
+
+		it("should report errors from Promises with _error (< v2)", function()
+			local oldPromise = Promise.reject()
+			oldPromise._error = "Sample error"
+
+			local newPromise = Promise.resolve():andThenReturn(oldPromise)
+
+			expect(newPromise:getStatus()).to.equal(Promise.Status.Rejected)
+
+			local trace = tostring(newPromise._values[1])
+			expect(trace:find("Sample error")).to.be.ok()
+			expect(trace:find("...Rejected because it was chained to the following Promise, which encountered an error:")).to.be.ok()
+			expect(trace:find("%[No stack trace available")).to.be.ok()
+		end)
+	end)
+
+	describe("Promise.defer", function()
+		it("should execute after the time event", function()
+			local callCount = 0
+			local promise = Promise.defer(function(resolve, reject, onCancel, nothing)
+				expect(type(resolve)).to.equal("function")
+				expect(type(reject)).to.equal("function")
+				expect(type(onCancel)).to.equal("function")
+				expect(type(nothing)).to.equal("nil")
+
+				callCount = callCount + 1
+
+				resolve("foo")
+			end)
+
+			expect(callCount).to.equal(0)
+			expect(promise:getStatus()).to.equal(Promise.Status.Started)
+
+			advanceTime()
+			expect(callCount).to.equal(1)
+			expect(promise:getStatus()).to.equal(Promise.Status.Resolved)
+
+			advanceTime()
+			expect(callCount).to.equal(1)
+		end)
+	end)
+
+	describe("Promise.delay", function()
+		it("Should schedule promise resolution", function()
+			local promise = Promise.delay(1)
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Started)
+
+			advanceTime()
+			expect(promise:getStatus()).to.equal(Promise.Status.Started)
+
+			advanceTime(1)
+			expect(promise:getStatus()).to.equal(Promise.Status.Resolved)
 		end)
 	end)
 
@@ -132,6 +248,19 @@ return function()
 	end)
 
 	describe("Promise:andThen", function()
+		it("should allow yielding", function()
+			local bindable = Instance.new("BindableEvent")
+			local promise = Promise.resolve():andThen(function()
+				bindable.Event:Wait()
+				return 5
+			end)
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Started)
+			bindable:Fire()
+			expect(promise:getStatus()).to.equal(Promise.Status.Resolved)
+			expect(promise._values[1]).to.equal(5)
+		end)
+
 		it("should chain onto resolved promises", function()
 			local args
 			local argsLength
@@ -198,6 +327,24 @@ return function()
 			expect(chained).never.to.equal(promise)
 			expect(chained:getStatus()).to.equal(Promise.Status.Resolved)
 			expect(#chained._values).to.equal(0)
+		end)
+
+		it("should reject on error in callback", function()
+			local callCount = 0
+
+			local promise = Promise.resolve(1):andThen(function()
+				callCount = callCount + 1
+				error("hahah")
+			end)
+
+			expect(promise).to.be.ok()
+			expect(callCount).to.equal(1)
+			expect(promise:getStatus()).to.equal(Promise.Status.Rejected)
+			expect(tostring(promise._values[1]):find("hahah")).to.be.ok()
+
+			-- Loosely check for the pieces of the stack trace we expect
+			expect(tostring(promise._values[1]):find("init.spec")).to.be.ok()
+			expect(tostring(promise._values[1]):find("runExecutor")).to.be.ok()
 		end)
 
 		it("should chain onto asynchronously resolved promises", function()
@@ -719,7 +866,7 @@ return function()
 			expect(promise:getStatus()).to.equal(Promise.Status.Started)
 			bindable:Fire()
 			expect(promise:getStatus()).to.equal(Promise.Status.Rejected)
-			expect(promise._values[1]:find("errortext")).to.be.ok()
+			expect(tostring(promise._values[1]):find("errortext")).to.be.ok()
 		end)
 	end)
 
@@ -772,10 +919,33 @@ return function()
 			Promise.try(function()
 				error('errortext')
 			end):catch(function(e)
-				errorText = e
+				errorText = tostring(e)
 			end)
 
 			expect(errorText:find("errortext")).to.be.ok()
+		end)
+
+		it("should reject with error objects", function()
+			local object = {}
+			local success, value = Promise.try(function()
+				error(object)
+			end):_unwrap()
+
+			expect(success).to.equal(false)
+			expect(value).to.equal(object)
+		end)
+
+		it("should catch asynchronous errors", function()
+			local bindable = Instance.new("BindableEvent")
+			local promise = Promise.try(function()
+				bindable.Event:Wait()
+				error('errortext')
+			end)
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Started)
+			bindable:Fire()
+			expect(promise:getStatus()).to.equal(Promise.Status.Rejected)
+			expect(tostring(promise._values[1]):find("errortext")).to.be.ok()
 		end)
 	end)
 
@@ -1013,6 +1183,295 @@ return function()
 			expect(promises[1]:getStatus()).to.equal(Promise.Status.Cancelled)
 			expect(promises[2]:getStatus()).to.equal(Promise.Status.Cancelled)
 			expect(promises[3]:getStatus()).to.equal(Promise.Status.Started)
+		end)
+	end)
+
+	describe("Promise:await", function()
+		it("should return the correct values", function()
+			local promise = Promise.resolve(5, 6, nil, 7)
+
+			local a, b, c, d, e = promise:await()
+
+			expect(a).to.equal(true)
+			expect(b).to.equal(5)
+			expect(c).to.equal(6)
+			expect(d).to.equal(nil)
+			expect(e).to.equal(7)
+		end)
+	end)
+
+	describe("Promise:expect", function()
+		it("should throw the correct values", function()
+			local rejectionValue = {}
+			local promise = Promise.reject(rejectionValue)
+
+			local success, value = pcall(function()
+				promise:expect()
+			end)
+
+			expect(success).to.equal(false)
+			expect(value).to.equal(rejectionValue)
+		end)
+	end)
+
+	describe("Promise:now", function()
+		it("should resolve if the Promise is resolved", function()
+			local success, value = Promise.resolve("foo"):now():_unwrap()
+
+			expect(success).to.equal(true)
+			expect(value).to.equal("foo")
+		end)
+
+		it("should reject if the Promise is not resolved", function()
+			local success, value = Promise.new(function() end):now():_unwrap()
+
+			expect(success).to.equal(false)
+			expect(Promise.Error.isKind(value, "NotResolvedInTime")).to.equal(true)
+		end)
+
+		it("should reject with a custom rejection value", function()
+			local success, value = Promise.new(function() end):now("foo"):_unwrap()
+
+			expect(success).to.equal(false)
+			expect(value).to.equal("foo")
+		end)
+	end)
+
+	describe("Promise.each", function()
+		it("should iterate", function()
+			local ok, result = Promise.each({
+				"foo", "bar", "baz", "qux"
+			}, function(...)
+				return {...}
+			end):_unwrap()
+
+			expect(ok).to.equal(true)
+			expect(result[1][1]).to.equal("foo")
+			expect(result[1][2]).to.equal(1)
+			expect(result[2][1]).to.equal("bar")
+			expect(result[2][2]).to.equal(2)
+			expect(result[3][1]).to.equal("baz")
+			expect(result[3][2]).to.equal(3)
+			expect(result[4][1]).to.equal("qux")
+			expect(result[4][2]).to.equal(4)
+		end)
+
+		it("should iterate serially", function()
+			local resolves = {}
+			local callCounts = {}
+
+			local promise = Promise.each({
+				"foo", "bar", "baz"
+			}, function(value, index)
+				callCounts[index] = (callCounts[index] or 0) + 1
+
+				return Promise.new(function(resolve)
+					table.insert(resolves, function()
+						resolve(value:upper())
+					end)
+				end)
+			end)
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Started)
+			expect(#resolves).to.equal(1)
+			expect(callCounts[1]).to.equal(1)
+			expect(callCounts[2]).to.never.be.ok()
+
+			table.remove(resolves, 1)()
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Started)
+			expect(#resolves).to.equal(1)
+			expect(callCounts[1]).to.equal(1)
+			expect(callCounts[2]).to.equal(1)
+			expect(callCounts[3]).to.never.be.ok()
+
+			table.remove(resolves, 1)()
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Started)
+			expect(callCounts[1]).to.equal(1)
+			expect(callCounts[2]).to.equal(1)
+			expect(callCounts[3]).to.equal(1)
+
+			table.remove(resolves, 1)()
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Resolved)
+			expect(type(promise._values[1])).to.equal("table")
+			expect(type(promise._values[2])).to.equal("nil")
+
+			local result = promise._values[1]
+
+			expect(result[1]).to.equal("FOO")
+			expect(result[2]).to.equal("BAR")
+			expect(result[3]).to.equal("BAZ")
+		end)
+
+		it("should reject with the value if the predicate promise rejects", function()
+			local promise = Promise.each({1, 2, 3}, function()
+				return Promise.reject("foobar")
+			end)
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Rejected)
+			expect(promise._values[1]).to.equal("foobar")
+		end)
+
+		it("should allow Promises to be in the list and wait when it gets to them", function()
+			local innerResolve
+			local innerPromise = Promise.new(function(resolve)
+				innerResolve = resolve
+			end)
+
+			local promise = Promise.each({
+				innerPromise
+			}, function(value)
+				return value * 2
+			end)
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Started)
+
+			innerResolve(2)
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Resolved)
+			expect(promise._values[1][1]).to.equal(4)
+		end)
+
+		it("should reject with the value if a Promise from the list rejects", function()
+			local called = false
+			local promise = Promise.each({1, 2, Promise.reject("foobar")}, function(value)
+				called = true
+				return "never"
+			end)
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Rejected)
+			expect(promise._values[1]).to.equal("foobar")
+			expect(called).to.equal(false)
+		end)
+
+		it("should reject immediately if there's a cancelled Promise in the list initially", function()
+			local cancelled = Promise.new(function() end)
+			cancelled:cancel()
+
+			local called = false
+			local promise = Promise.each({1, 2, cancelled}, function()
+				called = true
+			end)
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Rejected)
+			expect(called).to.equal(false)
+			expect(promise._values[1].kind).to.equal(Promise.Error.Kind.AlreadyCancelled)
+		end)
+
+		it("should stop iteration if Promise.each is cancelled", function()
+			local callCounts = {}
+
+			local promise = Promise.each({
+				"foo", "bar", "baz"
+			}, function(value, index)
+				callCounts[index] = (callCounts[index] or 0) + 1
+
+				return Promise.new(function()
+
+				end)
+			end)
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Started)
+			expect(callCounts[1]).to.equal(1)
+			expect(callCounts[2]).to.never.be.ok()
+
+			promise:cancel()
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Cancelled)
+			expect(callCounts[1]).to.equal(1)
+			expect(callCounts[2]).to.never.be.ok()
+		end)
+
+		it("should cancel the Promise returned from the predicate if Promise.each is cancelled", function()
+			local innerPromise
+
+			local promise = Promise.each({
+				"foo", "bar", "baz"
+			}, function(value, index)
+				innerPromise = Promise.new(function()
+				end)
+				return innerPromise
+			end)
+
+			promise:cancel()
+
+			expect(innerPromise:getStatus()).to.equal(Promise.Status.Cancelled)
+		end)
+
+		it("should cancel Promises in the list if Promise.each is cancelled", function()
+			local innerPromise = Promise.new(function() end)
+
+			local promise = Promise.each({innerPromise}, function() end)
+
+			promise:cancel()
+
+			expect(innerPromise:getStatus()).to.equal(Promise.Status.Cancelled)
+		end)
+	end)
+
+	describe("Promise.retry", function()
+		it("should retry N times", function()
+			local counter = 0
+
+			local promise = Promise.retry(function(parameter)
+				expect(parameter).to.equal("foo")
+
+				counter = counter + 1
+
+				if counter == 5 then
+					return Promise.resolve("ok")
+				end
+
+				return Promise.reject("fail")
+			end, 5, "foo")
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Resolved)
+			expect(promise._values[1]).to.equal("ok")
+		end)
+
+		it("should reject if threshold is exceeded", function()
+			local promise = Promise.retry(function()
+				return Promise.reject("fail")
+			end, 5)
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Rejected)
+			expect(promise._values[1]).to.equal("fail")
+		end)
+	end)
+
+	describe("Promise.fromEvent", function()
+		it("should convert a Promise into an event", function()
+			local event = Instance.new("BindableEvent")
+
+			local promise = Promise.fromEvent(event.Event)
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Started)
+
+			event:Fire("foo")
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Resolved)
+			expect(promise._values[1]).to.equal("foo")
+		end)
+
+		it("should convert a Promise into an event with the predicate", function()
+			local event = Instance.new("BindableEvent")
+
+			local promise = Promise.fromEvent(event.Event, function(param)
+				return param == "foo"
+			end)
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Started)
+
+			event:Fire("bar")
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Started)
+
+			event:Fire("foo")
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Resolved)
+			expect(promise._values[1]).to.equal("foo")
 		end)
 	end)
 end

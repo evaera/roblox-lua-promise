@@ -1,9 +1,0 @@
-return {
-	include = {
-		"^lib",
-	},
-	exclude = {
-		"%.spec$",
-		"_spec$",
-	},
-}

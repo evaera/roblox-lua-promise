@@ -7,6 +7,18 @@
 			"Lib": {
 				"$path": "lib"
 			}
+		},
+		"TestService": {
+			"$className": "TestService",
+			"$properties": {
+				"ExecuteWithStudioRun": true
+			},
+			"TestEZ": {
+				"$path": "modules/testez/src"
+			},
+			"run": {
+				"$path": "runTests.server.lua"
+			}
 		}
 	}
 }
