@@ -1,17 +1,19 @@
 ---
-title: Usage Guide
+title: Tour of Promises
 ---
 
-# Usage Guide
+# Tour of Promises
+
+Here's quick introduction to Promises. For more complete information, check out the [API Reference](/lib).
 
 ## Creating a Promise
 
-There are a few ways to create a Promise. If you need to call functions that yield, you should use <ApiLink to="Promise.async" />:
+There are a few ways to create a Promise. The most common way is to call <ApiLink to="Promise.new" />:
 
 ```lua
 local myFunction()
-	return Promise.async(function(resolve, reject, onCancel)
-		wait(1)
+	return Promise.new(function(resolve, reject, onCancel)
+		somethingThatYields()
 		resolve("Hello world!")
 	end)
 end
@@ -19,7 +21,11 @@ end
 myFunction():andThen(print)
 ```
 
-If you don't need to yield, you can use regular <ApiLink to="Promise.new" />:
+Another example which resolves a Promise after the first time an event fires:
+
+::: tip
+There's actually a built-in function called <ApiLink to="Promise.fromEvent" /> that does exactly this!
+:::
 
 ```lua
 local myFunction()
@@ -50,7 +56,7 @@ end
 myFunction():andThen(print)
 ```
 
-If you already have a function that yields, and you want it to return a Promise instead, you can use <ApiLink to="Promise.promisify" />:
+If you already have a function that yields, and you want it to return a Promise instead, you can use <ApiLink to="Promise.promisify" /> or <ApiLink to="Promise.try" />:
 
 ```lua
 local function myYieldingFunction(waitTime, text)
@@ -64,7 +70,7 @@ myFunction(1.2, "Hello world!"):andThen(print):catch(function()
 end)
 ```
 
-## Rejection and errors
+## Rejection and Errors
 
 You must observe the result of a Promise, either with `catch` or `finally`, otherwise an unhandled Promise rejection warning will be printed to the console.
 
@@ -85,12 +91,12 @@ end):andThen(print)
 You can also return a Promise from your handler, and it will be chained onto:
 
 ```lua
-Promise.async(function(resolve)
-	wait(1)
+Promise.new(function(resolve)
+	somethingThatYields()
 	resolve(1)
 end):andThen(function(x)
-	return Promise.async(function(resolve)
-		wait(1)
+	return Promise.new(function(resolve)
+		somethingThatYields()
 		resolve(x + 1)
 	end)
 end):andThen(print) --> 2
@@ -100,46 +106,48 @@ You can also call `:andThen` multiple times on a single Promise to have multiple
 
 Resolving a Promise with a Promise will be chained as well:
 ```lua
-Promise.async(function(resolve)
-	wait(1)
-	resolve(Promise.async(function(resolve)
-		wait(1)
+Promise.new(function(resolve)
+	somethingThatYields()
+	resolve(Promise.new(function(resolve)
+		somethingThatYields()
 		resolve(1)
 	end))
 end):andThen(print) --> 1
 ```
 
-However, any value that is returned from the Promise executor (the function you pass into `Promise.async`) is discarded. Do not return values from the function executor.
+However, any value that is returned from the Promise executor (the function you pass into `Promise.new`) is discarded. Do not return values from the function executor.
 
-## Yielding in Promise executor
+## A Better Alternative to `spawn`, `wait`, and `delay`
 
-If you need to yield in the Promise executor, you must wrap your yielding code in a new thread to prevent your calling thread from yielding. The easiest way to do this is to use the <ApiLink to="Promise.async" /> constructor instead of <ApiLink to="Promise.new" />:
+Using `spawn`, `wait`, or `delay` alongside asynchronous code can be tempting, but you should **never** use them!
+
+`spawn`, `wait`, and `delay` do not resume threads at a consistent interval. If Roblox has resumed too many threads in a single Lua step, it will begin throttling and your thread that was meant to be resumed on the next frame could actually be resumed several seconds later. The unexpected delay caused by this behavior will cause cascading timing issues in your game and could lead to some potentially ugly bugs.
+
+You should use <ApiLink to="Promise.delay" /> instead, which has an accurate custom scheduler.
 
 ```lua
-Promise.async(function(resolve)
-  wait(1)
-  resolve()
+Promise.delay(5):andThen(function()
+	print("5 seconds have passed!")
 end)
 ```
 
-`Promise.async` uses `Promise.new` internally, except it allows yielding while `Promise.new` does not.
+For quickly launching a new thread (similar to `spawn`), you can use <ApiLink to="Promise.try" />:
 
-`Promise.async` attaches a one-time listener to the next `RunService.Heartbeat` event to fire off the rest of your Promise executor, ensuring it always waits at least one step.
+```lua
+Promise.try(function()
+	somethingThatYields()
+end)
+-- Doesn't block this
+someCode()
+```
 
-The reason `Promise.async` includes this wait time is to ensure that your Promises have consistent timing. Otherwise, your Promise would run synchronously up to the first yield, and asynchronously afterwards. This can often lead to undesirable results. Additionally, Promise executors that only sometimes yield can lead to unexpected timing issues. Thus, we use `Promise.async` so there is always a guaranteed yield before execution.
+As a convenience, <ApiLink to="Promise.timeout" /> exists, which will return a rejected Promise if the Promise you call it on doesn't resolve within the given amount of seconds:
 
-::: danger Don't use regular spawn
-Using `spawn` inside `Promise.new` might seem like a tempting alternative to `Promise.async` here, but you should **never** use it!
-
-`spawn` (and `wait`, for that matter) do not resume threads at a consistent interval. If Roblox has resumed too many threads in a single Lua step, it will begin throttling and your thread that was meant to be resumed on the next frame could actually be resumed several seconds later. The unexpected delay caused by this behavior will cause cascading timing issues in your game and could lead to some potentially ugly bugs.
-:::
-
-### When to use `Promise.new`
-In some cases, it is desirable for a Promise to execute completely synchronously. If you don't need to yield in your Promise executor, then you should use `Promise.new`.
-
-For example, an example of a situation where it might be appropriate to use Promise.new is when resolving after an event is fired.
-
-However, in some situations, <ApiLink to="Promise.resolve" /> may be more appropriate.
+```lua
+returnsAPromise():timeout(5):andThen(function()
+	print("This returned in at most 5 seconds")
+end)
+```
 
 ## Cancellation
 Promises are cancellable, but abort semantics are optional. This means that you can cancel any Promise and it will never resolve or reject, even if the function is still working in the background. But you can optionally add a cancellation hook which allows you to abort ongoing operations with the third `onCancel` parameter given to your Promise executor.
@@ -157,12 +165,12 @@ If you attach a `:andThen` or `:catch` handler to a Promise after it's been canc
 ::: warning
 If you cancel a Promise immediately after creating it without yielding in between, the fate of the Promise is dependent on if the Promise handler yields or not. If the Promise handler resolves without yielding, then the Promise will already be settled by the time you are able to cancel it, thus any consumers of the Promise will have already been called and cancellation is not possible.
 
-If the Promise does yield, then cancelling it immediately *will* prevent its resolution. This is always the case when using `Promise.async`.
+If the Promise does yield, then cancelling it immediately *will* prevent its resolution.
 :::
 
 Attempting to cancel an already-settled Promise is ignored.
 
-### Cancellation propagation
+### Cancellation Propagation
 When you cancel a Promise, the cancellation propagates up and down the Promise chain. Promises keep a list of other Promises that consume them (e.g. `andThen`).
 
 When the upwards propagation encounters a Promise that no longer has any consumers, that Promise is cancelled as well. Note that it's impossible to cancel an already-settled Promise, so upwards propagation will stop when it reaches a settled Promise.

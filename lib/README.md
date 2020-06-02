@@ -20,8 +20,8 @@ docs:
   properties:
     - name: Status
       tags: [ 'read only', 'static', 'enums' ]
-      type: PromiseStatus
-      desc: A table containing all members of the `PromiseStatus` enum, e.g., `Promise.Status.Resolved`.
+      type: Status
+      desc: A table containing all members of the `Status` enum, e.g., `Promise.Status.Resolved`.
       
 
   functions:
@@ -234,10 +234,10 @@ docs:
 
     - name: allSettled
       desc: |
-        Accepts an array of Promises and returns a new Promise that resolves with an array of in-place PromiseStatuses when all input Promises have settled. This is equivalent to mapping `promise:finally` over the array of Promises.
+        Accepts an array of Promises and returns a new Promise that resolves with an array of in-place Statuses when all input Promises have settled. This is equivalent to mapping `promise:finally` over the array of Promises.
       static: true
       params: "promises: array<Promise<T>>"
-      returns: Promise<array<PromiseStatus>>
+      returns: Promise<array<Status>>
 
     - name: race
       desc: |
@@ -287,6 +287,7 @@ docs:
       static: true
 
     - name: each
+      since: 2.0.0
       desc: |
         Iterates serially over the given an array of values, calling the predicate callback on each value before continuing.
         
@@ -350,6 +351,7 @@ docs:
       static: true
 
     - name: retry
+      since: 2.0.0
       desc: |
         Repeatedly calls a Promise-returning function up to `times` number of times, until the returned Promise resolves.
 
@@ -370,6 +372,7 @@ docs:
       static: true
 
     - name: fromEvent
+      since: 2.0.0
       desc: |
         Converts an event into a Promise which resolves the next time the event fires.
 
@@ -514,7 +517,7 @@ docs:
         - name: finallyHandler
           type:
             kind: function
-            params: "status: PromiseStatus"
+            params: "status: Status"
             returns: ...any? 
       returns: Promise<...any?> 
       overloads:
@@ -522,7 +525,7 @@ docs:
           - name: finallyHandler
             type:
               kind: function
-              params: "status: PromiseStatus"
+              params: "status: Status"
               returns: Promise<T>
           returns: Promise<T>
 
@@ -543,7 +546,7 @@ docs:
         - name: doneHandler
           type:
             kind: function
-            params: "status: PromiseStatus"
+            params: "status: Status"
             returns: ...any? 
       returns: Promise<...any?> 
       overloads:
@@ -551,7 +554,7 @@ docs:
           - name: doneHandler
             type:
               kind: function
-              params: "status: PromiseStatus"
+              params: "status: Status"
               returns: Promise<T>
           returns: Promise<T>
 
@@ -742,7 +745,7 @@ docs:
       tags: [ 'yields' ]
       desc: Yields the current thread until the given Promise completes. Returns the Promise's status, followed by the values that the promise resolved or rejected with.
       returns:
-        - type: PromiseStatus
+        - type: Status
           desc: The Promise's status.
         - type: ...any?
           desc: The values that the Promise resolved or rejected with.
@@ -764,7 +767,7 @@ docs:
     
     - name: getStatus
       desc: Returns the current Promise status.
-      returns: PromiseStatus
+      returns: Status
 ---
 
 <ApiDocs />
