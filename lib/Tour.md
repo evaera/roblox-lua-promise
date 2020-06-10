@@ -32,7 +32,7 @@ local myFunction()
 	return Promise.new(function(resolve, reject, onCancel)
 		local connection
 
-		someEvent:Connect(function(...)
+		connection = someEvent:Connect(function(...)
 			connection:Disconnect()
 			resolve(...)
 		end)
