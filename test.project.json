@@ -1,5 +1,5 @@
 {
-	"name": "lua-promise-test",
+	"name": "promise-test",
 	"tree": {
 		"$className": "DataModel",
 		"ServerScriptService": {
