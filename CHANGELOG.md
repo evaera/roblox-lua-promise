@@ -1,6 +1,10 @@
 # Changelog
 
-## [3.0.0] - 2020-06-02
+## [3.0.0-rc.3] - 2020-07-10
+### Fixed
+- Fixed a bug where queued `andThen` and `catch` callbacks did not begin on their own new threads.
+
+## [3.0.0-rc.1] - 2020-06-02
 ### Changed
 - Runtime errors are now represented by objects. You must call tostring on rejection values before assuming they are strings (this was always good practice, but is required now).
 - Yielding is now allowed in `Promise.new`, `andThen`, and `Promise.try` executors.
