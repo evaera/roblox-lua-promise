@@ -261,6 +261,30 @@ return function()
 			expect(promise._values[1]).to.equal(5)
 		end)
 
+		it("should run andThens on a new thread", function()
+			local bindable = Instance.new("BindableEvent")
+
+			local resolve
+			local parentPromise = Promise.new(function(_resolve)
+				resolve = _resolve
+			end)
+
+			local deadlockedPromise = parentPromise:andThen(function()
+				bindable.Event:Wait()
+				return 5
+			end)
+
+			local successfulPromise = parentPromise:andThen(function()
+				return "foo"
+			end)
+
+			expect(parentPromise:getStatus()).to.equal(Promise.Status.Started)
+			resolve()
+			expect(successfulPromise:getStatus()).to.equal(Promise.Status.Resolved)
+			expect(successfulPromise._values[1]).to.equal("foo")
+			expect(deadlockedPromise:getStatus()).to.equal(Promise.Status.Started)
+		end)
+
 		it("should chain onto resolved promises", function()
 			local args
 			local argsLength
