@@ -5,10 +5,9 @@
 local ERROR_NON_PROMISE_IN_LIST = "Non-promise value passed into %s at index %s"
 local ERROR_NON_LIST = "Please pass a list of promises to %s"
 local ERROR_NON_FUNCTION = "Please pass a handler function to %s!"
-
+local TIME_GETTER = os.clock
+local TIME_EVENT = game:GetService("RunService").Heartbeat
 local MODE_KEY_METATABLE = {__mode = "k"}
-
-local RunService = game:GetService("RunService")
 
 --[[
 	Creates an enum dictionary with some metamethods to prevent common mistakes.
@@ -54,7 +53,7 @@ local Error do
 			context = options.context,
 			kind = options.kind,
 			parent = parent,
-			createdTick = tick(),
+			createdTick = TIME_GETTER(),
 			createdTrace = debug.traceback(),
 		}, Error)
 	end
@@ -178,8 +177,6 @@ end
 local Promise = {
 	Error = Error,
 	Status = makeEnum("Promise.Status", {"Started", "Resolved", "Rejected", "Cancelled"}),
-	_timeEvent = RunService.Heartbeat,
-	_getTime = tick,
 }
 Promise.prototype = {}
 Promise.__index = Promise.prototype
@@ -294,7 +291,7 @@ function Promise.defer(callback)
 	local promise
 	promise = Promise._new(traceback, function(resolve, reject, onCancel)
 		local connection
-		connection = Promise._timeEvent:Connect(function()
+		connection = TIME_EVENT:Connect(function()
 			connection:Disconnect()
 			local ok, _, result = runExecutor(traceback, callback, resolve, reject, onCancel)
 
@@ -706,7 +703,7 @@ do
 		end
 
 		return Promise._new(debug.traceback(nil, 2), function(resolve, _, onCancel)
-			local startTime = Promise._getTime()
+			local startTime = TIME_GETTER()
 			local endTime = startTime + seconds
 
 			local node = {
@@ -717,19 +714,20 @@ do
 
 			if connection == nil then -- first is nil when connection is nil
 				first = node
-				connection = Promise._timeEvent:Connect(function()
-					local currentTime = Promise._getTime()
-					while first.endTime <= currentTime do
-						-- Don't use currentTime here, as this is the time when we started resolving,
-						-- not necessarily the time *right now*.
-						first.resolve(Promise._getTime() - first.startTime)
-						first = first.next
+				connection = TIME_EVENT:Connect(function()
+					while first.endTime <= TIME_GETTER() do
+						local current = first
+						first = current.next
+
 						if first == nil then
 							connection:Disconnect()
 							connection = nil
-							break
+						else
+							first.previous = nil
 						end
-						first.previous = nil
+
+						current.resolve(TIME_GETTER() - current.startTime)
+						if current.next == nil then return end -- kill this thread if there was no `first` before `resolve`
 					end
 				end)
 			else -- first is non-nil
@@ -1250,7 +1248,7 @@ function Promise.prototype:_reject(...)
 		local err = tostring((...))
 
 		coroutine.wrap(function()
-			Promise._timeEvent:Wait()
+			TIME_EVENT:Wait()
 
 			-- Someone observed the error, hooray!
 			if not self._unhandledRejection then
