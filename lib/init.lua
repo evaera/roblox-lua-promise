@@ -5,8 +5,6 @@
 local ERROR_NON_PROMISE_IN_LIST = "Non-promise value passed into %s at index %s"
 local ERROR_NON_LIST = "Please pass a list of promises to %s"
 local ERROR_NON_FUNCTION = "Please pass a handler function to %s!"
-local TIME_GETTER = os.clock
-local TIME_EVENT = game:GetService("RunService").Heartbeat
 local MODE_KEY_METATABLE = {__mode = "k"}
 
 --[[
@@ -53,7 +51,7 @@ local Error do
 			context = options.context,
 			kind = options.kind,
 			parent = parent,
-			createdTick = TIME_GETTER(),
+			createdTick = os.clock(),
 			createdTrace = debug.traceback(),
 		}, Error)
 	end
@@ -177,6 +175,8 @@ end
 local Promise = {
 	Error = Error,
 	Status = makeEnum("Promise.Status", {"Started", "Resolved", "Rejected", "Cancelled"}),
+	_getTime = os.clock,
+	_timeEvent = game:GetService("RunService").Heartbeat,
 }
 Promise.prototype = {}
 Promise.__index = Promise.prototype
@@ -291,7 +291,7 @@ function Promise.defer(callback)
 	local promise
 	promise = Promise._new(traceback, function(resolve, reject, onCancel)
 		local connection
-		connection = TIME_EVENT:Connect(function()
+		connection = Promise._timeEvent:Connect(function()
 			connection:Disconnect()
 			local ok, _, result = runExecutor(traceback, callback, resolve, reject, onCancel)
 
@@ -703,7 +703,7 @@ do
 		end
 
 		return Promise._new(debug.traceback(nil, 2), function(resolve, _, onCancel)
-			local startTime = TIME_GETTER()
+			local startTime = Promise._getTime()
 			local endTime = startTime + seconds
 
 			local node = {
@@ -714,8 +714,8 @@ do
 
 			if connection == nil then -- first is nil when connection is nil
 				first = node
-				connection = TIME_EVENT:Connect(function()
-					while first.endTime <= TIME_GETTER() do
+				connection = Promise._timeEvent:Connect(function()
+					while first.endTime <= Promise._getTime() do
 						local current = first
 						first = current.next
 
@@ -726,7 +726,7 @@ do
 							first.previous = nil
 						end
 
-						current.resolve(TIME_GETTER() - current.startTime)
+						current.resolve(Promise._getTime() - current.startTime)
 						if current.next == nil then return end -- kill this thread if there was no `first` before `resolve`
 					end
 				end)
@@ -1248,7 +1248,7 @@ function Promise.prototype:_reject(...)
 		local err = tostring((...))
 
 		coroutine.wrap(function()
-			TIME_EVENT:Wait()
+			Promise._timeEvent:Wait()
 
 			-- Someone observed the error, hooray!
 			if not self._unhandledRejection then
