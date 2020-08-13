@@ -5,10 +5,7 @@
 local ERROR_NON_PROMISE_IN_LIST = "Non-promise value passed into %s at index %s"
 local ERROR_NON_LIST = "Please pass a list of promises to %s"
 local ERROR_NON_FUNCTION = "Please pass a handler function to %s!"
-
 local MODE_KEY_METATABLE = {__mode = "k"}
-
-local RunService = game:GetService("RunService")
 
 --[[
 	Creates an enum dictionary with some metamethods to prevent common mistakes.
@@ -54,7 +51,7 @@ local Error do
 			context = options.context,
 			kind = options.kind,
 			parent = parent,
-			createdTick = tick(),
+			createdTick = os.clock(),
 			createdTrace = debug.traceback(),
 		}, Error)
 	end
@@ -178,8 +175,8 @@ end
 local Promise = {
 	Error = Error,
 	Status = makeEnum("Promise.Status", {"Started", "Resolved", "Rejected", "Cancelled"}),
-	_timeEvent = RunService.Heartbeat,
-	_getTime = tick,
+	_getTime = os.clock,
+	_timeEvent = game:GetService("RunService").Heartbeat,
 }
 Promise.prototype = {}
 Promise.__index = Promise.prototype
@@ -718,18 +715,19 @@ do
 			if connection == nil then -- first is nil when connection is nil
 				first = node
 				connection = Promise._timeEvent:Connect(function()
-					local currentTime = Promise._getTime()
-					while first.endTime <= currentTime do
-						-- Don't use currentTime here, as this is the time when we started resolving,
-						-- not necessarily the time *right now*.
-						first.resolve(Promise._getTime() - first.startTime)
-						first = first.next
+					while first.endTime <= Promise._getTime() do
+						local current = first
+						first = current.next
+
 						if first == nil then
 							connection:Disconnect()
 							connection = nil
-							break
+						else
+							first.previous = nil
 						end
-						first.previous = nil
+
+						current.resolve(Promise._getTime() - current.startTime)
+						if current.next == nil then return end -- kill this thread if there was no `first` before `resolve`
 					end
 				end)
 			else -- first is non-nil
