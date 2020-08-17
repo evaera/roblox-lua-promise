@@ -30,22 +30,23 @@ local HttpService = game:GetService("HttpService")
 -- Ideally, you do this once per project per async method that you use.
 local function httpGet(url)
 	return Promise.new(function(resolve, reject)
-		local ok, result = pcall(HttpService.GetAsync, HttpService, url)
+		local result = HttpService:JSONDecode(HttpService:GetAsync(url))
 
-		if ok then
-			resolve(result)
+		if result.ok then
+			resolve(result.data)
 		else
-			reject(result)
+			reject(result.error)
 		end
 	end)
 end
 
 -- Usage
-httpGet("https://google.com")
+httpGet("https://some-api.example")
 	:andThen(function(body)
-		print("Here's the Google homepage:", body)
+		print("Here's the web api result:", body)
 	end)
 	:catch(function(err)
-		warn("We failed to get the Google homepage!", err)
+		warn("Web api encountered an error:", err)
 	end)
 ```
+
