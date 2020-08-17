@@ -1,5 +1,9 @@
 # Changelog
 
+## [3.0.0]
+- `Promise.delay` now uses `os.clock`
+- Made `Promise.delay` behavior more consistent when creating new timers in the callback of a timer.
+
 ## [3.0.0-rc.3] - 2020-07-10
 ### Fixed
 - Fixed a bug where queued `andThen` and `catch` callbacks did not begin on their own new threads.
