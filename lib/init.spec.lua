@@ -201,6 +201,21 @@ return function()
 			advanceTime(1)
 			expect(promise:getStatus()).to.equal(Promise.Status.Resolved)
 		end)
+
+		it("Should allow for delays to be cancelled", function()
+			local promise = Promise.delay(2)
+
+			Promise.delay(1):andThen(function()
+			    promise:cancel()
+			end)
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Started)
+			advanceTime()
+			expect(promise:getStatus()).to.equal(Promise.Status.Started)
+			advanceTime(1)
+			expect(promise:getStatus()).to.equal(Promise.Status.Cancelled)
+			advanceTime(1)
+		end)
 	end)
 
 	describe("Promise.resolve", function()
