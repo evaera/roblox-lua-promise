@@ -1292,6 +1292,10 @@ function Promise.prototype:_finalize()
 		coroutine.wrap(callback)(self._status)
 	end
 
+	self._queuedFinally = nil
+	self._queuedReject = nil
+	self._queuedResolve = nil
+
 	-- Clear references to other Promises to allow gc
 	if not Promise.TEST then
 		self._parent = nil
