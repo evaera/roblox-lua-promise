@@ -1,6 +1,11 @@
 # Changelog
 
-## [3.0.0]
+## [Next]
+### Fixed
+- Make `Promise.is` work with promises from old versions of the library
+
+## [3.0.0] - 2020-08-17
+### Changed
 - `Promise.delay` now uses `os.clock`
 - Made `Promise.delay` behavior more consistent when creating new timers in the callback of a timer.
 

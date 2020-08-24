@@ -1513,4 +1513,36 @@ return function()
 			expect(promise._values[1]).to.equal("foo")
 		end)
 	end)
+
+	describe("Promise.is", function()
+		it("should work with current version", function()
+			local promise = Promise.resolve(1)
+
+			expect(Promise.is(promise)).to.equal(true)
+		end)
+
+		it("should work with any object with an andThen", function()
+			local obj = {
+				andThen = function()
+					return 1
+				end
+			}
+
+			expect(Promise.is(obj)).to.equal(true)
+		end)
+
+		it("should work with older promises", function()
+			local OldPromise = {}
+			OldPromise.prototype = {}
+			OldPromise.__index = OldPromise.prototype
+
+			function OldPromise.prototype:andThen()
+
+			end
+
+			local oldPromise = setmetatable({}, OldPromise)
+
+			expect(Promise.is(oldPromise)).to.equal(true)
+		end)
+	end)
 end
