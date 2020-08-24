@@ -190,7 +190,7 @@ return function()
 	end)
 
 	describe("Promise.delay", function()
-		it("Should schedule promise resolution", function()
+		it("should schedule promise resolution", function()
 			local promise = Promise.delay(1)
 
 			expect(promise:getStatus()).to.equal(Promise.Status.Started)
@@ -202,7 +202,7 @@ return function()
 			expect(promise:getStatus()).to.equal(Promise.Status.Resolved)
 		end)
 
-		it("Should allow for delays to be cancelled", function()
+		it("should allow for delays to be cancelled", function()
 			local promise = Promise.delay(2)
 
 			Promise.delay(1):andThen(function()
