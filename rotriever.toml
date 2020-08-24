@@ -1,6 +1,6 @@
 [package]
 name = "evaera/roblox-lua-promise"
-version = "3.0.0"
+version = "3.0.1"
 author = "evaera"
 content_root = "lib"
 license = "MIT"

@@ -1,6 +1,6 @@
 # Changelog
 
-## [Next]
+## [3.0.1] - 2020-08-24
 ### Fixed
 - Make `Promise.is` work with promises from old versions of the library (#41)
 - Make `Promise.delay` properly break out of the current loop (#40)
