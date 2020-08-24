@@ -719,7 +719,9 @@ do
 			if connection == nil then -- first is nil when connection is nil
 				first = node
 				connection = Promise._timeEvent:Connect(function()
-					while first.endTime <= Promise._getTime() do
+					local threadStart = Promise._getTime()
+
+					while first ~= nil and first.endTime < threadStart do
 						local current = first
 						first = current.next
 
@@ -731,7 +733,6 @@ do
 						end
 
 						current.resolve(Promise._getTime() - current.startTime)
-						if current.next == nil then return end -- kill this thread if there was no `first` before `resolve`
 					end
 				end)
 			else -- first is non-nil
