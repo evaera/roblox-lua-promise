@@ -1,5 +1,5 @@
 {
-	"name": "promise-test",
+	"name": "Promise-test",
 	"tree": {
 		"$className": "DataModel",
 		"ServerScriptService": {
