@@ -22,7 +22,7 @@ docs:
       tags: [ 'read only', 'static', 'enums' ]
       type: Status
       desc: A table containing all members of the `Status` enum, e.g., `Promise.Status.Resolved`.
-      
+
 
   functions:
     - name: new
@@ -45,9 +45,9 @@ docs:
         ```
 
         You do not need to use `pcall` within a Promise. Errors that occur during execution will be caught and turned into a rejection automatically. If `error()` is called with a table, that table will be the rejection value. Otherwise, string errors will be converted into `Promise.Error(Promise.Error.Kind.ExecutionError)` objects for tracking debug information.
-        
+
         You may register an optional cancellation hook by using the `onCancel` argument:
-          * This should be used to abort any ongoing operations leading up to the promise being settled. 
+          * This should be used to abort any ongoing operations leading up to the promise being settled.
           * Call the `onCancel` function with a function callback as its only argument to set a hook which will in turn be called when/if the promise is cancelled.
           * `onCancel` returns `true` if the Promise was already cancelled when you called `onCancel`.
           * Calling `onCancel` with no argument will not override a previously set cancellation hook, but it will still return `true` if the Promise is currently cancelled.
@@ -89,7 +89,7 @@ docs:
         The same as [[Promise.new]], except execution begins after the next `Heartbeat` event.
 
         This is a spiritual replacement for `spawn`, but it does not suffer from the same [issues](https://eryn.io/gist/3db84579866c099cdd5bb2ff37947cec) as `spawn`.
-        
+
         ```lua
         local function waitForChild(instance, childName, timeout)
           return Promise.defer(function(resolve, reject)
@@ -99,7 +99,7 @@ docs:
           end)
         end
         ```
-        
+
       static: true
       params:
         - name: deferExecutor
@@ -184,7 +184,7 @@ docs:
         local isPlayerInGroup = Promise.promisify(function(player, groupId)
           return player:IsInGroup(groupId)
         end)
-        ```        
+        ```
       static: true
       params:
         - name: callback
@@ -202,7 +202,7 @@ docs:
             returns:
               - name: "*"
                 desc: The return values from the wrapped function.
-  
+
     - name: resolve
       desc: Creates an immediately resolved Promise with the given value.
       static: true
@@ -234,13 +234,13 @@ docs:
       static: true
       params: "value: ...any"
       returns: Promise<...any>
-        
+
     - name: all
       desc: |
         Accepts an array of Promises and returns a new promise that:
           * is resolved after all input promises resolve.
           * is rejected if *any* input promises reject.
-        
+
         Note: Only the first return value from each promise will be present in the resulting array.
 
         After any input Promise rejects, all other input Promises that are still pending will be cancelled if they have no other consumers.
@@ -318,7 +318,7 @@ docs:
       static: true
       params: "promises: array<Promise<T>>, count: number"
       returns: Promise<array<T>>
-    
+
     - name: any
       desc: |
         Accepts an array of Promises and returns a Promise that is resolved as soon as *any* of the input Promises resolves. It will reject only if *all* input Promises reject. As soon as one Promises resolves, all other pending Promises are cancelled if they have no other consumers.
@@ -356,11 +356,34 @@ docs:
       returns: Promise<number>
       static: true
 
+    - name: fold
+      since: unreleased
+      desc: |
+        Folds an array into a promise or a value. The array is traversed sequentially and
+
+        The reducer function can return a promise or directly a value. It always received the last resolved value.
+
+        The folding will stop at the first rejection encountered.
+        ```
+      params:
+        - name: list
+          type: "array<T>"
+        - name: reducer
+          desc: The function to call with the accumulated value, the current element from the array and its index.
+          type:
+            kind: function
+            params: "accumulator: U, value: T, index: number"
+            returns: U | Promise<U>
+        - name: initialValue
+          type: "U"
+      returns: U | Promise<U>
+      static: true
+
     - name: each
       since: 3.0.0
       desc: |
         Iterates serially over the given an array of values, calling the predicate callback on each value before continuing.
-        
+
         If the predicate returns a Promise, we wait for that Promise to resolve before moving on to the next item
         in the array.
 
@@ -395,14 +418,14 @@ docs:
           > 4) Got qux!
         ]]
         ```
-        
+
         If the Promise a predicate returns rejects, the Promise from `Promise.each` is also rejected with the same value.
 
         If the array of values contains a Promise, when we get to that point in the list, we wait for the Promise to resolve before calling the predicate with the value.
-        
+
         If a Promise in the array of values is already Rejected when `Promise.each` is called, `Promise.each` rejects with that value immediately (the predicate callback will never be called even once). If a Promise in the list is already Cancelled when `Promise.each` is called, `Promise.each` rejects with `Promise.Error(Promise.Error.Kind.AlreadyCancelled`). If a Promise in the array of values is Started at first, but later rejects, `Promise.each` will reject with that value and iteration will not continue once iteration encounters that value.
 
-        Returns a Promise containing an array of the returned/resolved values from the predicate for each item in the array of values. 
+        Returns a Promise containing an array of the returned/resolved values from the predicate for each item in the array of values.
 
         If this Promise returned from `Promise.each` rejects or is cancelled for any reason, the following are true:
         - Iteration will not continue.
@@ -507,7 +530,7 @@ docs:
       desc: Checks whether the given object is a Promise via duck typing. This only checks if the object is a table and has an `andThen` method.
       static: true
       params: "object: any"
-      returns: 
+      returns:
         - type: boolean
           desc: "`true` if the given `object` is a Promise."
 
@@ -548,7 +571,7 @@ docs:
               params: "...: ...any?"
               returns: Promise<T>
           returns: Promise<T>
-    
+
     - name: catch
       desc: |
         Shorthand for `Promise:andThen(nil, failureHandler)`.
@@ -558,7 +581,7 @@ docs:
         ::: warning
         Within the failure handler, you should never assume that the rejection value is a string. Some rejections within the Promise library are represented by [[Error]] objects. If you want to treat it as a string for debugging, you should call `tostring` on it first.
         :::
-      params: 
+      params:
         - name: failureHandler
           type:
             kind: function
@@ -587,14 +610,14 @@ docs:
         ```
 
         If you return a Promise from the tap handler callback, its value will be discarded but `tap` will still wait until it resolves before passing the original value through.
-      params: 
+      params:
         - name: tapHandler
           type:
             kind: function
             params: "...: ...any?"
             returns: ...any?
       returns: Promise<...any?>
-    
+
     - name: finally
       desc: |
         Set a handler that will be called regardless of the promise's fate. The handler is called when the promise is resolved, rejected, *or* cancelled.
@@ -628,8 +651,8 @@ docs:
           type:
             kind: function
             params: "status: Status"
-            returns: ...any? 
-      returns: Promise<...any?> 
+            returns: ...any?
+      returns: Promise<...any?>
       overloads:
         - params:
           - name: finallyHandler
@@ -657,8 +680,8 @@ docs:
           type:
             kind: function
             params: "status: Status"
-            returns: ...any? 
-      returns: Promise<...any?> 
+            returns: ...any?
+      returns: Promise<...any?>
       overloads:
         - params:
           - name: doneHandler
@@ -787,7 +810,7 @@ docs:
             return "some", "values"
           end)
         ```
-    
+
       params:
         - name: "..."
           type: "...any?"
@@ -878,7 +901,7 @@ docs:
           type: boolean
         - desc: The values that the Promise resolved or rejected with.
           type: ...any?
-    
+
     - name: awaitStatus
       tags: [ 'yields' ]
       desc: Yields the current thread until the given Promise completes. Returns the Promise's status, followed by the values that the promise resolved or rejected with.
@@ -907,12 +930,12 @@ docs:
         ```lua
         select(2, assert(promise:await()))
         ```
-        
+
         **Errors** if the Promise rejects or gets cancelled.
       returns:
         - type: ...any?
           desc: The values that the Promise resolved with.
-    
+
     - name: getStatus
       desc: Returns the current Promise status.
       returns: Status
