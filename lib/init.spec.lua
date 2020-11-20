@@ -811,6 +811,51 @@ return function()
 		end)
 	end)
 
+	describe("Promise.fold", function()
+		it("should return the initial value when the list is empty", function()
+			local initialValue = {}
+			local result = Promise.fold({}, function()
+				error("should not be called")
+			end, initialValue)
+			expect(result).to.equal(initialValue)
+		end)
+
+		it("should fold the list if the reducer never returns promises", function()
+			local sum = Promise.fold({1, 2, 3}, function(sum, element)
+				return sum + element
+			end, 0)
+			expect(sum).to.equal(6)
+		end)
+
+		it("should fold the list into a promise if the reducer returns at least a promise", function()
+			local sum = Promise.fold({1, 2, 3}, function(sum, element, index)
+				if index == 2 then
+					return Promise.resolve(sum + element)
+				else
+					return sum + element
+				end
+			end, 0)
+			expect(Promise.is(sum)).to.equal(true)
+			expect(sum:getStatus()).to.equal(Promise.Status.Resolved)
+			expect(sum:expect()).to.equal(6)
+		end)
+
+		it("should return the first rejected promise", function()
+			local errorMessage = "foo"
+			local sum = Promise.fold({1, 2, 3}, function(sum, element, index)
+				if index == 2 then
+					return Promise.reject(errorMessage)
+				else
+					return sum + element
+				end
+			end, 0)
+			expect(Promise.is(sum)).to.equal(true)
+			local status, rejection = sum:awaitStatus()
+			expect(status).to.equal(Promise.Status.Rejected)
+			expect(rejection).to.equal(errorMessage)
+		end)
+	end)
+
 	describe("Promise.race", function()
 		it("should resolve with the first settled value", function()
 			local promise = Promise.race({

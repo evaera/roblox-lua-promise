@@ -439,6 +439,24 @@ function Promise.all(promises)
 	return Promise._all(debug.traceback(nil, 2), promises)
 end
 
+function Promise.fold(list, callback, initialValue)
+	assert(type(list) == "table", "Bad argument #1 to Promise.fold: must be a table")
+	assert(type(callback) == "function", "Bad argument #2 to Promise.fold: must be a function")
+
+	local previousValue = initialValue
+	for i = 1, #list do
+		local element = list[i]
+		if Promise.is(previousValue) then
+			previousValue = previousValue:andThen(function(previousValueResolved)
+				return callback(previousValueResolved, element, i)
+			end)
+		else
+			previousValue = callback(previousValue, element, i)
+		end
+	end
+	return previousValue
+end
+
 function Promise.some(promises, amount)
 	assert(type(amount) == "number", "Bad argument #2 to Promise.some: must be a number")
 
