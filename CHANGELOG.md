@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased changes
+
+### Added
+- Added `Promise.fold` (#47)
+
 ## [3.0.1] - 2020-08-24
 ### Fixed
 - Make `Promise.is` work with promises from old versions of the library (#41)
