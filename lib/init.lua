@@ -443,15 +443,11 @@ function Promise.fold(list, callback, initialValue)
 	assert(type(list) == "table", "Bad argument #1 to Promise.fold: must be a table")
 	assert(type(callback) == "function", "Bad argument #2 to Promise.fold: must be a function")
 
-	local accumulator = initialValue
+	local accumulator = Promise.resolve(initialValue)
 	return Promise.each(list, function(resolvedElement, i)
-		if Promise.is(accumulator) then
-			accumulator = accumulator:andThen(function(previousValueResolved)
-				return callback(previousValueResolved, resolvedElement, i)
-			end)
-		else
-			accumulator = callback(accumulator, resolvedElement, i)
-		end
+		accumulator = accumulator:andThen(function(previousValueResolved)
+			return callback(previousValueResolved, resolvedElement, i)
+		end)
 	end):andThenReturn(accumulator)
 end
 
