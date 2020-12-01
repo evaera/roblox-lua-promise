@@ -359,15 +359,27 @@ docs:
     - name: fold
       since: unreleased
       desc: |
-        Folds an array into a promise or a value. The array is traversed sequentially and
+        Folds an array of values or promises into a single value. The array is traversed sequentially.
 
-        The reducer function can return a promise or directly a value. It always received the last resolved value.
+        The reducer function can return a promise or value directly. Each iteration receives the resolved value from the previous, and the first receives your defined initial value.
 
         The folding will stop at the first rejection encountered.
+        ```lua
+        local basket = {"blueberry", "melon", "pear", "melon"}
+        Promise.fold(basket, function(accumulatedCost, fruit)
+          if fruit == "blueberry" then
+            return cost -- blueberries are free!
+          else
+            -- call a function that returns a promise with the fruit price
+            return fetchPrice(fruit):andThen(function(fruitCost)
+              return cost + fruitCost
+            end)
+          end
+        end, 0)
         ```
       params:
         - name: list
-          type: "array<T>"
+          type: "array<T | Promise<T>>"
         - name: reducer
           desc: The function to call with the accumulated value, the current element from the array and its index.
           type:
@@ -376,7 +388,7 @@ docs:
             returns: U | Promise<U>
         - name: initialValue
           type: "U"
-      returns: U | Promise<U>
+      returns: Promise<U>
       static: true
 
     - name: each
