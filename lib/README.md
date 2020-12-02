@@ -366,7 +366,7 @@ docs:
         The folding will stop at the first rejection encountered.
         ```lua
         local basket = {"blueberry", "melon", "pear", "melon"}
-        Promise.fold(basket, function(accumulatedCost, fruit)
+        Promise.fold(basket, function(cost, fruit)
           if fruit == "blueberry" then
             return cost -- blueberries are free!
           else
