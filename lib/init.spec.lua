@@ -190,7 +190,7 @@ return function()
 	end)
 
 	describe("Promise.delay", function()
-		it("Should schedule promise resolution", function()
+		it("should schedule promise resolution", function()
 			local promise = Promise.delay(1)
 
 			expect(promise:getStatus()).to.equal(Promise.Status.Started)
@@ -200,6 +200,21 @@ return function()
 
 			advanceTime(1)
 			expect(promise:getStatus()).to.equal(Promise.Status.Resolved)
+		end)
+
+		it("should allow for delays to be cancelled", function()
+			local promise = Promise.delay(2)
+
+			Promise.delay(1):andThen(function()
+			    promise:cancel()
+			end)
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Started)
+			advanceTime()
+			expect(promise:getStatus()).to.equal(Promise.Status.Started)
+			advanceTime(1)
+			expect(promise:getStatus()).to.equal(Promise.Status.Cancelled)
+			advanceTime(1)
 		end)
 	end)
 
@@ -259,6 +274,30 @@ return function()
 			bindable:Fire()
 			expect(promise:getStatus()).to.equal(Promise.Status.Resolved)
 			expect(promise._values[1]).to.equal(5)
+		end)
+
+		it("should run andThens on a new thread", function()
+			local bindable = Instance.new("BindableEvent")
+
+			local resolve
+			local parentPromise = Promise.new(function(_resolve)
+				resolve = _resolve
+			end)
+
+			local deadlockedPromise = parentPromise:andThen(function()
+				bindable.Event:Wait()
+				return 5
+			end)
+
+			local successfulPromise = parentPromise:andThen(function()
+				return "foo"
+			end)
+
+			expect(parentPromise:getStatus()).to.equal(Promise.Status.Started)
+			resolve()
+			expect(successfulPromise:getStatus()).to.equal(Promise.Status.Resolved)
+			expect(successfulPromise._values[1]).to.equal("foo")
+			expect(deadlockedPromise:getStatus()).to.equal(Promise.Status.Started)
 		end)
 
 		it("should chain onto resolved promises", function()
@@ -769,6 +808,76 @@ return function()
 			expect(promises[1]:getStatus()).to.equal(Promise.Status.Cancelled)
 			expect(promises[2]:getStatus()).to.equal(Promise.Status.Cancelled)
 			expect(promises[3]:getStatus()).to.equal(Promise.Status.Started)
+		end)
+	end)
+
+	describe("Promise.fold", function()
+		it("should return the initial value in a promise when the list is empty", function()
+			local initialValue = {}
+			local result = Promise.fold({}, function()
+				error("should not be called")
+			end, initialValue)
+
+			expect(Promise.is(result)).to.equal(true)
+			expect(result:getStatus()).to.equal(Promise.Status.Resolved)
+			expect(result:expect()).to.equal(initialValue)
+		end)
+
+		it("should accept promises in the list", function()
+			local sum = Promise.fold({Promise.resolve(1), 2, 3}, function(sum, element)
+				return sum + element
+			end, 0)
+			expect(Promise.is(sum)).to.equal(true)
+			expect(sum:getStatus()).to.equal(Promise.Status.Resolved)
+			expect(sum:expect()).to.equal(6)
+		end)
+
+		it("should always return a promise even if the list or reducer don't use them", function()
+			local sum = Promise.fold({1, 2, 3}, function(sum, element, index)
+				if index == 2 then
+					return Promise.delay(1):andThenReturn(sum + element)
+				else
+					return sum + element
+				end
+			end, 0)
+			expect(Promise.is(sum)).to.equal(true)
+			expect(sum:getStatus()).to.equal(Promise.Status.Started)
+			advanceTime(2)
+			expect(sum:getStatus()).to.equal(Promise.Status.Resolved)
+			expect(sum:expect()).to.equal(6)
+		end)
+
+		it("should return the first rejected promise", function()
+			local errorMessage = "foo"
+			local sum = Promise.fold({1, 2, 3}, function(sum, element, index)
+				if index == 2 then
+					return Promise.reject(errorMessage)
+				else
+					return sum + element
+				end
+			end, 0)
+			expect(Promise.is(sum)).to.equal(true)
+			local status, rejection = sum:awaitStatus()
+			expect(status).to.equal(Promise.Status.Rejected)
+			expect(rejection).to.equal(errorMessage)
+		end)
+
+		it("should return the first canceled promise", function()
+			local secondPromise
+			local sum = Promise.fold({1, 2, 3}, function(sum, element, index)
+				if index == 1 then
+					return sum + element
+				elseif index == 2 then
+					secondPromise = Promise.delay(1):andThenReturn(sum + element)
+					return secondPromise
+				else
+					error('this should not run if the promise is cancelled')
+				end
+			end, 0)
+			expect(Promise.is(sum)).to.equal(true)
+			expect(sum:getStatus()).to.equal(Promise.Status.Started)
+			secondPromise:cancel()
+			expect(sum:getStatus()).to.equal(Promise.Status.Cancelled)
 		end)
 	end)
 
@@ -1472,6 +1581,38 @@ return function()
 
 			expect(promise:getStatus()).to.equal(Promise.Status.Resolved)
 			expect(promise._values[1]).to.equal("foo")
+		end)
+	end)
+
+	describe("Promise.is", function()
+		it("should work with current version", function()
+			local promise = Promise.resolve(1)
+
+			expect(Promise.is(promise)).to.equal(true)
+		end)
+
+		it("should work with any object with an andThen", function()
+			local obj = {
+				andThen = function()
+					return 1
+				end
+			}
+
+			expect(Promise.is(obj)).to.equal(true)
+		end)
+
+		it("should work with older promises", function()
+			local OldPromise = {}
+			OldPromise.prototype = {}
+			OldPromise.__index = OldPromise.prototype
+
+			function OldPromise.prototype:andThen()
+
+			end
+
+			local oldPromise = setmetatable({}, OldPromise)
+
+			expect(Promise.is(oldPromise)).to.equal(true)
 		end)
 	end)
 end

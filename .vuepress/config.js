@@ -41,6 +41,7 @@ module.exports = {
 
     sidebarDepth: 3,
     sidebar: [
+      '/lib/Installation',
       '/lib/WhyUsePromises',
       '/lib/Tour',
       '/lib/Examples',

@@ -22,7 +22,7 @@ docs:
       tags: [ 'read only', 'static', 'enums' ]
       type: Status
       desc: A table containing all members of the `Status` enum, e.g., `Promise.Status.Resolved`.
-      
+
 
   functions:
     - name: new
@@ -44,10 +44,10 @@ docs:
         myFunction():andThen(print)
         ```
 
-        Errors that occur during execution will be caught and turned into a rejection automatically. If `error()` is called with a table, that table will be the rejection value. Otherwise, string errors will be converted into `Promise.Error(Promise.Error.Kind.ExecutionError)` objects for tracking debug information.
-        
+        You do not need to use `pcall` within a Promise. Errors that occur during execution will be caught and turned into a rejection automatically. If `error()` is called with a table, that table will be the rejection value. Otherwise, string errors will be converted into `Promise.Error(Promise.Error.Kind.ExecutionError)` objects for tracking debug information.
+
         You may register an optional cancellation hook by using the `onCancel` argument:
-          * This should be used to abort any ongoing operations leading up to the promise being settled. 
+          * This should be used to abort any ongoing operations leading up to the promise being settled.
           * Call the `onCancel` function with a function callback as its only argument to set a hook which will in turn be called when/if the promise is cancelled.
           * `onCancel` returns `true` if the Promise was already cancelled when you called `onCancel`.
           * Calling `onCancel` with no argument will not override a previously set cancellation hook, but it will still return `true` if the Promise is currently cancelled.
@@ -89,7 +89,7 @@ docs:
         The same as [[Promise.new]], except execution begins after the next `Heartbeat` event.
 
         This is a spiritual replacement for `spawn`, but it does not suffer from the same [issues](https://eryn.io/gist/3db84579866c099cdd5bb2ff37947cec) as `spawn`.
-        
+
         ```lua
         local function waitForChild(instance, childName, timeout)
           return Promise.defer(function(resolve, reject)
@@ -99,7 +99,7 @@ docs:
           end)
         end
         ```
-        
+
       static: true
       params:
         - name: deferExecutor
@@ -184,7 +184,7 @@ docs:
         local isPlayerInGroup = Promise.promisify(function(player, groupId)
           return player:IsInGroup(groupId)
         end)
-        ```        
+        ```
       static: true
       params:
         - name: callback
@@ -202,7 +202,7 @@ docs:
             returns:
               - name: "*"
                 desc: The return values from the wrapped function.
-  
+
     - name: resolve
       desc: Creates an immediately resolved Promise with the given value.
       static: true
@@ -215,19 +215,45 @@ docs:
         ::: tip
         Someone needs to consume this rejection (i.e. `:catch()` it), otherwise it will emit an unhandled Promise rejection warning on the next frame. Thus, you should not create and store rejected Promises for later use. Only create them on-demand as needed.
         :::
+
+        ```lua
+          -- Example using Promise.resolve to deliver cached values:
+          function getSomething(name)
+            if cache[name] then
+              return Promise.resolve(cache[name])
+            else
+              return Promise.new(function(resolve, reject)
+                local thing = getTheThing()
+                cache[name] = thing
+
+                resolve(thing)
+              end)
+            end
+          end
+        ```
       static: true
       params: "value: ...any"
       returns: Promise<...any>
-        
+
     - name: all
       desc: |
         Accepts an array of Promises and returns a new promise that:
           * is resolved after all input promises resolve.
           * is rejected if *any* input promises reject.
-        
+
         Note: Only the first return value from each promise will be present in the resulting array.
 
         After any input Promise rejects, all other input Promises that are still pending will be cancelled if they have no other consumers.
+
+        ```lua
+          local promises = {
+            returnsAPromise("example 1"),
+            returnsAPromise("example 2"),
+            returnsAPromise("example 3"),
+          }
+
+          return Promise.all(promises)
+        ```
       static: true
       params: "promises: array<Promise<T>>"
       returns: Promise<array<T>>
@@ -235,6 +261,16 @@ docs:
     - name: allSettled
       desc: |
         Accepts an array of Promises and returns a new Promise that resolves with an array of in-place Statuses when all input Promises have settled. This is equivalent to mapping `promise:finally` over the array of Promises.
+
+        ```lua
+          local promises = {
+            returnsAPromise("example 1"),
+            returnsAPromise("example 2"),
+            returnsAPromise("example 3"),
+          }
+
+          return Promise.allSettled(promises)
+        ```
       static: true
       params: "promises: array<Promise<T>>"
       returns: Promise<array<Status>>
@@ -250,6 +286,16 @@ docs:
         :::
 
         All other Promises that don't win the race will be cancelled if they have no other consumers.
+
+        ```lua
+          local promises = {
+            returnsAPromise("example 1"),
+            returnsAPromise("example 2"),
+            returnsAPromise("example 3"),
+          }
+
+          return Promise.race(promises) -- Only returns 1st value to resolve or reject
+        ```
       static: true
       params: "promises: array<Promise<T>>"
       returns: Promise<T>
@@ -259,15 +305,35 @@ docs:
         Accepts an array of Promises and returns a Promise that is resolved as soon as `count` Promises are resolved from the input array. The resolved array values are in the order that the Promises resolved in. When this Promise resolves, all other pending Promises are cancelled if they have no other consumers.
 
         `count` 0 results in an empty array. The resultant array will never have more than `count` elements.
+
+        ```lua
+          local promises = {
+            returnsAPromise("example 1"),
+            returnsAPromise("example 2"),
+            returnsAPromise("example 3"),
+          }
+
+          return Promise.some(promises, 2) -- Only resolves with first 2 promises to resolve
+        ```
       static: true
       params: "promises: array<Promise<T>>, count: number"
       returns: Promise<array<T>>
-    
+
     - name: any
       desc: |
         Accepts an array of Promises and returns a Promise that is resolved as soon as *any* of the input Promises resolves. It will reject only if *all* input Promises reject. As soon as one Promises resolves, all other pending Promises are cancelled if they have no other consumers.
 
         Resolves directly with the value of the first resolved Promise. This is essentially [[Promise.some]] with `1` count, except the Promise resolves with the value directly instead of an array with one element.
+
+        ```lua
+          local promises = {
+            returnsAPromise("example 1"),
+            returnsAPromise("example 2"),
+            returnsAPromise("example 3"),
+          }
+
+          return Promise.any(promises) -- Resolves with first value to resolve (only rejects if all 3 rejected)
+        ```
 
       static: true
       params: "promises: array<Promise<T>>"
@@ -282,15 +348,54 @@ docs:
         ::: warning
           Passing `NaN`, infinity, or a number less than 1/60 is equivalent to passing 1/60.
         :::
+
+        ```lua
+          Promise.delay(5):andThenCall(print, "This prints after 5 seconds")
+        ```
       params: "seconds: number"
       returns: Promise<number>
+      static: true
+
+    - name: fold
+      since: 3.1.0
+      desc: |
+        Folds an array of values or promises into a single value. The array is traversed sequentially.
+
+        The reducer function can return a promise or value directly. Each iteration receives the resolved value from the previous, and the first receives your defined initial value.
+
+        The folding will stop at the first rejection encountered.
+        ```lua
+        local basket = {"blueberry", "melon", "pear", "melon"}
+        Promise.fold(basket, function(cost, fruit)
+          if fruit == "blueberry" then
+            return cost -- blueberries are free!
+          else
+            -- call a function that returns a promise with the fruit price
+            return fetchPrice(fruit):andThen(function(fruitCost)
+              return cost + fruitCost
+            end)
+          end
+        end, 0)
+        ```
+      params:
+        - name: list
+          type: "array<T | Promise<T>>"
+        - name: reducer
+          desc: The function to call with the accumulated value, the current element from the array and its index.
+          type:
+            kind: function
+            params: "accumulator: U, value: T, index: number"
+            returns: U | Promise<U>
+        - name: initialValue
+          type: "U"
+      returns: Promise<U>
       static: true
 
     - name: each
       since: 3.0.0
       desc: |
         Iterates serially over the given an array of values, calling the predicate callback on each value before continuing.
-        
+
         If the predicate returns a Promise, we wait for that Promise to resolve before moving on to the next item
         in the array.
 
@@ -325,14 +430,14 @@ docs:
           > 4) Got qux!
         ]]
         ```
-        
+
         If the Promise a predicate returns rejects, the Promise from `Promise.each` is also rejected with the same value.
 
         If the array of values contains a Promise, when we get to that point in the list, we wait for the Promise to resolve before calling the predicate with the value.
-        
+
         If a Promise in the array of values is already Rejected when `Promise.each` is called, `Promise.each` rejects with that value immediately (the predicate callback will never be called even once). If a Promise in the list is already Cancelled when `Promise.each` is called, `Promise.each` rejects with `Promise.Error(Promise.Error.Kind.AlreadyCancelled`). If a Promise in the array of values is Started at first, but later rejects, `Promise.each` will reject with that value and iteration will not continue once iteration encounters that value.
 
-        Returns a Promise containing an array of the returned/resolved values from the predicate for each item in the array of values. 
+        Returns a Promise containing an array of the returned/resolved values from the predicate for each item in the array of values.
 
         If this Promise returned from `Promise.each` rejects or is cancelled for any reason, the following are true:
         - Iteration will not continue.
@@ -356,6 +461,25 @@ docs:
         Repeatedly calls a Promise-returning function up to `times` number of times, until the returned Promise resolves.
 
         If the amount of retries is exceeded, the function will return the latest rejected Promise.
+
+        ```lua
+          local function canFail(a, b, c)
+            return Promise.new(function(resolve, reject)
+              -- do something that can fail
+
+              local failed, thing = doSomethingThatCanFail(a, b, c)
+
+              if failed then
+                reject("it failed")
+              else
+                resolve(thing)
+              end
+            end)
+          end
+
+          local MAX_RETRIES = 10
+          local value = Promise.retry(canFail, MAX_RETRIES, "foo", "bar", "baz") -- args to send to canFail
+        ```
       params:
         - name: callback
           type:
@@ -418,7 +542,7 @@ docs:
       desc: Checks whether the given object is a Promise via duck typing. This only checks if the object is a table and has an `andThen` method.
       static: true
       params: "object: any"
-      returns: 
+      returns:
         - type: boolean
           desc: "`true` if the given `object` is a Promise."
 
@@ -459,15 +583,17 @@ docs:
               params: "...: ...any?"
               returns: Promise<T>
           returns: Promise<T>
-    
+
     - name: catch
       desc: |
         Shorthand for `Promise:andThen(nil, failureHandler)`.
 
+        Returns a Promise that resolves if the `failureHandler` worked without encountering an additional error.
+
         ::: warning
         Within the failure handler, you should never assume that the rejection value is a string. Some rejections within the Promise library are represented by [[Error]] objects. If you want to treat it as a string for debugging, you should call `tostring` on it first.
         :::
-      params: 
+      params:
         - name: failureHandler
           type:
             kind: function
@@ -496,14 +622,14 @@ docs:
         ```
 
         If you return a Promise from the tap handler callback, its value will be discarded but `tap` will still wait until it resolves before passing the original value through.
-      params: 
+      params:
         - name: tapHandler
           type:
             kind: function
             params: "...: ...any?"
             returns: ...any?
       returns: Promise<...any?>
-    
+
     - name: finally
       desc: |
         Set a handler that will be called regardless of the promise's fate. The handler is called when the promise is resolved, rejected, *or* cancelled.
@@ -513,13 +639,32 @@ docs:
         ::: warning
         If the Promise is cancelled, any Promises chained off of it with `andThen` won't run. Only Promises chained with `finally` or `done` will run in the case of cancellation.
         :::
+
+        ```lua
+          local thing = createSomething()
+
+          doSomethingWith(thing)
+            :andThen(function()
+              print("It worked!")
+              -- do something..
+            end)
+            :catch(function()
+              warn("Oh no it failed!")
+            end)
+            :finally(function()
+              -- either way, destroy thing
+
+              thing:Destroy()
+            end)
+
+        ```
       params:
         - name: finallyHandler
           type:
             kind: function
             params: "status: Status"
-            returns: ...any? 
-      returns: Promise<...any?> 
+            returns: ...any?
+      returns: Promise<...any?>
       overloads:
         - params:
           - name: finallyHandler
@@ -547,8 +692,8 @@ docs:
           type:
             kind: function
             params: "status: Status"
-            returns: ...any? 
-      returns: Promise<...any?> 
+            returns: ...any?
+      returns: Promise<...any?>
       overloads:
         - params:
           - name: doneHandler
@@ -677,7 +822,7 @@ docs:
             return "some", "values"
           end)
         ```
-    
+
       params:
         - name: "..."
           type: "...any?"
@@ -690,6 +835,20 @@ docs:
         Returns a new Promise that resolves if the chained Promise resolves within `seconds` seconds, or rejects if execution time exceeds `seconds`. The chained Promise will be cancelled if the timeout is reached.
 
         Rejects with `rejectionValue` if it is non-nil. If a `rejectionValue` is not given, it will reject with a `Promise.Error(Promise.Error.Kind.TimedOut)`. This can be checked with [[Error.isKind]].
+
+        ```lua
+          getSomething():timeout(5):andThen(function(something)
+            -- got something and it only took at max 5 seconds
+          end):catch(function(e)
+            -- Either getting something failed or the time was exceeded.
+
+            if Promise.Error.isKind(e, Promise.Error.Kind.TimedOut) then
+              warn("Operation timed out!")
+            else
+              warn("Operation encountered an error!")
+            end
+          end)
+        ```
 
         Sugar for:
 
@@ -710,6 +869,10 @@ docs:
         Cancellations will propagate upwards and downwards through chained promises.
 
         Promises will only be cancelled if all of their consumers are also cancelled. This is to say that if you call `andThen` twice on the same promise, and you cancel only one of the child promises, it will not cancel the parent promise until the other child promise is also cancelled.
+
+        ```lua
+          promise:cancel()
+        ```
 
     - name: now
       desc: |
@@ -735,12 +898,22 @@ docs:
         ::: warning
         If the Promise gets cancelled, this function will return `false`, which is indistinguishable from a rejection. If you need to differentiate, you should use [[Promise.awaitStatus]] instead.
         :::
+
+        ```lua
+          local worked, value = getTheValue():await()
+
+          if worked then
+            print("got", value)
+          else
+            warn("it failed")
+          end
+        ```
       returns:
         - desc: "`true` if the Promise successfully resolved."
           type: boolean
         - desc: The values that the Promise resolved or rejected with.
           type: ...any?
-    
+
     - name: awaitStatus
       tags: [ 'yields' ]
       desc: Yields the current thread until the given Promise completes. Returns the Promise's status, followed by the values that the promise resolved or rejected with.
@@ -754,17 +927,27 @@ docs:
       desc: |
         Yields the current thread until the given Promise completes. Returns the the values that the promise resolved with.
 
+        ```lua
+          local worked = pcall(function()
+            print("got", getTheValue():expect())
+          end)
+
+          if not worked then
+            warn("it failed")
+          end
+        ```
+
         This is essentially sugar for:
 
         ```lua
         select(2, assert(promise:await()))
         ```
-        
+
         **Errors** if the Promise rejects or gets cancelled.
       returns:
         - type: ...any?
           desc: The values that the Promise resolved with.
-    
+
     - name: getStatus
       desc: Returns the current Promise status.
       returns: Status
