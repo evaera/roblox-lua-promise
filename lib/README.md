@@ -357,7 +357,7 @@ docs:
       static: true
 
     - name: fold
-      since: unreleased
+      since: 3.1.0
       desc: |
         Folds an array of values or promises into a single value. The array is traversed sequentially.
 

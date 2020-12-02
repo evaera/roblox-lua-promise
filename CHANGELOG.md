@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased changes
+## [3.1.0] - 2020-12-01
 
 ### Added
 - Added `Promise.fold` (#47)
