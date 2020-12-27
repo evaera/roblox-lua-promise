@@ -124,7 +124,6 @@ local function packResult(success, ...)
 	return success, select("#", ...), { ... }
 end
 
-
 local function makeErrorHandler(traceback)
 	assert(traceback ~= nil)
 
@@ -280,7 +279,7 @@ function Promise.new(executor)
 end
 
 function Promise:__tostring()
-	return string.format("Promise(%s)", self:getStatus())
+	return string.format("Promise(%s)", self._status)
 end
 
 --[[
@@ -1321,7 +1320,7 @@ end
 ]]
 function Promise.prototype:now(rejectionValue)
 	local traceback = debug.traceback(nil, 2)
-	if self:getStatus() == Promise.Status.Resolved then
+	if self._status == Promise.Status.Resolved then
 		return self:_andThen(traceback, function(...)
 			return ...
 		end)
@@ -1360,7 +1359,7 @@ function Promise.fromEvent(event, predicate)
 		return true
 	end
 
-	return Promise._new(debug.traceback(nil, 2), function(resolve, reject, onCancel)
+	return Promise._new(debug.traceback(nil, 2), function(resolve, _, onCancel)
 		local connection
 		local shouldDisconnect = false
 
@@ -1393,9 +1392,7 @@ function Promise.fromEvent(event, predicate)
 			return disconnect()
 		end
 
-		onCancel(function()
-			disconnect()
-		end)
+		onCancel(disconnect)
 	end)
 end
 
