@@ -1397,3 +1397,7 @@ function Promise.fromEvent(event, predicate)
 end
 
 return Promise
+
+local PromiseTypeModule = require(script.PromiseType)
+export type Promise<T> = PromiseTypeModule.Promise<T>
+export type PromiseLike<T> = PromiseTypeModule.PromiseLike<T>
