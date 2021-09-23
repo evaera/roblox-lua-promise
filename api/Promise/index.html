@@ -1,0 +1,1464 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="generator" content="Docusaurus v2.0.0-beta.6">
+<title data-react-helmet="true">Promise | roblox-lua-promise</title><meta data-react-helmet="true" property="og:title" content="Promise | roblox-lua-promise"><meta data-react-helmet="true" name="twitter:card" content="summary_large_image"><meta data-react-helmet="true" name="description" content="A Promise is an object that represents a value that will exist in the future, but doesn&#x27;t right now.
+Promises allow you to then attach callbacks that can run once the value becomes available (known as *resolving*),
+or if an error has occurred (known as *rejecting*)."><meta data-react-helmet="true" property="og:description" content="A Promise is an object that represents a value that will exist in the future, but doesn&#x27;t right now.
+Promises allow you to then attach callbacks that can run once the value becomes available (known as *resolving*),
+or if an error has occurred (known as *rejecting*)."><meta data-react-helmet="true" property="og:url" content="https://evaera.github.io/roblox-lua-promise/api/Promise"><meta data-react-helmet="true" name="docusaurus_locale" content="en"><meta data-react-helmet="true" name="docusaurus_tag" content="default"><link data-react-helmet="true" rel="shortcut icon" href="/roblox-lua-promise/favicon.ico"><link data-react-helmet="true" rel="canonical" href="https://evaera.github.io/roblox-lua-promise/api/Promise"><link data-react-helmet="true" rel="alternate" href="https://evaera.github.io/roblox-lua-promise/api/Promise" hreflang="en"><link data-react-helmet="true" rel="alternate" href="https://evaera.github.io/roblox-lua-promise/api/Promise" hreflang="x-default"><link rel="stylesheet" href="/roblox-lua-promise/assets/css/styles.1d24bed0.css">
+<link rel="preload" href="/roblox-lua-promise/assets/js/runtime~main.3ffdb875.js" as="script">
+<link rel="preload" href="/roblox-lua-promise/assets/js/main.9487701b.js" as="script">
+</head>
+<body>
+<script>!function(){function t(t){document.documentElement.setAttribute("data-theme",t)}var e=function(){var t=null;try{t=localStorage.getItem("theme")}catch(t){}return t}();t(null!==e?e:"light")}()</script><div id="__docusaurus">
+<div><a href="#" class="skipToContent_1oUP">Skip to main content</a></div><nav class="navbar navbar--fixed-top"><div class="navbar__inner"><div class="navbar__items"><button aria-label="Navigation bar toggle" class="navbar__toggle clean-btn" type="button" tabindex="0"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"></path></svg></button><a class="navbar__brand" href="/roblox-lua-promise/"><b class="navbar__title">roblox-lua-promise</b></a><a class="navbar__item navbar__link" href="/roblox-lua-promise/docs/intro">Docs</a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/roblox-lua-promise/api/">API</a><a class="navbar__item navbar__link" href="/roblox-lua-promise/changelog">Changelog</a></div><div class="navbar__items navbar__items--right"><a href="https://discord.gg/ECEDZbFXnE" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link"><span>Discord<svg width="13.5" height="13.5" aria-hidden="true" viewBox="0 0 24 24" class="iconExternalLink_3J9K"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"></path></svg></span></a><a href="https://github.com/evaera/roblox-lua-promise" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link"><span>GitHub<svg width="13.5" height="13.5" aria-hidden="true" viewBox="0 0 24 24" class="iconExternalLink_3J9K"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"></path></svg></span></a><div class="react-toggle toggle_3Zt9 react-toggle--disabled"><div class="react-toggle-track" role="button" tabindex="-1"><div class="react-toggle-track-check"><span class="toggle_71bT">🌜</span></div><div class="react-toggle-track-x"><span class="toggle_71bT">🌞</span></div><div class="react-toggle-thumb"></div></div><input type="checkbox" class="react-toggle-screenreader-only" aria-label="Switch between dark and light mode"></div><div class="navbar__search"><span aria-label="expand searchbar" role="button" class="search-icon" tabindex="0"></span><input type="search" id="search_input_react" placeholder="Press S to Search..." aria-label="Search" class="navbar__search-input search-bar"></div></div></div><div role="presentation" class="navbar-sidebar__backdrop"></div></nav><div class="main-wrapper docPageContainer_3ccu"><div class="docPage_8QDt"><div class="docSidebarContainer_1Ern"><div class="sidebar_15mo"><nav class="menu thin-scrollbar menu_Bmed menuWithAnnouncementBar_2WvA"><ul class="theme-doc-sidebar-menu menu__list"><li class="theme-doc-sidebar-item-link menu__list-item"><a class="menu__link" href="/roblox-lua-promise/api/Error">Error</a></li><li class="theme-doc-sidebar-item-link menu__list-item"><a class="menu__link menu__link--active" aria-current="page" href="/roblox-lua-promise/api/Promise">Promise</a></li></ul></nav><button type="button" title="Collapse sidebar" aria-label="Collapse sidebar" class="button button--secondary button--outline collapseSidebarButton_1CGd"><svg width="20" height="20" aria-hidden="true" class="collapseSidebarButtonIcon_3E-R"><g fill="#7a7a7a"><path d="M9.992 10.023c0 .2-.062.399-.172.547l-4.996 7.492a.982.982 0 01-.828.454H1c-.55 0-1-.453-1-1 0-.2.059-.403.168-.551l4.629-6.942L.168 3.078A.939.939 0 010 2.528c0-.548.45-.997 1-.997h2.996c.352 0 .649.18.828.45L9.82 9.472c.11.148.172.347.172.55zm0 0"></path><path d="M19.98 10.023c0 .2-.058.399-.168.547l-4.996 7.492a.987.987 0 01-.828.454h-3c-.547 0-.996-.453-.996-1 0-.2.059-.403.168-.551l4.625-6.942-4.625-6.945a.939.939 0 01-.168-.55 1 1 0 01.996-.997h3c.348 0 .649.18.828.45l4.996 7.492c.11.148.168.347.168.55zm0 0"></path></g></svg></button></div></div><main class="docMainContainer_27Zo"><div class="container padding-vert--lg"><div class="row"><div class="col"><div class="docItemContainer_3H03"><article><div class="member_2635 markdown"><header><h1 class="docTitle_GF7h">Promise</h1><div class="luaClassTags_Ddhq"></div><label class="privateToggle_xMIu"><span class="privateCheckboxContainer_WxBz"><input type="checkbox" class="privateCheckboxInternal_3wPm" name="checkbox"><span class="privateCheckboxControl_2NO3"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="3" d="M4 11.91l5.37 5.37L19.79 5.59"></path></svg></span></span><span class="privateCheckboxLabel_j3Uk">Show Private</span></label><div>
+<p>
+  A Promise is an object that represents a value that will exist in the future, but doesn't right now.
+  Promises allow you to then attach callbacks that can run once the value becomes available (known as <em>resolving</em>),
+  or if an error has occurred (known as <em>rejecting</em>).
+</p>
+</div></header><h2><a aria-hidden="true" tabindex="-1" class="anchor anchor__h2 anchorWithStickyNavbar_31ik" id="types"></a>Types<a class="hash-link" href="#types" title="Direct link to heading">#</a></h2><div class="divider_wJfn"></div><h3><a aria-hidden="true" tabindex="-1" class="anchor anchor__h3 anchorWithStickyNavbar_31ik" id="Status"></a><code style="text-decoration:none">Status</code><a class="hash-link" href="#Status" title="Direct link to heading">#</a></h3><span class="docTag_3K0W" style="border-color:#218c74;color:#218c74">enum</span><div class="repositoryDetailsContainer_1YsL"><a class="sourceButton_3Nc5" href="https://github.com/evaera/roblox-lua-promise/blob/master/lib/init.lua#L186"><div class="sourceButtonText_B34l">&lt;/&gt;</div></a></div><div class="memberString_2_bn"><code class="purple_3km9">interface</code> <code>Status {</code><div class="inset_2aGl"><div><code>Started: </code><code class="blue_1B1Q">&quot;Started&quot;</code><span class="inlineDescription_30X9">-- <span>
+<p>The Promise is executing, and not settled yet.</p>
+</span></span></div><div><code>Resolved: </code><code class="blue_1B1Q">&quot;Resolved&quot;</code><span class="inlineDescription_30X9">-- <span>
+<p>The Promise finished successfully.</p>
+</span></span></div><div><code>Rejected: </code><code class="blue_1B1Q">&quot;Rejected&quot;</code><span class="inlineDescription_30X9">-- <span>
+<p>The Promise was rejected.</p>
+</span></span></div><div><code>Cancelled: </code><code class="blue_1B1Q">&quot;Cancelled&quot;</code><span class="inlineDescription_30X9">-- <span>
+<p>The Promise was cancelled before it finished.</p>
+</span></span></div></div><code>}</code></div><div>
+<p>An enum value used to represent the Promise's status.</p>
+</div><h2><a aria-hidden="true" tabindex="-1" class="anchor anchor__h2 anchorWithStickyNavbar_31ik" id="properties"></a>Properties<a class="hash-link" href="#properties" title="Direct link to heading">#</a></h2><div class="divider_wJfn"></div><h3><a aria-hidden="true" tabindex="-1" class="anchor anchor__h3 anchorWithStickyNavbar_31ik" id="Status"></a><code style="text-decoration:none">Status</code><a class="hash-link" href="#Status" title="Direct link to heading">#</a></h3><span class="docTag_3K0W" style="border-color:#2b8ab6;color:#2b8ab6">enums</span><span class="docTag_3K0W" style="border-color:#dc0073;color:#dc0073">static</span><div class="repositoryDetailsContainer_1YsL"><a class="sourceButton_3Nc5" href="https://github.com/evaera/roblox-lua-promise/blob/master/lib/init.lua#L194"><div class="sourceButtonText_B34l">&lt;/&gt;</div></a></div><div class="memberString_2_bn"><code>Promise.Status: </code> <code class="blue_1B1Q">Status</code></div><div>
+<p>A table containing all members of the <code>Status</code> enum, e.g., <code>Promise.Status.Resolved</code>.</p>
+</div><h2><a aria-hidden="true" tabindex="-1" class="anchor anchor__h2 anchorWithStickyNavbar_31ik" id="functions"></a>Functions<a class="hash-link" href="#functions" title="Direct link to heading">#</a></h2><div class="divider_wJfn"></div><h3><a aria-hidden="true" tabindex="-1" class="anchor anchor__h3 anchorWithStickyNavbar_31ik" id="new"></a><code style="text-decoration:none">new</code><a class="hash-link" href="#new" title="Direct link to heading">#</a></h3><div class="repositoryDetailsContainer_1YsL"><a class="sourceButton_3Nc5" href="https://github.com/evaera/roblox-lua-promise/blob/master/lib/init.lua#L325"><div class="sourceButtonText_B34l">&lt;/&gt;</div></a></div><div class="memberString_2_bn"><code>Promise.</code><code class="green_K7bQ">new</code><code>(</code><code>executor: </code><code class="green_K7bQ">(</code><div class="inset_2aGl"><code>resolve</code><code>:</code> <code class="purple_3km9">(</code><code>...</code><code>:</code> <code class="blue_1B1Q">any</code><code class="purple_3km9">)</code><code class="purple_3km9"> → </code><code class="purple_3km9">(</code><code class="purple_3km9">)</code><code class="green_K7bQ">,</code></div><div class="inset_2aGl"><code>reject</code><code>:</code> <code class="purple_3km9">(</code><code>...</code><code>:</code> <code class="blue_1B1Q">any</code><code class="purple_3km9">)</code><code class="purple_3km9"> → </code><code class="purple_3km9">(</code><code class="purple_3km9">)</code><code class="green_K7bQ">,</code></div><div class="inset_2aGl"><code>onCancel</code><code>:</code> <code class="purple_3km9">(</code><code>abortHandler</code><code>:</code> <code class="yellow_32vk">(</code><code class="yellow_32vk">)</code><code class="yellow_32vk"> → </code><code class="blue_1B1Q">boolean</code><code class="purple_3km9">)</code></div><code class="green_K7bQ">)</code><code class="green_K7bQ"> → </code><code class="green_K7bQ">(</code><code class="green_K7bQ">)</code><code>) → </code><code class="blue_1B1Q">Promise</code></div><div>
+<p>Construct a new Promise that will be resolved or rejected with the given callbacks.</p>
+<p>If you <code>resolve</code> with a Promise, it will be chained onto.</p>
+<p>You can safely yield within the executor function and it will not block the creating thread.</p>
+<pre class="language-lua"><code class="language-lua"><span class="token keyword">local</span> <span class="token function">myFunction</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+	<span class="token keyword">return</span> Promise<span class="token punctuation">.</span><span class="token function">new</span><span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span>resolve<span class="token punctuation">,</span> reject<span class="token punctuation">,</span> onCancel<span class="token punctuation">)</span>
+		<span class="token function">wait</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span>
+		<span class="token function">resolve</span><span class="token punctuation">(</span><span class="token string">"Hello world!"</span><span class="token punctuation">)</span>
+	<span class="token keyword">end</span><span class="token punctuation">)</span>
+<span class="token keyword">end</span>
+
+<span class="token function">myFunction</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span><span class="token function">andThen</span><span class="token punctuation">(</span>print<span class="token punctuation">)</span>
+</code></pre>
+<p>You do not need to use <code>pcall</code> within a Promise. Errors that occur during execution will be caught and turned into a rejection automatically. If <code>error()</code> is called with a table, that table will be the rejection value. Otherwise, string errors will be converted into <code>Promise.Error(Promise.Error.Kind.ExecutionError)</code> objects for tracking debug information.</p>
+<p>You may register an optional cancellation hook by using the <code>onCancel</code> argument:</p>
+<ul>
+  <li>This should be used to abort any ongoing operations leading up to the promise being settled.</li>
+  <li>Call the <code>onCancel</code> function with a function callback as its only argument to set a hook which will in turn be called when/if the promise is cancelled.</li>
+  <li><code>onCancel</code> returns <code>true</code> if the Promise was already cancelled when you called <code>onCancel</code>.</li>
+  <li>Calling <code>onCancel</code> with no argument will not override a previously set cancellation hook, but it will still return <code>true</code> if the Promise is currently cancelled.</li>
+  <li>You can set the cancellation hook at any time before resolving.</li>
+  <li>When a promise is cancelled, calls to <code>resolve</code> or <code>reject</code> will be ignored, regardless of if you set a cancellation hook or not.</li>
+</ul>
+</div><div class="divider_wJfn"></div><h3><a aria-hidden="true" tabindex="-1" class="anchor anchor__h3 anchorWithStickyNavbar_31ik" id="defer"></a><code style="text-decoration:none">defer</code><a class="hash-link" href="#defer" title="Direct link to heading">#</a></h3><div class="repositoryDetailsContainer_1YsL"><a class="sourceButton_3Nc5" href="https://github.com/evaera/roblox-lua-promise/blob/master/lib/init.lua#L351"><div class="sourceButtonText_B34l">&lt;/&gt;</div></a></div><div class="memberString_2_bn"><code>Promise.</code><code class="green_K7bQ">defer</code><code>(</code><code>executor: </code><code class="green_K7bQ">(</code><div class="inset_2aGl"><code>resolve</code><code>:</code> <code class="purple_3km9">(</code><code>...</code><code>:</code> <code class="blue_1B1Q">any</code><code class="purple_3km9">)</code><code class="purple_3km9"> → </code><code class="purple_3km9">(</code><code class="purple_3km9">)</code><code class="green_K7bQ">,</code></div><div class="inset_2aGl"><code>reject</code><code>:</code> <code class="purple_3km9">(</code><code>...</code><code>:</code> <code class="blue_1B1Q">any</code><code class="purple_3km9">)</code><code class="purple_3km9"> → </code><code class="purple_3km9">(</code><code class="purple_3km9">)</code><code class="green_K7bQ">,</code></div><div class="inset_2aGl"><code>onCancel</code><code>:</code> <code class="purple_3km9">(</code><code>abortHandler</code><code>:</code> <code class="yellow_32vk">(</code><code class="yellow_32vk">)</code><code class="yellow_32vk"> → </code><code class="blue_1B1Q">boolean</code><code class="purple_3km9">)</code></div><code class="green_K7bQ">)</code><code class="green_K7bQ"> → </code><code class="green_K7bQ">(</code><code class="green_K7bQ">)</code><code>) → </code><code class="blue_1B1Q">Promise</code></div><div>
+<p>The same as <a href="/roblox-lua-promise/api/Promise#new">Promise.new</a>, except execution begins after the next <code>Heartbeat</code> event.</p>
+<p>This is a spiritual replacement for <code>spawn</code>, but it does not suffer from the same <a href="https://eryn.io/gist/3db84579866c099cdd5bb2ff37947cec" target="_blank">issues</a> as <code>spawn</code>.</p>
+<pre class="language-lua"><code class="language-lua"><span class="token keyword">local</span> <span class="token keyword">function</span> <span class="token function">waitForChild</span><span class="token punctuation">(</span>instance<span class="token punctuation">,</span> childName<span class="token punctuation">,</span> timeout<span class="token punctuation">)</span>
+  <span class="token keyword">return</span> Promise<span class="token punctuation">.</span><span class="token function">defer</span><span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span>resolve<span class="token punctuation">,</span> reject<span class="token punctuation">)</span>
+	<span class="token keyword">local</span> child <span class="token operator">=</span> instance<span class="token punctuation">:</span><span class="token function">WaitForChild</span><span class="token punctuation">(</span>childName<span class="token punctuation">,</span> timeout<span class="token punctuation">)</span>
+
+	<span class="token punctuation">;</span><span class="token punctuation">(</span>child <span class="token keyword">and</span> resolve <span class="token keyword">or</span> reject<span class="token punctuation">)</span><span class="token punctuation">(</span>child<span class="token punctuation">)</span>
+  <span class="token keyword">end</span><span class="token punctuation">)</span>
+<span class="token keyword">end</span>
+</code></pre>
+</div><div class="divider_wJfn"></div><h3><a aria-hidden="true" tabindex="-1" class="anchor anchor__h3 anchorWithStickyNavbar_31ik" id="resolve"></a><code style="text-decoration:none">resolve</code><a class="hash-link" href="#resolve" title="Direct link to heading">#</a></h3><div class="repositoryDetailsContainer_1YsL"><a class="sourceButton_3Nc5" href="https://github.com/evaera/roblox-lua-promise/blob/master/lib/init.lua#L378"><div class="sourceButtonText_B34l">&lt;/&gt;</div></a></div><div class="memberString_2_bn"><code>Promise.</code><code class="green_K7bQ">resolve</code><code>(</code><code>...: </code><code class="blue_1B1Q">any</code><code>) → </code><code class="blue_1B1Q">Promise&lt;...any&gt;</code></div><div>
+<p>Creates an immediately resolved Promise with the given value.</p>
+</div><div class="divider_wJfn"></div><h3><a aria-hidden="true" tabindex="-1" class="anchor anchor__h3 anchorWithStickyNavbar_31ik" id="reject"></a><code style="text-decoration:none">reject</code><a class="hash-link" href="#reject" title="Direct link to heading">#</a></h3><div class="repositoryDetailsContainer_1YsL"><a class="sourceButton_3Nc5" href="https://github.com/evaera/roblox-lua-promise/blob/master/lib/init.lua#L411"><div class="sourceButtonText_B34l">&lt;/&gt;</div></a></div><div class="memberString_2_bn"><code>Promise.</code><code class="green_K7bQ">reject</code><code>(</code><code>...: </code><code class="blue_1B1Q">any</code><code>) → </code><code class="blue_1B1Q">Promise&lt;...any&gt;</code></div><div>
+<p>Creates an immediately rejected Promise with the given value.</p>
+<div class="admonition admonition-caution alert alert--warning">
+  <div class="admonition-heading">
+    <h5><span class="admonition-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+          <path d="M8.893 1.5c-.183-.31-.52-.5-.887-.5s-.703.19-.886.5L.138 13.499a.98.98 0 0 0 0 1.001c.193.31.53.501.886.501h13.964c.367 0 .704-.19.877-.5a1.03 1.03 0 0 0 .01-1.002L8.893 1.5zm.133 11.497H6.987v-2.003h2.039v2.003zm0-3.004H6.987V5.987h2.039v4.006z"></path>
+        </svg></span>caution</h5>
+  </div>
+  <div class="admonition-content">
+    <p>Something needs to consume this rejection (i.e. <code>:catch()</code> it), otherwise it will emit an unhandled Promise rejection warning on the next frame. Thus, you should not create and store rejected Promises for later use. Only create them on-demand as needed.</p>
+  </div>
+</div>
+<pre class="language-lua"><code class="language-lua"><span class="token comment">-- Example using Promise.resolve to deliver cached values:</span>
+<span class="token keyword">function</span> <span class="token function">getSomething</span><span class="token punctuation">(</span>name<span class="token punctuation">)</span>
+	<span class="token keyword">if</span> cache<span class="token punctuation">[</span>name<span class="token punctuation">]</span> <span class="token keyword">then</span>
+		<span class="token keyword">return</span> Promise<span class="token punctuation">.</span><span class="token function">resolve</span><span class="token punctuation">(</span>cache<span class="token punctuation">[</span>name<span class="token punctuation">]</span><span class="token punctuation">)</span>
+	<span class="token keyword">else</span>
+		<span class="token keyword">return</span> Promise<span class="token punctuation">.</span><span class="token function">new</span><span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span>resolve<span class="token punctuation">,</span> reject<span class="token punctuation">)</span>
+			<span class="token keyword">local</span> thing <span class="token operator">=</span> <span class="token function">getTheThing</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+			cache<span class="token punctuation">[</span>name<span class="token punctuation">]</span> <span class="token operator">=</span> thing
+
+			<span class="token function">resolve</span><span class="token punctuation">(</span>thing<span class="token punctuation">)</span>
+		<span class="token keyword">end</span><span class="token punctuation">)</span>
+	<span class="token keyword">end</span>
+<span class="token keyword">end</span>
+</code></pre>
+</div><div class="divider_wJfn"></div><h3><a aria-hidden="true" tabindex="-1" class="anchor anchor__h3 anchorWithStickyNavbar_31ik" id="try"></a><code style="text-decoration:none">try</code><a class="hash-link" href="#try" title="Direct link to heading">#</a></h3><div class="repositoryDetailsContainer_1YsL"><a class="sourceButton_3Nc5" href="https://github.com/evaera/roblox-lua-promise/blob/master/lib/init.lua#L452"><div class="sourceButtonText_B34l">&lt;/&gt;</div></a></div><div class="memberString_2_bn"><code>Promise.</code><code class="green_K7bQ">try</code><code>(</code><code>callback: </code><code class="green_K7bQ">(</code><code>...</code><code>:</code> <code class="blue_1B1Q">any</code><code class="green_K7bQ">)</code><code class="green_K7bQ"> → </code><code class="blue_1B1Q">...any</code><code>) → </code><code class="blue_1B1Q">Promise</code></div><div>
+<p>Begins a Promise chain, calling a function and returning a Promise resolving with its return value. If the function errors, the returned Promise will be rejected with the error. You can safely yield within the Promise.try callback.</p>
+<div class="admonition admonition-info alert alert--info">
+  <div class="admonition-heading">
+    <h5><span class="admonition-icon"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="16" viewBox="0 0 14 16">
+          <path d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path>
+        </svg></span>info</h5>
+  </div>
+  <div class="admonition-content">
+    <p><code>Promise.try</code> is similar to <a href="#promisify">Promise.promisify</a>, except the callback is invoked immediately instead of returning a new function.</p>
+  </div>
+</div>
+<pre class="language-lua"><code class="language-lua">Promise<span class="token punctuation">.</span><span class="token function">try</span><span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+	<span class="token keyword">return</span> math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">1</span> <span class="token keyword">and</span> <span class="token string">"ok"</span> <span class="token keyword">or</span> <span class="token function">error</span><span class="token punctuation">(</span><span class="token string">"Oh an error!"</span><span class="token punctuation">)</span>
+<span class="token keyword">end</span><span class="token punctuation">)</span>
+	<span class="token punctuation">:</span><span class="token function">andThen</span><span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span>text<span class="token punctuation">)</span>
+		<span class="token function">print</span><span class="token punctuation">(</span>text<span class="token punctuation">)</span>
+	<span class="token keyword">end</span><span class="token punctuation">)</span>
+	<span class="token punctuation">:</span><span class="token function">catch</span><span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span>err<span class="token punctuation">)</span>
+		<span class="token function">warn</span><span class="token punctuation">(</span><span class="token string">"Something went wrong"</span><span class="token punctuation">)</span>
+	<span class="token keyword">end</span><span class="token punctuation">)</span>
+</code></pre>
+</div><div class="divider_wJfn"></div><h3><a aria-hidden="true" tabindex="-1" class="anchor anchor__h3 anchorWithStickyNavbar_31ik" id="all"></a><code style="text-decoration:none">all</code><a class="hash-link" href="#all" title="Direct link to heading">#</a></h3><div class="repositoryDetailsContainer_1YsL"><a class="sourceButton_3Nc5" href="https://github.com/evaera/roblox-lua-promise/blob/master/lib/init.lua#L569"><div class="sourceButtonText_B34l">&lt;/&gt;</div></a></div><div class="memberString_2_bn"><code>Promise.</code><code class="green_K7bQ">all</code><code>(</code><code>promises: </code><code class="blue_1B1Q">{Promise&lt;T&gt;}</code><code>) → </code><code class="blue_1B1Q">Promise&lt;{T}&gt;</code></div><div>
+<p>Accepts an array of Promises and returns a new promise that:</p>
+<ul>
+  <li>is resolved after all input promises resolve.</li>
+  <li>is rejected if <em>any</em> input promises reject.</li>
+</ul>
+<div class="admonition admonition-info alert alert--info">
+  <div class="admonition-heading">
+    <h5><span class="admonition-icon"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="16" viewBox="0 0 14 16">
+          <path d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path>
+        </svg></span>info</h5>
+  </div>
+  <div class="admonition-content">
+    <p>Only the first return value from each promise will be present in the resulting array.</p>
+  </div>
+</div>
+<p>After any input Promise rejects, all other input Promises that are still pending will be cancelled if they have no other consumers.</p>
+<pre class="language-lua"><code class="language-lua"><span class="token keyword">local</span> promises <span class="token operator">=</span> <span class="token punctuation">{</span>
+	<span class="token function">returnsAPromise</span><span class="token punctuation">(</span><span class="token string">"example 1"</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+	<span class="token function">returnsAPromise</span><span class="token punctuation">(</span><span class="token string">"example 2"</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+	<span class="token function">returnsAPromise</span><span class="token punctuation">(</span><span class="token string">"example 3"</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">return</span> Promise<span class="token punctuation">.</span><span class="token function">all</span><span class="token punctuation">(</span>promises<span class="token punctuation">)</span>
+</code></pre>
+</div><div class="divider_wJfn"></div><h3><a aria-hidden="true" tabindex="-1" class="anchor anchor__h3 anchorWithStickyNavbar_31ik" id="fold"></a><code style="text-decoration:none">fold</code><a class="hash-link" href="#fold" title="Direct link to heading">#</a></h3><div class="repositoryDetailsContainer_1YsL"><span class="releaseVersion_1J0o">since v3.1.0</span><a class="sourceButton_3Nc5" href="https://github.com/evaera/roblox-lua-promise/blob/master/lib/init.lua#L598"><div class="sourceButtonText_B34l">&lt;/&gt;</div></a></div><div class="memberString_2_bn"><code>Promise.</code><code class="green_K7bQ">fold</code><code>(</code><div class="inset_2aGl"><div><code>list: </code><code class="blue_1B1Q">{T | Promise&lt;T&gt;}</code><code>,</code></div><div><code>reducer: </code><code class="green_K7bQ">(</code><div class="inset_2aGl"><code>accumulator</code><code>:</code> <code class="blue_1B1Q">U</code><code class="green_K7bQ">,</code></div><div class="inset_2aGl"><code>value</code><code>:</code> <code class="blue_1B1Q">T</code><code class="green_K7bQ">,</code></div><div class="inset_2aGl"><code>index</code><code>:</code> <code class="blue_1B1Q">number</code></div><code class="green_K7bQ">)</code><code class="green_K7bQ"> → </code><code class="blue_1B1Q">U</code><code class="blue_1B1Q">|</code><code class="blue_1B1Q">Promise&lt;U&gt;</code><code>,</code></div><div><code>initialValue: </code><code class="blue_1B1Q">U</code></div></div><code>) → </code><code>(</code><code>)</code></div><div>
+<p>Folds an array of values or promises into a single value. The array is traversed sequentially.</p>
+<p>The reducer function can return a promise or value directly. Each iteration receives the resolved value from the previous, and the first receives your defined initial value.</p>
+<p>The folding will stop at the first rejection encountered.</p>
+<pre class="language-lua"><code class="language-lua"><span class="token keyword">local</span> basket <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token string">"blueberry"</span><span class="token punctuation">,</span> <span class="token string">"melon"</span><span class="token punctuation">,</span> <span class="token string">"pear"</span><span class="token punctuation">,</span> <span class="token string">"melon"</span><span class="token punctuation">}</span>
+Promise<span class="token punctuation">.</span><span class="token function">fold</span><span class="token punctuation">(</span>basket<span class="token punctuation">,</span> <span class="token keyword">function</span><span class="token punctuation">(</span>cost<span class="token punctuation">,</span> fruit<span class="token punctuation">)</span>
+	<span class="token keyword">if</span> fruit <span class="token operator">==</span> <span class="token string">"blueberry"</span> <span class="token keyword">then</span>
+		<span class="token keyword">return</span> cost <span class="token comment">-- blueberries are free!</span>
+	<span class="token keyword">else</span>
+		<span class="token comment">-- call a function that returns a promise with the fruit price</span>
+		<span class="token keyword">return</span> <span class="token function">fetchPrice</span><span class="token punctuation">(</span>fruit<span class="token punctuation">)</span><span class="token punctuation">:</span><span class="token function">andThen</span><span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span>fruitCost<span class="token punctuation">)</span>
+			<span class="token keyword">return</span> cost <span class="token operator">+</span> fruitCost
+		<span class="token keyword">end</span><span class="token punctuation">)</span>
+	<span class="token keyword">end</span>
+<span class="token keyword">end</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span>
+</code></pre>
+</div><div class="divider_wJfn"></div><h3><a aria-hidden="true" tabindex="-1" class="anchor anchor__h3 anchorWithStickyNavbar_31ik" id="some"></a><code style="text-decoration:none">some</code><a class="hash-link" href="#some" title="Direct link to heading">#</a></h3><div class="repositoryDetailsContainer_1YsL"><a class="sourceButton_3Nc5" href="https://github.com/evaera/roblox-lua-promise/blob/master/lib/init.lua#L629"><div class="sourceButtonText_B34l">&lt;/&gt;</div></a></div><div class="memberString_2_bn"><code>Promise.</code><code class="green_K7bQ">some</code><code>(</code><div class="inset_2aGl"><div><code>promises: </code><code class="blue_1B1Q">{Promise&lt;T&gt;}</code><code>,</code></div><div><code>count: </code><code class="blue_1B1Q">number</code></div></div><code>) → </code><code class="blue_1B1Q">Promise&lt;{T}&gt;</code></div><div>
+<p>Accepts an array of Promises and returns a Promise that is resolved as soon as <code>count</code> Promises are resolved from the input array. The resolved array values are in the order that the Promises resolved in. When this Promise resolves, all other pending Promises are cancelled if they have no other consumers.</p>
+<p><code>count</code> 0 results in an empty array. The resultant array will never have more than <code>count</code> elements.</p>
+<pre class="language-lua"><code class="language-lua"><span class="token keyword">local</span> promises <span class="token operator">=</span> <span class="token punctuation">{</span>
+	<span class="token function">returnsAPromise</span><span class="token punctuation">(</span><span class="token string">"example 1"</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+	<span class="token function">returnsAPromise</span><span class="token punctuation">(</span><span class="token string">"example 2"</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+	<span class="token function">returnsAPromise</span><span class="token punctuation">(</span><span class="token string">"example 3"</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">return</span> Promise<span class="token punctuation">.</span><span class="token function">some</span><span class="token punctuation">(</span>promises<span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span> <span class="token comment">-- Only resolves with first 2 promises to resolve</span>
+</code></pre>
+</div><div class="divider_wJfn"></div><h3><a aria-hidden="true" tabindex="-1" class="anchor anchor__h3 anchorWithStickyNavbar_31ik" id="any"></a><code style="text-decoration:none">any</code><a class="hash-link" href="#any" title="Direct link to heading">#</a></h3><div class="repositoryDetailsContainer_1YsL"><a class="sourceButton_3Nc5" href="https://github.com/evaera/roblox-lua-promise/blob/master/lib/init.lua#L653"><div class="sourceButtonText_B34l">&lt;/&gt;</div></a></div><div class="memberString_2_bn"><code>Promise.</code><code class="green_K7bQ">any</code><code>(</code><code>promises: </code><code class="blue_1B1Q">{Promise&lt;T&gt;}</code><code>) → </code><code class="blue_1B1Q">Promise&lt;T&gt;</code></div><div>
+<p>Accepts an array of Promises and returns a Promise that is resolved as soon as <em>any</em> of the input Promises resolves. It will reject only if <em>all</em> input Promises reject. As soon as one Promises resolves, all other pending Promises are cancelled if they have no other consumers.</p>
+<p>Resolves directly with the value of the first resolved Promise. This is essentially [[Promise.some]] with <code>1</code> count, except the Promise resolves with the value directly instead of an array with one element.</p>
+<pre class="language-lua"><code class="language-lua"><span class="token keyword">local</span> promises <span class="token operator">=</span> <span class="token punctuation">{</span>
+	<span class="token function">returnsAPromise</span><span class="token punctuation">(</span><span class="token string">"example 1"</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+	<span class="token function">returnsAPromise</span><span class="token punctuation">(</span><span class="token string">"example 2"</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+	<span class="token function">returnsAPromise</span><span class="token punctuation">(</span><span class="token string">"example 3"</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">return</span> Promise<span class="token punctuation">.</span><span class="token function">any</span><span class="token punctuation">(</span>promises<span class="token punctuation">)</span> <span class="token comment">-- Resolves with first value to resolve (only rejects if all 3 rejected)</span>
+</code></pre>
+</div><div class="divider_wJfn"></div><h3><a aria-hidden="true" tabindex="-1" class="anchor anchor__h3 anchorWithStickyNavbar_31ik" id="allSettled"></a><code style="text-decoration:none">allSettled</code><a class="hash-link" href="#allSettled" title="Direct link to heading">#</a></h3><div class="repositoryDetailsContainer_1YsL"><a class="sourceButton_3Nc5" href="https://github.com/evaera/roblox-lua-promise/blob/master/lib/init.lua#L675"><div class="sourceButtonText_B34l">&lt;/&gt;</div></a></div><div class="memberString_2_bn"><code>Promise.</code><code class="green_K7bQ">allSettled</code><code>(</code><code>promises: </code><code class="blue_1B1Q">{Promise&lt;T&gt;}</code><code>) → </code><code class="blue_1B1Q">Promise&lt;{Status}&gt;</code></div><div>
+<p>Accepts an array of Promises and returns a new Promise that resolves with an array of in-place Statuses when all input Promises have settled. This is equivalent to mapping <code>promise:finally</code> over the array of Promises.</p>
+<pre class="language-lua"><code class="language-lua"><span class="token keyword">local</span> promises <span class="token operator">=</span> <span class="token punctuation">{</span>
+	<span class="token function">returnsAPromise</span><span class="token punctuation">(</span><span class="token string">"example 1"</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+	<span class="token function">returnsAPromise</span><span class="token punctuation">(</span><span class="token string">"example 2"</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+	<span class="token function">returnsAPromise</span><span class="token punctuation">(</span><span class="token string">"example 3"</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">return</span> Promise<span class="token punctuation">.</span><span class="token function">allSettled</span><span class="token punctuation">(</span>promises<span class="token punctuation">)</span>
+</code></pre>
+</div><div class="divider_wJfn"></div><h3><a aria-hidden="true" tabindex="-1" class="anchor anchor__h3 anchorWithStickyNavbar_31ik" id="race"></a><code style="text-decoration:none">race</code><a class="hash-link" href="#race" title="Direct link to heading">#</a></h3><div class="repositoryDetailsContainer_1YsL"><a class="sourceButton_3Nc5" href="https://github.com/evaera/roblox-lua-promise/blob/master/lib/init.lua#L755"><div class="sourceButtonText_B34l">&lt;/&gt;</div></a></div><div class="memberString_2_bn"><code>Promise.</code><code class="green_K7bQ">race</code><code>(</code><code>promises:: </code><code class="blue_1B1Q">{Promise&lt;T&gt;}</code><code>) → </code><code class="blue_1B1Q">Promise&lt;T&gt;</code></div><div>
+<p>Accepts an array of Promises and returns a new promise that is resolved or rejected as soon as any Promise in the array resolves or rejects.</p>
+<div class="admonition admonition-warning alert alert--danger">
+  <div class="admonition-heading">
+    <h5><span class="admonition-icon"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="16" viewBox="0 0 12 16">
+          <path d="M5.05.31c.81 2.17.41 3.38-.52 4.31C3.55 5.67 1.98 6.45.9 7.98c-1.45 2.05-1.7 6.53 3.53 7.7-2.2-1.16-2.67-4.52-.3-6.61-.61 2.03.53 3.33 1.94 2.86 1.39-.47 2.3.53 2.27 1.67-.02.78-.31 1.44-1.13 1.81 3.42-.59 4.78-3.42 4.78-5.56 0-2.84-2.53-3.22-1.25-5.61-1.52.13-2.03 1.13-1.89 2.75.09 1.08-1.02 1.8-1.86 1.33-.67-.41-.66-1.19-.06-1.78C8.18 5.31 8.68 2.45 5.05.32L5.03.3l.02.01z"></path>
+        </svg></span>warning</h5>
+  </div>
+  <div class="admonition-content">
+    <p>If the first Promise to settle from the array settles with a rejection, the resulting Promise from <code>race</code> will reject.</p>
+    <p>If you instead want to tolerate rejections, and only care about at least one Promise resolving, you should use <a href="#any">Promise.any</a> or <a href="#some">Promise.some</a> instead.</p>
+  </div>
+</div>
+<p>All other Promises that don't win the race will be cancelled if they have no other consumers.</p>
+<pre class="language-lua"><code class="language-lua"><span class="token keyword">local</span> promises <span class="token operator">=</span> <span class="token punctuation">{</span>
+	<span class="token function">returnsAPromise</span><span class="token punctuation">(</span><span class="token string">"example 1"</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+	<span class="token function">returnsAPromise</span><span class="token punctuation">(</span><span class="token string">"example 2"</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+	<span class="token function">returnsAPromise</span><span class="token punctuation">(</span><span class="token string">"example 3"</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">return</span> Promise<span class="token punctuation">.</span><span class="token function">race</span><span class="token punctuation">(</span>promises<span class="token punctuation">)</span> <span class="token comment">-- Only returns 1st value to resolve or reject</span>
+</code></pre>
+</div><div class="divider_wJfn"></div><h3><a aria-hidden="true" tabindex="-1" class="anchor anchor__h3 anchorWithStickyNavbar_31ik" id="each"></a><code style="text-decoration:none">each</code><a class="hash-link" href="#each" title="Direct link to heading">#</a></h3><div class="repositoryDetailsContainer_1YsL"><span class="releaseVersion_1J0o">since 3.0.0</span><a class="sourceButton_3Nc5" href="https://github.com/evaera/roblox-lua-promise/blob/master/lib/init.lua#L850"><div class="sourceButtonText_B34l">&lt;/&gt;</div></a></div><div class="memberString_2_bn"><code>Promise.</code><code class="green_K7bQ">each</code><code>(</code><div class="inset_2aGl"><div><code>list: </code><code class="blue_1B1Q">{T | Promise&lt;T&gt;}</code><code>,</code></div><div><code>predicate: </code><code class="green_K7bQ">(</code><div class="inset_2aGl"><code>value</code><code>:</code> <code class="blue_1B1Q">T</code><code class="green_K7bQ">,</code></div><div class="inset_2aGl"><code>index</code><code>:</code> <code class="blue_1B1Q">number</code></div><code class="green_K7bQ">)</code><code class="green_K7bQ"> → </code><code class="blue_1B1Q">U</code><code class="blue_1B1Q">|</code><code class="blue_1B1Q">Promise&lt;U&gt;</code></div></div><code>) → </code><code class="blue_1B1Q">Promise&lt;{U}&gt;</code></div><div>
+<p>Iterates serially over the given an array of values, calling the predicate callback on each value before continuing.</p>
+<p>
+  If the predicate returns a Promise, we wait for that Promise to resolve before moving on to the next item
+  in the array.
+</p>
+<div class="admonition admonition-info alert alert--info">
+  <div class="admonition-heading">
+    <h5><span class="admonition-icon"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="16" viewBox="0 0 14 16">
+          <path d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path>
+        </svg></span>info</h5>
+  </div>
+  <div class="admonition-content">
+    <p><code>Promise.each</code> is similar to <code>Promise.all</code>, except the Promises are ran in order instead of all at once.</p>
+    <p>But because Promises are eager, by the time they are created, they're already running. Thus, we need a way to defer creation of each Promise until a later time.</p>
+    <p>The predicate function exists as a way for us to operate on our data instead of creating a new closure for each Promise. If you would prefer, you can pass in an array of functions, and in the predicate, call the function and return its return value.</p>
+  </div>
+</div>
+<pre class="language-lua"><code class="language-lua">Promise<span class="token punctuation">.</span><span class="token function">each</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+	<span class="token string">"foo"</span><span class="token punctuation">,</span>
+	<span class="token string">"bar"</span><span class="token punctuation">,</span>
+	<span class="token string">"baz"</span><span class="token punctuation">,</span>
+	<span class="token string">"qux"</span>
+<span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token keyword">function</span><span class="token punctuation">(</span>value<span class="token punctuation">,</span> index<span class="token punctuation">)</span>
+	<span class="token keyword">return</span> Promise<span class="token punctuation">.</span><span class="token function">delay</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">:</span><span class="token function">andThen</span><span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+	<span class="token function">print</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token string">"%d) Got %s!"</span><span class="token punctuation">)</span><span class="token punctuation">:</span><span class="token function">format</span><span class="token punctuation">(</span>index<span class="token punctuation">,</span> value<span class="token punctuation">)</span><span class="token punctuation">)</span>
+	<span class="token keyword">end</span><span class="token punctuation">)</span>
+<span class="token keyword">end</span><span class="token punctuation">)</span>
+
+<span class="token comment">--[[
+	(1 second passes)
+	> 1) Got foo!
+	(1 second passes)
+	> 2) Got bar!
+	(1 second passes)
+	> 3) Got baz!
+	(1 second passes)
+	> 4) Got qux!
+]]</span>
+</code></pre>
+<p>If the Promise a predicate returns rejects, the Promise from <code>Promise.each</code> is also rejected with the same value.</p>
+<p>If the array of values contains a Promise, when we get to that point in the list, we wait for the Promise to resolve before calling the predicate with the value.</p>
+<p>If a Promise in the array of values is already Rejected when <code>Promise.each</code> is called, <code>Promise.each</code> rejects with that value immediately (the predicate callback will never be called even once). If a Promise in the list is already Cancelled when <code>Promise.each</code> is called, <code>Promise.each</code> rejects with <code>Promise.Error(Promise.Error.Kind.AlreadyCancelled</code>). If a Promise in the array of values is Started at first, but later rejects, <code>Promise.each</code> will reject with that value and iteration will not continue once iteration encounters that value.</p>
+<p>Returns a Promise containing an array of the returned/resolved values from the predicate for each item in the array of values.</p>
+<p>If this Promise returned from <code>Promise.each</code> rejects or is cancelled for any reason, the following are true:</p>
+<ul>
+  <li>Iteration will not continue.</li>
+  <li>Any Promises within the array of values will now be cancelled if they have no other consumers.</li>
+  <li>The Promise returned from the currently active predicate will be cancelled if it hasn't resolved yet.</li>
+</ul>
+</div><div class="divider_wJfn"></div><h3><a aria-hidden="true" tabindex="-1" class="anchor anchor__h3 anchorWithStickyNavbar_31ik" id="is"></a><code style="text-decoration:none">is</code><a class="hash-link" href="#is" title="Direct link to heading">#</a></h3><div class="repositoryDetailsContainer_1YsL"><a class="sourceButton_3Nc5" href="https://github.com/evaera/roblox-lua-promise/blob/master/lib/init.lua#L949"><div class="sourceButtonText_B34l">&lt;/&gt;</div></a></div><div class="memberString_2_bn"><code>Promise.</code><code class="green_K7bQ">is</code><code>(</code><code>object: </code><code class="blue_1B1Q">any</code><code>) → </code><code class="blue_1B1Q">boolean</code><span class="inlineDescription_30X9">-- <span>
+<p><code>true</code> if the given <code>object</code> is a Promise.</p>
+</span></span></div><div>
+<p>Checks whether the given object is a Promise via duck typing. This only checks if the object is a table and has an <code>andThen</code> method.</p>
+</div><div class="divider_wJfn"></div><h3><a aria-hidden="true" tabindex="-1" class="anchor anchor__h3 anchorWithStickyNavbar_31ik" id="promisify"></a><code style="text-decoration:none">promisify</code><a class="hash-link" href="#promisify" title="Direct link to heading">#</a></h3><div class="repositoryDetailsContainer_1YsL"><a class="sourceButton_3Nc5" href="https://github.com/evaera/roblox-lua-promise/blob/master/lib/init.lua#L998"><div class="sourceButtonText_B34l">&lt;/&gt;</div></a></div><div class="memberString_2_bn"><code>Promise.</code><code class="green_K7bQ">promisify</code><code>(</code><code>callback: </code><code class="green_K7bQ">(</code><code>...</code><code>:</code> <code class="blue_1B1Q">any</code><code class="green_K7bQ">)</code><code class="green_K7bQ"> → </code><code class="blue_1B1Q">...any</code><code>) → </code><code class="green_K7bQ">(</code><code>...</code><code>:</code> <code class="blue_1B1Q">any</code><code class="green_K7bQ">)</code><code class="green_K7bQ"> → </code><code class="blue_1B1Q">Promise</code></div><div>
+<p>Wraps a function that yields into one that returns a Promise.</p>
+<p>Any errors that occur while executing the function will be turned into rejections.</p>
+<div class="admonition admonition-info alert alert--info">
+  <div class="admonition-heading">
+    <h5><span class="admonition-icon"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="16" viewBox="0 0 14 16">
+          <path d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path>
+        </svg></span>info</h5>
+  </div>
+  <div class="admonition-content">
+    <p><code>Promise.promisify</code> is similar to <a href="#try">Promise.try</a>, except the callback is returned as a callable function instead of being invoked immediately.</p>
+  </div>
+</div>
+<pre class="language-lua"><code class="language-lua"><span class="token keyword">local</span> sleep <span class="token operator">=</span> Promise<span class="token punctuation">.</span><span class="token function">promisify</span><span class="token punctuation">(</span>wait<span class="token punctuation">)</span>
+
+<span class="token function">sleep</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">:</span><span class="token function">andThen</span><span class="token punctuation">(</span>print<span class="token punctuation">)</span>
+</code></pre>
+<pre class="language-lua"><code class="language-lua"><span class="token keyword">local</span> isPlayerInGroup <span class="token operator">=</span> Promise<span class="token punctuation">.</span><span class="token function">promisify</span><span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span>player<span class="token punctuation">,</span> groupId<span class="token punctuation">)</span>
+	<span class="token keyword">return</span> player<span class="token punctuation">:</span><span class="token function">IsInGroup</span><span class="token punctuation">(</span>groupId<span class="token punctuation">)</span>
+<span class="token keyword">end</span><span class="token punctuation">)</span>
+</code></pre>
+</div><div class="divider_wJfn"></div><h3><a aria-hidden="true" tabindex="-1" class="anchor anchor__h3 anchorWithStickyNavbar_31ik" id="delay"></a><code style="text-decoration:none">delay</code><a class="hash-link" href="#delay" title="Direct link to heading">#</a></h3><div class="repositoryDetailsContainer_1YsL"><a class="sourceButton_3Nc5" href="https://github.com/evaera/roblox-lua-promise/blob/master/lib/init.lua#L1022"><div class="sourceButtonText_B34l">&lt;/&gt;</div></a></div><div class="memberString_2_bn"><code>Promise.</code><code class="green_K7bQ">delay</code><code>(</code><code>seconds: </code><code class="blue_1B1Q">number</code><code>) → </code><code class="blue_1B1Q">Promise&lt;number&gt;</code></div><div>
+<p>Returns a Promise that resolves after <code>seconds</code> seconds have passed. The Promise resolves with the actual amount of time that was waited.</p>
+<p>This function is <strong>not</strong> a wrapper around <code>wait</code>. <code>Promise.delay</code> uses a custom scheduler which provides more accurate timing. As an optimization, cancelling this Promise instantly removes the task from the scheduler.</p>
+<div class="admonition admonition-warning alert alert--danger">
+  <div class="admonition-heading">
+    <h5><span class="admonition-icon"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="16" viewBox="0 0 12 16">
+          <path d="M5.05.31c.81 2.17.41 3.38-.52 4.31C3.55 5.67 1.98 6.45.9 7.98c-1.45 2.05-1.7 6.53 3.53 7.7-2.2-1.16-2.67-4.52-.3-6.61-.61 2.03.53 3.33 1.94 2.86 1.39-.47 2.3.53 2.27 1.67-.02.78-.31 1.44-1.13 1.81 3.42-.59 4.78-3.42 4.78-5.56 0-2.84-2.53-3.22-1.25-5.61-1.52.13-2.03 1.13-1.89 2.75.09 1.08-1.02 1.8-1.86 1.33-.67-.41-.66-1.19-.06-1.78C8.18 5.31 8.68 2.45 5.05.32L5.03.3l.02.01z"></path>
+        </svg></span>warning</h5>
+  </div>
+  <div class="admonition-content">
+    <p>Passing <code>NaN</code>, infinity, or a number less than 1/60 is equivalent to passing 1/60.</p>
+  </div>
+</div>
+<pre class="language-lua"><code class="language-lua">	Promise<span class="token punctuation">.</span><span class="token function">delay</span><span class="token punctuation">(</span><span class="token number">5</span><span class="token punctuation">)</span><span class="token punctuation">:</span><span class="token function">andThenCall</span><span class="token punctuation">(</span>print<span class="token punctuation">,</span> <span class="token string">"This prints after 5 seconds"</span><span class="token punctuation">)</span>
+</code></pre>
+</div><div class="divider_wJfn"></div><h3><a aria-hidden="true" tabindex="-1" class="anchor anchor__h3 anchorWithStickyNavbar_31ik" id="timeout"></a><code style="text-decoration:none">timeout</code><a class="hash-link" href="#timeout" title="Direct link to heading">#</a></h3><div class="repositoryDetailsContainer_1YsL"><a class="sourceButton_3Nc5" href="https://github.com/evaera/roblox-lua-promise/blob/master/lib/init.lua#L1158"><div class="sourceButtonText_B34l">&lt;/&gt;</div></a></div><div class="memberString_2_bn"><code>Promise:</code><code class="green_K7bQ">timeout</code><code>(</code><div class="inset_2aGl"><div><code>seconds: </code><code class="blue_1B1Q">number</code><code>,</code></div><div><code>rejectionValue?: </code><code class="blue_1B1Q">any</code><span class="inlineDescription_30X9">-- <span>
+<p>The value to reject with if the timeout is reached</p>
+</span></span></div></div><code>) → </code><code class="blue_1B1Q">Promise</code></div><div>
+<p>Returns a new Promise that resolves if the chained Promise resolves within <code>seconds</code> seconds, or rejects if execution time exceeds <code>seconds</code>. The chained Promise will be cancelled if the timeout is reached.</p>
+<p>Rejects with <code>rejectionValue</code> if it is non-nil. If a <code>rejectionValue</code> is not given, it will reject with a <code>Promise.Error(Promise.Error.Kind.TimedOut)</code>. This can be checked with [[Error.isKind]].</p>
+<pre class="language-lua"><code class="language-lua"><span class="token function">getSomething</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span><span class="token function">timeout</span><span class="token punctuation">(</span><span class="token number">5</span><span class="token punctuation">)</span><span class="token punctuation">:</span><span class="token function">andThen</span><span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span>something<span class="token punctuation">)</span>
+	<span class="token comment">-- got something and it only took at max 5 seconds</span>
+<span class="token keyword">end</span><span class="token punctuation">)</span><span class="token punctuation">:</span><span class="token function">catch</span><span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span>e<span class="token punctuation">)</span>
+	<span class="token comment">-- Either getting something failed or the time was exceeded.</span>
+
+	<span class="token keyword">if</span> Promise<span class="token punctuation">.</span>Error<span class="token punctuation">.</span><span class="token function">isKind</span><span class="token punctuation">(</span>e<span class="token punctuation">,</span> Promise<span class="token punctuation">.</span>Error<span class="token punctuation">.</span>Kind<span class="token punctuation">.</span>TimedOut<span class="token punctuation">)</span> <span class="token keyword">then</span>
+		<span class="token function">warn</span><span class="token punctuation">(</span><span class="token string">"Operation timed out!"</span><span class="token punctuation">)</span>
+	<span class="token keyword">else</span>
+		<span class="token function">warn</span><span class="token punctuation">(</span><span class="token string">"Operation encountered an error!"</span><span class="token punctuation">)</span>
+	<span class="token keyword">end</span>
+<span class="token keyword">end</span><span class="token punctuation">)</span>
+</code></pre>
+<p>Sugar for:</p>
+<pre class="language-lua"><code class="language-lua">Promise<span class="token punctuation">.</span><span class="token function">race</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+	Promise<span class="token punctuation">.</span><span class="token function">delay</span><span class="token punctuation">(</span>seconds<span class="token punctuation">)</span><span class="token punctuation">:</span><span class="token function">andThen</span><span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+		<span class="token keyword">return</span> Promise<span class="token punctuation">.</span><span class="token function">reject</span><span class="token punctuation">(</span>
+			rejectionValue <span class="token operator">==</span> <span class="token keyword">nil</span>
+			<span class="token keyword">and</span> Promise<span class="token punctuation">.</span>Error<span class="token punctuation">.</span><span class="token function">new</span><span class="token punctuation">(</span><span class="token punctuation">{</span> kind <span class="token operator">=</span> Promise<span class="token punctuation">.</span>Error<span class="token punctuation">.</span>Kind<span class="token punctuation">.</span>TimedOut <span class="token punctuation">}</span><span class="token punctuation">)</span>
+			<span class="token keyword">or</span> rejectionValue
+		<span class="token punctuation">)</span>
+	<span class="token keyword">end</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+	promise
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+</code></pre>
+</div><div class="divider_wJfn"></div><h3><a aria-hidden="true" tabindex="-1" class="anchor anchor__h3 anchorWithStickyNavbar_31ik" id="getStatus"></a><code style="text-decoration:none">getStatus</code><a class="hash-link" href="#getStatus" title="Direct link to heading">#</a></h3><div class="repositoryDetailsContainer_1YsL"><a class="sourceButton_3Nc5" href="https://github.com/evaera/roblox-lua-promise/blob/master/lib/init.lua#L1182"><div class="sourceButtonText_B34l">&lt;/&gt;</div></a></div><div class="memberString_2_bn"><code>Promise:</code><code class="green_K7bQ">getStatus</code><code>(</code><code>) → </code><code class="blue_1B1Q">Status</code></div><div>
+<p>Returns the current Promise status.</p>
+</div><div class="divider_wJfn"></div><h3><a aria-hidden="true" tabindex="-1" class="anchor anchor__h3 anchorWithStickyNavbar_31ik" id="andThen"></a><code style="text-decoration:none">andThen</code><a class="hash-link" href="#andThen" title="Direct link to heading">#</a></h3><div class="repositoryDetailsContainer_1YsL"><a class="sourceButton_3Nc5" href="https://github.com/evaera/roblox-lua-promise/blob/master/lib/init.lua#L1254"><div class="sourceButtonText_B34l">&lt;/&gt;</div></a></div><div class="memberString_2_bn"><code>Promise:</code><code class="green_K7bQ">andThen</code><code>(</code><div class="inset_2aGl"><div><code>successHandler: </code><code class="green_K7bQ">(</code><code>...</code><code>:</code> <code class="blue_1B1Q">any</code><code class="green_K7bQ">)</code><code class="green_K7bQ"> → </code><code class="blue_1B1Q">...any</code><code>,</code></div><div><code>failureHandler?: </code><code class="green_K7bQ">(</code><code>...</code><code>:</code> <code class="blue_1B1Q">any</code><code class="green_K7bQ">)</code><code class="green_K7bQ"> → </code><code class="blue_1B1Q">...any</code></div></div><code>) → </code><code class="blue_1B1Q">Promise&lt;...any&gt;</code></div><div>
+<p>Chains onto an existing Promise and returns a new Promise.</p>
+<div class="admonition admonition-warning alert alert--danger">
+  <div class="admonition-heading">
+    <h5><span class="admonition-icon"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="16" viewBox="0 0 12 16">
+          <path d="M5.05.31c.81 2.17.41 3.38-.52 4.31C3.55 5.67 1.98 6.45.9 7.98c-1.45 2.05-1.7 6.53 3.53 7.7-2.2-1.16-2.67-4.52-.3-6.61-.61 2.03.53 3.33 1.94 2.86 1.39-.47 2.3.53 2.27 1.67-.02.78-.31 1.44-1.13 1.81 3.42-.59 4.78-3.42 4.78-5.56 0-2.84-2.53-3.22-1.25-5.61-1.52.13-2.03 1.13-1.89 2.75.09 1.08-1.02 1.8-1.86 1.33-.67-.41-.66-1.19-.06-1.78C8.18 5.31 8.68 2.45 5.05.32L5.03.3l.02.01z"></path>
+        </svg></span>warning</h5>
+  </div>
+  <div class="admonition-content">
+    <p>Within the failure handler, you should never assume that the rejection value is a string. Some rejections within the Promise library are represented by [[Error]] objects. If you want to treat it as a string for debugging, you should call <code>tostring</code> on it first.</p>
+  </div>
+</div>
+<p>Return a Promise from the success or failure handler and it will be chained onto.</p>
+</div><div class="divider_wJfn"></div><h3><a aria-hidden="true" tabindex="-1" class="anchor anchor__h3 anchorWithStickyNavbar_31ik" id="catch"></a><code style="text-decoration:none">catch</code><a class="hash-link" href="#catch" title="Direct link to heading">#</a></h3><div class="repositoryDetailsContainer_1YsL"><a class="sourceButton_3Nc5" href="https://github.com/evaera/roblox-lua-promise/blob/master/lib/init.lua#L1280"><div class="sourceButtonText_B34l">&lt;/&gt;</div></a></div><div class="memberString_2_bn"><code>Promise:</code><code class="green_K7bQ">catch</code><code>(</code><code>failureHandler: </code><code class="green_K7bQ">(</code><code>...</code><code>:</code> <code class="blue_1B1Q">any</code><code class="green_K7bQ">)</code><code class="green_K7bQ"> → </code><code class="blue_1B1Q">...any</code><code>) → </code><code class="blue_1B1Q">Promise&lt;...any&gt;</code></div><div>
+<p>Shorthand for <code>Promise:andThen(nil, failureHandler)</code>.</p>
+<p>Returns a Promise that resolves if the <code>failureHandler</code> worked without encountering an additional error.</p>
+<div class="admonition admonition-warning alert alert--danger">
+  <div class="admonition-heading">
+    <h5><span class="admonition-icon"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="16" viewBox="0 0 12 16">
+          <path d="M5.05.31c.81 2.17.41 3.38-.52 4.31C3.55 5.67 1.98 6.45.9 7.98c-1.45 2.05-1.7 6.53 3.53 7.7-2.2-1.16-2.67-4.52-.3-6.61-.61 2.03.53 3.33 1.94 2.86 1.39-.47 2.3.53 2.27 1.67-.02.78-.31 1.44-1.13 1.81 3.42-.59 4.78-3.42 4.78-5.56 0-2.84-2.53-3.22-1.25-5.61-1.52.13-2.03 1.13-1.89 2.75.09 1.08-1.02 1.8-1.86 1.33-.67-.41-.66-1.19-.06-1.78C8.18 5.31 8.68 2.45 5.05.32L5.03.3l.02.01z"></path>
+        </svg></span>warning</h5>
+  </div>
+  <div class="admonition-content">
+    <p>Within the failure handler, you should never assume that the rejection value is a string. Some rejections within the Promise library are represented by [[Error]] objects. If you want to treat it as a string for debugging, you should call <code>tostring</code> on it first.</p>
+  </div>
+</div>
+</div><div class="divider_wJfn"></div><h3><a aria-hidden="true" tabindex="-1" class="anchor anchor__h3 anchorWithStickyNavbar_31ik" id="tap"></a><code style="text-decoration:none">tap</code><a class="hash-link" href="#tap" title="Direct link to heading">#</a></h3><div class="repositoryDetailsContainer_1YsL"><a class="sourceButton_3Nc5" href="https://github.com/evaera/roblox-lua-promise/blob/master/lib/init.lua#L1304"><div class="sourceButtonText_B34l">&lt;/&gt;</div></a></div><div class="memberString_2_bn"><code>Promise:</code><code class="green_K7bQ">tap</code><code>(</code><code>tapHandler: </code><code class="green_K7bQ">(</code><code>...</code><code>:</code> <code class="blue_1B1Q">any</code><code class="green_K7bQ">)</code><code class="green_K7bQ"> → </code><code class="blue_1B1Q">...any</code><code>) → </code><code class="blue_1B1Q">Promise&lt;...any&gt;</code></div><div>
+<p>Similar to <a href="#andThen">Promise.andThen</a>, except the return value is the same as the value passed to the handler. In other words, you can insert a <code>:tap</code> into a Promise chain without affecting the value that downstream Promises receive.</p>
+<pre class="language-lua"><code class="language-lua">	<span class="token function">getTheValue</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+	<span class="token punctuation">:</span><span class="token function">tap</span><span class="token punctuation">(</span>print<span class="token punctuation">)</span>
+	<span class="token punctuation">:</span><span class="token function">andThen</span><span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span>theValue<span class="token punctuation">)</span>
+		<span class="token function">print</span><span class="token punctuation">(</span><span class="token string">"Got"</span><span class="token punctuation">,</span> theValue<span class="token punctuation">,</span> <span class="token string">"even though print returns nil!"</span><span class="token punctuation">)</span>
+	<span class="token keyword">end</span><span class="token punctuation">)</span>
+</code></pre>
+<p>If you return a Promise from the tap handler callback, its value will be discarded but <code>tap</code> will still wait until it resolves before passing the original value through.</p>
+</div><div class="divider_wJfn"></div><h3><a aria-hidden="true" tabindex="-1" class="anchor anchor__h3 anchorWithStickyNavbar_31ik" id="andThenCall"></a><code style="text-decoration:none">andThenCall</code><a class="hash-link" href="#andThenCall" title="Direct link to heading">#</a></h3><div class="repositoryDetailsContainer_1YsL"><a class="sourceButton_3Nc5" href="https://github.com/evaera/roblox-lua-promise/blob/master/lib/init.lua#L1339"><div class="sourceButtonText_B34l">&lt;/&gt;</div></a></div><div class="memberString_2_bn"><code>Promise:</code><code class="green_K7bQ">andThenCall</code><code>(</code><div class="inset_2aGl"><div><code>callback: </code><code class="green_K7bQ">(</code><code>...</code><code>:</code> <code class="blue_1B1Q">any</code><code class="green_K7bQ">)</code><code class="green_K7bQ"> → </code><code class="blue_1B1Q">any</code><code>,</code></div><div><code>...?: </code><code class="blue_1B1Q">any</code><span class="inlineDescription_30X9">-- <span>
+<p>Additional arguments which will be passed to <code>callback</code></p>
+</span></span></div></div><code>) → </code><code class="blue_1B1Q">Promise</code></div><div>
+<p>Attaches an <code>andThen</code> handler to this Promise that calls the given callback with the predefined arguments. The resolved value is discarded.</p>
+<pre class="language-lua"><code class="language-lua">	promise<span class="token punctuation">:</span><span class="token function">andThenCall</span><span class="token punctuation">(</span>someFunction<span class="token punctuation">,</span> <span class="token string">"some"</span><span class="token punctuation">,</span> <span class="token string">"arguments"</span><span class="token punctuation">)</span>
+</code></pre>
+<p>This is sugar for</p>
+<pre class="language-lua"><code class="language-lua">	promise<span class="token punctuation">:</span><span class="token function">andThen</span><span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+	<span class="token keyword">return</span> <span class="token function">someFunction</span><span class="token punctuation">(</span><span class="token string">"some"</span><span class="token punctuation">,</span> <span class="token string">"arguments"</span><span class="token punctuation">)</span>
+	<span class="token keyword">end</span><span class="token punctuation">)</span>
+</code></pre>
+</div><div class="divider_wJfn"></div><h3><a aria-hidden="true" tabindex="-1" class="anchor anchor__h3 anchorWithStickyNavbar_31ik" id="andThenReturn"></a><code style="text-decoration:none">andThenReturn</code><a class="hash-link" href="#andThenReturn" title="Direct link to heading">#</a></h3><div class="repositoryDetailsContainer_1YsL"><a class="sourceButton_3Nc5" href="https://github.com/evaera/roblox-lua-promise/blob/master/lib/init.lua#L1369"><div class="sourceButtonText_B34l">&lt;/&gt;</div></a></div><div class="memberString_2_bn"><code>Promise:</code><code class="green_K7bQ">andThenReturn</code><code>(</code><div class="inset_2aGl"><div><code>...: </code><code class="blue_1B1Q">any</code><span class="inlineDescription_30X9">-- <span>
+<p>Values to return from the function</p>
+</span></span></div></div><code>) → </code><code class="blue_1B1Q">Promise</code></div><div>
+<p>Attaches an <code>andThen</code> handler to this Promise that discards the resolved value and returns the given value from it.</p>
+<pre class="language-lua"><code class="language-lua">	promise<span class="token punctuation">:</span><span class="token function">andThenReturn</span><span class="token punctuation">(</span><span class="token string">"some"</span><span class="token punctuation">,</span> <span class="token string">"values"</span><span class="token punctuation">)</span>
+</code></pre>
+<p>This is sugar for</p>
+<pre class="language-lua"><code class="language-lua">	promise<span class="token punctuation">:</span><span class="token function">andThen</span><span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+		<span class="token keyword">return</span> <span class="token string">"some"</span><span class="token punctuation">,</span> <span class="token string">"values"</span>
+	<span class="token keyword">end</span><span class="token punctuation">)</span>
+</code></pre>
+<div class="admonition admonition-caution alert alert--warning">
+  <div class="admonition-heading">
+    <h5><span class="admonition-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+          <path d="M8.893 1.5c-.183-.31-.52-.5-.887-.5s-.703.19-.886.5L.138 13.499a.98.98 0 0 0 0 1.001c.193.31.53.501.886.501h13.964c.367 0 .704-.19.877-.5a1.03 1.03 0 0 0 .01-1.002L8.893 1.5zm.133 11.497H6.987v-2.003h2.039v2.003zm0-3.004H6.987V5.987h2.039v4.006z"></path>
+        </svg></span>caution</h5>
+  </div>
+  <div class="admonition-content">
+    <p>Promises are eager, so if you pass a Promise to <code>andThenReturn</code>, it will begin executing before <code>andThenReturn</code> is reached in the chain. Likewise, if you pass a Promise created from [[Promise.reject]] into <code>andThenReturn</code>, it's possible that this will trigger the unhandled rejection warning. If you need to return a Promise, it's usually best practice to use [[Promise.andThen]].</p>
+  </div>
+</div>
+</div><div class="divider_wJfn"></div><h3><a aria-hidden="true" tabindex="-1" class="anchor anchor__h3 anchorWithStickyNavbar_31ik" id="cancel"></a><code style="text-decoration:none">cancel</code><a class="hash-link" href="#cancel" title="Direct link to heading">#</a></h3><div class="repositoryDetailsContainer_1YsL"><a class="sourceButton_3Nc5" href="https://github.com/evaera/roblox-lua-promise/blob/master/lib/init.lua#L1387"><div class="sourceButtonText_B34l">&lt;/&gt;</div></a></div><div class="memberString_2_bn"><code>Promise:</code><code class="green_K7bQ">cancel</code><code>(</code><code>) → </code><code>(</code><code>)</code></div><div>
+<p>Cancels this promise, preventing the promise from resolving or rejecting. Does not do anything if the promise is already settled.</p>
+<p>Cancellations will propagate upwards and downwards through chained promises.</p>
+<p>Promises will only be cancelled if all of their consumers are also cancelled. This is to say that if you call <code>andThen</code> twice on the same promise, and you cancel only one of the child promises, it will not cancel the parent promise until the other child promise is also cancelled.</p>
+<pre class="language-lua"><code class="language-lua">	promise<span class="token punctuation">:</span><span class="token function">cancel</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+</code></pre>
+</div><div class="divider_wJfn"></div><h3><a aria-hidden="true" tabindex="-1" class="anchor anchor__h3 anchorWithStickyNavbar_31ik" id="finally"></a><code style="text-decoration:none">finally</code><a class="hash-link" href="#finally" title="Direct link to heading">#</a></h3><div class="repositoryDetailsContainer_1YsL"><a class="sourceButton_3Nc5" href="https://github.com/evaera/roblox-lua-promise/blob/master/lib/init.lua#L1498"><div class="sourceButtonText_B34l">&lt;/&gt;</div></a></div><div class="memberString_2_bn"><code>Promise:</code><code class="green_K7bQ">finally</code><code>(</code><code>finallyHandler: </code><code class="green_K7bQ">(</code><code>status</code><code>:</code> <code class="blue_1B1Q">Status</code><code class="green_K7bQ">)</code><code class="green_K7bQ"> → </code><code class="blue_1B1Q">...any</code><code>) → </code><code class="blue_1B1Q">Promise&lt;...any&gt;</code></div><div>
+<p>Set a handler that will be called regardless of the promise's fate. The handler is called when the promise is resolved, rejected, <em>or</em> cancelled.</p>
+<p>Returns a new promise chained from this promise.</p>
+<div class="admonition admonition-caution alert alert--warning">
+  <div class="admonition-heading">
+    <h5><span class="admonition-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+          <path d="M8.893 1.5c-.183-.31-.52-.5-.887-.5s-.703.19-.886.5L.138 13.499a.98.98 0 0 0 0 1.001c.193.31.53.501.886.501h13.964c.367 0 .704-.19.877-.5a1.03 1.03 0 0 0 .01-1.002L8.893 1.5zm.133 11.497H6.987v-2.003h2.039v2.003zm0-3.004H6.987V5.987h2.039v4.006z"></path>
+        </svg></span>caution</h5>
+  </div>
+  <div class="admonition-content">
+    <p>If the Promise is cancelled, any Promises chained off of it with <code>andThen</code> won't run. Only Promises chained with <code>finally</code> or <code>done</code> will run in the case of cancellation.</p>
+  </div>
+</div>
+<pre class="language-lua"><code class="language-lua"><span class="token keyword">local</span> thing <span class="token operator">=</span> <span class="token function">createSomething</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token function">doSomethingWith</span><span class="token punctuation">(</span>thing<span class="token punctuation">)</span>
+	<span class="token punctuation">:</span><span class="token function">andThen</span><span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+		<span class="token function">print</span><span class="token punctuation">(</span><span class="token string">"It worked!"</span><span class="token punctuation">)</span>
+		<span class="token comment">-- do something..</span>
+	<span class="token keyword">end</span><span class="token punctuation">)</span>
+	<span class="token punctuation">:</span><span class="token function">catch</span><span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+		<span class="token function">warn</span><span class="token punctuation">(</span><span class="token string">"Oh no it failed!"</span><span class="token punctuation">)</span>
+	<span class="token keyword">end</span><span class="token punctuation">)</span>
+	<span class="token punctuation">:</span><span class="token function">finally</span><span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+		<span class="token comment">-- either way, destroy thing</span>
+
+		thing<span class="token punctuation">:</span><span class="token function">Destroy</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+	<span class="token keyword">end</span><span class="token punctuation">)</span>
+
+</code></pre>
+</div><div class="divider_wJfn"></div><h3><a aria-hidden="true" tabindex="-1" class="anchor anchor__h3 anchorWithStickyNavbar_31ik" id="finallyCall"></a><code style="text-decoration:none">finallyCall</code><a class="hash-link" href="#finallyCall" title="Direct link to heading">#</a></h3><div class="repositoryDetailsContainer_1YsL"><a class="sourceButton_3Nc5" href="https://github.com/evaera/roblox-lua-promise/blob/master/lib/init.lua#L1515"><div class="sourceButtonText_B34l">&lt;/&gt;</div></a></div><div class="memberString_2_bn"><code>Promise:</code><code class="green_K7bQ">finallyCall</code><code>(</code><div class="inset_2aGl"><div><code>callback: </code><code class="green_K7bQ">(</code><code>...</code><code>:</code> <code class="blue_1B1Q">any</code><code class="green_K7bQ">)</code><code class="green_K7bQ"> → </code><code class="blue_1B1Q">any</code><code>,</code></div><div><code>...?: </code><code class="blue_1B1Q">any</code><span class="inlineDescription_30X9">-- <span>
+<p>Additional arguments which will be passed to <code>callback</code></p>
+</span></span></div></div><code>) → </code><code class="blue_1B1Q">Promise</code></div><div>
+<p>Same as <code>andThenCall</code>, except for <code>finally</code>.</p>
+<p>Attaches a <code>finally</code> handler to this Promise that calls the given callback with the predefined arguments.</p>
+</div><div class="divider_wJfn"></div><h3><a aria-hidden="true" tabindex="-1" class="anchor anchor__h3 anchorWithStickyNavbar_31ik" id="finallyReturn"></a><code style="text-decoration:none">finallyReturn</code><a class="hash-link" href="#finallyReturn" title="Direct link to heading">#</a></h3><div class="repositoryDetailsContainer_1YsL"><a class="sourceButton_3Nc5" href="https://github.com/evaera/roblox-lua-promise/blob/master/lib/init.lua#L1541"><div class="sourceButtonText_B34l">&lt;/&gt;</div></a></div><div class="memberString_2_bn"><code>Promise:</code><code class="green_K7bQ">finallyReturn</code><code>(</code><div class="inset_2aGl"><div><code>...: </code><code class="blue_1B1Q">any</code><span class="inlineDescription_30X9">-- <span>
+<p>Values to return from the function</p>
+</span></span></div></div><code>) → </code><code class="blue_1B1Q">Promise</code></div><div>
+<p>Attaches a <code>finally</code> handler to this Promise that discards the resolved value and returns the given value from it.</p>
+<pre class="language-lua"><code class="language-lua">	promise<span class="token punctuation">:</span><span class="token function">finallyReturn</span><span class="token punctuation">(</span><span class="token string">"some"</span><span class="token punctuation">,</span> <span class="token string">"values"</span><span class="token punctuation">)</span>
+</code></pre>
+<p>This is sugar for</p>
+<pre class="language-lua"><code class="language-lua">	promise<span class="token punctuation">:</span><span class="token function">finally</span><span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+		<span class="token keyword">return</span> <span class="token string">"some"</span><span class="token punctuation">,</span> <span class="token string">"values"</span>
+	<span class="token keyword">end</span><span class="token punctuation">)</span>
+</code></pre>
+</div><div class="divider_wJfn"></div><h3><a aria-hidden="true" tabindex="-1" class="anchor anchor__h3 anchorWithStickyNavbar_31ik" id="done"></a><code style="text-decoration:none">done</code><a class="hash-link" href="#done" title="Direct link to heading">#</a></h3><div class="repositoryDetailsContainer_1YsL"><a class="sourceButton_3Nc5" href="https://github.com/evaera/roblox-lua-promise/blob/master/lib/init.lua#L1564"><div class="sourceButtonText_B34l">&lt;/&gt;</div></a></div><div class="memberString_2_bn"><code>Promise:</code><code class="green_K7bQ">done</code><code>(</code><code>doneHandler: </code><code class="green_K7bQ">(</code><code>status</code><code>:</code> <code class="blue_1B1Q">Status</code><code class="green_K7bQ">)</code><code class="green_K7bQ"> → </code><code class="blue_1B1Q">...any</code><code>) → </code><code class="blue_1B1Q">Promise&lt;...any&gt;</code></div><div>
+<p>Set a handler that will be called only if the Promise resolves or is cancelled. This method is similar to <code>finally</code>, except it doesn't catch rejections.</p>
+<div class="admonition admonition-caution alert alert--warning">
+  <div class="admonition-heading">
+    <h5><span class="admonition-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+          <path d="M8.893 1.5c-.183-.31-.52-.5-.887-.5s-.703.19-.886.5L.138 13.499a.98.98 0 0 0 0 1.001c.193.31.53.501.886.501h13.964c.367 0 .704-.19.877-.5a1.03 1.03 0 0 0 .01-1.002L8.893 1.5zm.133 11.497H6.987v-2.003h2.039v2.003zm0-3.004H6.987V5.987h2.039v4.006z"></path>
+        </svg></span>caution</h5>
+  </div>
+  <div class="admonition-content">
+    <p><code>done</code> should be reserved specifically when you want to perform some operation after the Promise is finished (like <code>finally</code>), but you don't want to consume rejections (like in this example). You should use <code>andThen</code> instead if you only care about the Resolved case.</p>
+  </div>
+</div>
+<div class="admonition admonition-warning alert alert--danger">
+  <div class="admonition-heading">
+    <h5><span class="admonition-icon"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="16" viewBox="0 0 12 16">
+          <path d="M5.05.31c.81 2.17.41 3.38-.52 4.31C3.55 5.67 1.98 6.45.9 7.98c-1.45 2.05-1.7 6.53 3.53 7.7-2.2-1.16-2.67-4.52-.3-6.61-.61 2.03.53 3.33 1.94 2.86 1.39-.47 2.3.53 2.27 1.67-.02.78-.31 1.44-1.13 1.81 3.42-.59 4.78-3.42 4.78-5.56 0-2.84-2.53-3.22-1.25-5.61-1.52.13-2.03 1.13-1.89 2.75.09 1.08-1.02 1.8-1.86 1.33-.67-.41-.66-1.19-.06-1.78C8.18 5.31 8.68 2.45 5.05.32L5.03.3l.02.01z"></path>
+        </svg></span>warning</h5>
+  </div>
+  <div class="admonition-content">
+    <p>Like <code>finally</code>, if the Promise is cancelled, any Promises chained off of it with <code>andThen</code> won't run. Only Promises chained with <code>done</code> and <code>finally</code> will run in the case of cancellation.</p>
+  </div>
+</div>
+<p>Returns a new promise chained from this promise.</p>
+</div><div class="divider_wJfn"></div><h3><a aria-hidden="true" tabindex="-1" class="anchor anchor__h3 anchorWithStickyNavbar_31ik" id="doneCall"></a><code style="text-decoration:none">doneCall</code><a class="hash-link" href="#doneCall" title="Direct link to heading">#</a></h3><div class="repositoryDetailsContainer_1YsL"><a class="sourceButton_3Nc5" href="https://github.com/evaera/roblox-lua-promise/blob/master/lib/init.lua#L1581"><div class="sourceButtonText_B34l">&lt;/&gt;</div></a></div><div class="memberString_2_bn"><code>Promise:</code><code class="green_K7bQ">doneCall</code><code>(</code><div class="inset_2aGl"><div><code>callback: </code><code class="green_K7bQ">(</code><code>...</code><code>:</code> <code class="blue_1B1Q">any</code><code class="green_K7bQ">)</code><code class="green_K7bQ"> → </code><code class="blue_1B1Q">any</code><code>,</code></div><div><code>...?: </code><code class="blue_1B1Q">any</code><span class="inlineDescription_30X9">-- <span>
+<p>Additional arguments which will be passed to <code>callback</code></p>
+</span></span></div></div><code>) → </code><code class="blue_1B1Q">Promise</code></div><div>
+<p>Same as <code>andThenCall</code>, except for <code>done</code>.</p>
+<p>Attaches a <code>done</code> handler to this Promise that calls the given callback with the predefined arguments.</p>
+</div><div class="divider_wJfn"></div><h3><a aria-hidden="true" tabindex="-1" class="anchor anchor__h3 anchorWithStickyNavbar_31ik" id="doneReturn"></a><code style="text-decoration:none">doneReturn</code><a class="hash-link" href="#doneReturn" title="Direct link to heading">#</a></h3><div class="repositoryDetailsContainer_1YsL"><a class="sourceButton_3Nc5" href="https://github.com/evaera/roblox-lua-promise/blob/master/lib/init.lua#L1607"><div class="sourceButtonText_B34l">&lt;/&gt;</div></a></div><div class="memberString_2_bn"><code>Promise:</code><code class="green_K7bQ">doneReturn</code><code>(</code><div class="inset_2aGl"><div><code>...: </code><code class="blue_1B1Q">any</code><span class="inlineDescription_30X9">-- <span>
+<p>Values to return from the function</p>
+</span></span></div></div><code>) → </code><code class="blue_1B1Q">Promise</code></div><div>
+<p>Attaches a <code>done</code> handler to this Promise that discards the resolved value and returns the given value from it.</p>
+<pre class="language-lua"><code class="language-lua">	promise<span class="token punctuation">:</span><span class="token function">doneReturn</span><span class="token punctuation">(</span><span class="token string">"some"</span><span class="token punctuation">,</span> <span class="token string">"values"</span><span class="token punctuation">)</span>
+</code></pre>
+<p>This is sugar for</p>
+<pre class="language-lua"><code class="language-lua">	promise<span class="token punctuation">:</span><span class="token function">done</span><span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+		<span class="token keyword">return</span> <span class="token string">"some"</span><span class="token punctuation">,</span> <span class="token string">"values"</span>
+	<span class="token keyword">end</span><span class="token punctuation">)</span>
+</code></pre>
+</div><div class="divider_wJfn"></div><h3><a aria-hidden="true" tabindex="-1" class="anchor anchor__h3 anchorWithStickyNavbar_31ik" id="awaitStatus"></a><code style="text-decoration:none">awaitStatus</code><a class="hash-link" href="#awaitStatus" title="Direct link to heading">#</a></h3><span title="This is a yielding function. When called, it will pause the Lua thread that called the function until a result is ready to be returned, without interrupting other scripts." class="badge_3tzl" style="color:#f1c40f"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="#f1c40f" role="img" aria-label="This is a yielding function. When called, it will pause the Lua thread that called the function until a result is ready to be returned, without interrupting other scripts."><path d="M96.4 11.9c-1.4-2.5-4-4-6.9-4H10.8c-2.9 0-5.4 1.5-6.9 4-1.4 2.5-1.4 5.5 0 7.9L43.3 88c1.4 2.5 4 4 6.9 4 2.9 0 5.4-1.5 6.9-4l39.3-68.2c1.4-2.4 1.4-5.4 0-7.9zM46.3 54.5c1.1-1.1 2.3-1.6 3.8-1.6s2.8.5 3.8 1.6c1.1 1.1 1.6 2.3 1.6 3.8s-.5 2.8-1.6 3.8c-1.1 1.1-2.3 1.6-3.8 1.6s-2.8-.5-3.8-1.6c-1.1-1.1-1.6-2.3-1.6-3.8.1-1.5.6-2.8 1.6-3.8zm-.5-4.9V21.8h8.8v27.8h-8.8z"></path></svg> Yields</span><div class="repositoryDetailsContainer_1YsL"><a class="sourceButton_3Nc5" href="https://github.com/evaera/roblox-lua-promise/blob/master/lib/init.lua#L1621"><div class="sourceButtonText_B34l">&lt;/&gt;</div></a></div><div class="memberString_2_bn"><code>Promise:</code><code class="green_K7bQ">awaitStatus</code><code>(</code><code>) → </code><code>(</code><div class="inset_2aGl"><div><code class="blue_1B1Q">Status</code><code>,</code><span class="inlineDescription_30X9">-- <span>
+<p>The Status representing the fate of the Promise</p>
+</span></span></div><div><code class="blue_1B1Q">...any</code><span class="inlineDescription_30X9">-- <span>
+<p>The values the Promise resolved or rejected with.</p>
+</span></span></div></div><code>)</code></div><div>
+<p>Yields the current thread until the given Promise completes. Returns the Promise's status, followed by the values that the promise resolved or rejected with.</p>
+</div><div class="divider_wJfn"></div><h3><a aria-hidden="true" tabindex="-1" class="anchor anchor__h3 anchorWithStickyNavbar_31ik" id="await"></a><code style="text-decoration:none">await</code><a class="hash-link" href="#await" title="Direct link to heading">#</a></h3><span title="This is a yielding function. When called, it will pause the Lua thread that called the function until a result is ready to be returned, without interrupting other scripts." class="badge_3tzl" style="color:#f1c40f"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="#f1c40f" role="img" aria-label="This is a yielding function. When called, it will pause the Lua thread that called the function until a result is ready to be returned, without interrupting other scripts."><path d="M96.4 11.9c-1.4-2.5-4-4-6.9-4H10.8c-2.9 0-5.4 1.5-6.9 4-1.4 2.5-1.4 5.5 0 7.9L43.3 88c1.4 2.5 4 4 6.9 4 2.9 0 5.4-1.5 6.9-4l39.3-68.2c1.4-2.4 1.4-5.4 0-7.9zM46.3 54.5c1.1-1.1 2.3-1.6 3.8-1.6s2.8.5 3.8 1.6c1.1 1.1 1.6 2.3 1.6 3.8s-.5 2.8-1.6 3.8c-1.1 1.1-2.3 1.6-3.8 1.6s-2.8-.5-3.8-1.6c-1.1-1.1-1.6-2.3-1.6-3.8.1-1.5.6-2.8 1.6-3.8zm-.5-4.9V21.8h8.8v27.8h-8.8z"></path></svg> Yields</span><div class="repositoryDetailsContainer_1YsL"><a class="sourceButton_3Nc5" href="https://github.com/evaera/roblox-lua-promise/blob/master/lib/init.lua#L1669"><div class="sourceButtonText_B34l">&lt;/&gt;</div></a></div><div class="memberString_2_bn"><code>Promise:</code><code class="green_K7bQ">await</code><code>(</code><code>) → </code><code>(</code><div class="inset_2aGl"><div><code class="blue_1B1Q">boolean</code><code>,</code><span class="inlineDescription_30X9">-- <span>
+<p><code>true</code> if the Promise successfully resolved</p>
+</span></span></div><div><code class="blue_1B1Q">...any</code><span class="inlineDescription_30X9">-- <span>
+<p>The values the Promise resolved or rejected with.</p>
+</span></span></div></div><code>)</code></div><div>
+<p>Yields the current thread until the given Promise completes. Returns true if the Promise resolved, followed by the values that the promise resolved or rejected with.</p>
+<div class="admonition admonition-caution alert alert--warning">
+  <div class="admonition-heading">
+    <h5><span class="admonition-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+          <path d="M8.893 1.5c-.183-.31-.52-.5-.887-.5s-.703.19-.886.5L.138 13.499a.98.98 0 0 0 0 1.001c.193.31.53.501.886.501h13.964c.367 0 .704-.19.877-.5a1.03 1.03 0 0 0 .01-1.002L8.893 1.5zm.133 11.497H6.987v-2.003h2.039v2.003zm0-3.004H6.987V5.987h2.039v4.006z"></path>
+        </svg></span>caution</h5>
+  </div>
+  <div class="admonition-content">
+    <p>If the Promise gets cancelled, this function will return <code>false</code>, which is indistinguishable from a rejection. If you need to differentiate, you should use [[Promise.awaitStatus]] instead.</p>
+  </div>
+</div>
+<pre class="language-lua"><code class="language-lua">	<span class="token keyword">local</span> worked<span class="token punctuation">,</span> value <span class="token operator">=</span> <span class="token function">getTheValue</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span><span class="token function">await</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token keyword">if</span> worked <span class="token keyword">then</span>
+	<span class="token function">print</span><span class="token punctuation">(</span><span class="token string">"got"</span><span class="token punctuation">,</span> value<span class="token punctuation">)</span>
+<span class="token keyword">else</span>
+	<span class="token function">warn</span><span class="token punctuation">(</span><span class="token string">"it failed"</span><span class="token punctuation">)</span>
+<span class="token keyword">end</span>
+</code></pre>
+</div><div class="divider_wJfn"></div><h3><a aria-hidden="true" tabindex="-1" class="anchor anchor__h3 anchorWithStickyNavbar_31ik" id="expect"></a><code style="text-decoration:none">expect</code><a class="hash-link" href="#expect" title="Direct link to heading">#</a></h3><span title="This is a yielding function. When called, it will pause the Lua thread that called the function until a result is ready to be returned, without interrupting other scripts." class="badge_3tzl" style="color:#f1c40f"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="#f1c40f" role="img" aria-label="This is a yielding function. When called, it will pause the Lua thread that called the function until a result is ready to be returned, without interrupting other scripts."><path d="M96.4 11.9c-1.4-2.5-4-4-6.9-4H10.8c-2.9 0-5.4 1.5-6.9 4-1.4 2.5-1.4 5.5 0 7.9L43.3 88c1.4 2.5 4 4 6.9 4 2.9 0 5.4-1.5 6.9-4l39.3-68.2c1.4-2.4 1.4-5.4 0-7.9zM46.3 54.5c1.1-1.1 2.3-1.6 3.8-1.6s2.8.5 3.8 1.6c1.1 1.1 1.6 2.3 1.6 3.8s-.5 2.8-1.6 3.8c-1.1 1.1-2.3 1.6-3.8 1.6s-2.8-.5-3.8-1.6c-1.1-1.1-1.6-2.3-1.6-3.8.1-1.5.6-2.8 1.6-3.8zm-.5-4.9V21.8h8.8v27.8h-8.8z"></path></svg> Yields</span><div class="repositoryDetailsContainer_1YsL"><a class="sourceButton_3Nc5" href="https://github.com/evaera/roblox-lua-promise/blob/master/lib/init.lua#L1706"><div class="sourceButtonText_B34l">&lt;/&gt;</div></a></div><div class="memberString_2_bn"><code>Promise:</code><code class="green_K7bQ">expect</code><code>(</code><code>) → </code><code class="blue_1B1Q">...any</code><span class="inlineDescription_30X9">-- <span>
+<p>The values the Promise resolved with.</p>
+</span></span></div><div>
+<p>Yields the current thread until the given Promise completes. Returns the the values that the promise resolved with.</p>
+<pre class="language-lua"><code class="language-lua"><span class="token keyword">local</span> worked <span class="token operator">=</span> <span class="token function">pcall</span><span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+	<span class="token function">print</span><span class="token punctuation">(</span><span class="token string">"got"</span><span class="token punctuation">,</span> <span class="token function">getTheValue</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span><span class="token function">expect</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token keyword">end</span><span class="token punctuation">)</span>
+
+<span class="token keyword">if</span> <span class="token keyword">not</span> worked <span class="token keyword">then</span>
+	<span class="token function">warn</span><span class="token punctuation">(</span><span class="token string">"it failed"</span><span class="token punctuation">)</span>
+<span class="token keyword">end</span>
+</code></pre>
+<p>This is essentially sugar for:</p>
+<pre class="language-lua"><code class="language-lua"><span class="token function">select</span><span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">,</span> <span class="token function">assert</span><span class="token punctuation">(</span>promise<span class="token punctuation">:</span><span class="token function">await</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+</code></pre>
+<p><strong>Errors</strong> if the Promise rejects or gets cancelled.</p>
+</div><h3>Errors</h3><table class="errorTable_1K-H"><thead><tr><th>Type</th><th>Description</th></tr></thead><tbody><tr><td>any</td><td>Errors with the rejection value if this Promise rejects or gets cancelled.</td></tr></tbody></table><div class="divider_wJfn"></div><h3><a aria-hidden="true" tabindex="-1" class="anchor anchor__h3 anchorWithStickyNavbar_31ik" id="now"></a><code style="text-decoration:none">now</code><a class="hash-link" href="#now" title="Direct link to heading">#</a></h3><div class="repositoryDetailsContainer_1YsL"><a class="sourceButton_3Nc5" href="https://github.com/evaera/roblox-lua-promise/blob/master/lib/init.lua#L1894"><div class="sourceButtonText_B34l">&lt;/&gt;</div></a></div><div class="memberString_2_bn"><code>Promise:</code><code class="green_K7bQ">now</code><code>(</code><div class="inset_2aGl"><div><code>rejectionValue?: </code><code class="blue_1B1Q">any</code><span class="inlineDescription_30X9">-- <span>
+<p>The value to reject with if the Promise isn't resolved</p>
+</span></span></div></div><code>) → </code><code class="blue_1B1Q">Promise</code></div><div>
+<p>Chains a Promise from this one that is resolved if this Promise is already resolved, and rejected if it is not resolved at the time of calling <code>:now()</code>. This can be used to ensure your <code>andThen</code> handler occurs on the same frame as the root Promise execution.</p>
+<pre class="language-lua"><code class="language-lua"><span class="token function">doSomething</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+	<span class="token punctuation">:</span><span class="token function">now</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+	<span class="token punctuation">:</span><span class="token function">andThen</span><span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span>value<span class="token punctuation">)</span>
+		<span class="token function">print</span><span class="token punctuation">(</span><span class="token string">"Got"</span><span class="token punctuation">,</span> value<span class="token punctuation">,</span> <span class="token string">"synchronously."</span><span class="token punctuation">)</span>
+	<span class="token keyword">end</span><span class="token punctuation">)</span>
+</code></pre>
+<p>If this Promise is still running, Rejected, or Cancelled, the Promise returned from <code>:now()</code> will reject with the <code>rejectionValue</code> if passed, otherwise with a <code>Promise.Error(Promise.Error.Kind.NotResolvedInTime)</code>. This can be checked with [[Error.isKind]].</p>
+</div><div class="divider_wJfn"></div><h3><a aria-hidden="true" tabindex="-1" class="anchor anchor__h3 anchorWithStickyNavbar_31ik" id="retry"></a><code style="text-decoration:none">retry</code><a class="hash-link" href="#retry" title="Direct link to heading">#</a></h3><div class="repositoryDetailsContainer_1YsL"><span class="releaseVersion_1J0o">since 3.0.0</span><a class="sourceButton_3Nc5" href="https://github.com/evaera/roblox-lua-promise/blob/master/lib/init.lua#L1938"><div class="sourceButtonText_B34l">&lt;/&gt;</div></a></div><div class="memberString_2_bn"><code>Promise.</code><code class="green_K7bQ">retry</code><code>(</code><div class="inset_2aGl"><div><code>callback: </code><code class="green_K7bQ">(</code><code>...</code><code>:</code> <code class="blue_1B1Q">P</code><code class="green_K7bQ">)</code><code class="green_K7bQ"> → </code><code class="blue_1B1Q">Promise&lt;T&gt;</code><code>,</code></div><div><code>times: </code><code class="blue_1B1Q">number</code><code>,</code></div><div><code>...?: </code><code class="blue_1B1Q">P</code></div></div><code>) → </code><code>(</code><code>)</code></div><div>
+<p>Repeatedly calls a Promise-returning function up to <code>times</code> number of times, until the returned Promise resolves.</p>
+<p>If the amount of retries is exceeded, the function will return the latest rejected Promise.</p>
+<pre class="language-lua"><code class="language-lua"><span class="token keyword">local</span> <span class="token keyword">function</span> <span class="token function">canFail</span><span class="token punctuation">(</span>a<span class="token punctuation">,</span> b<span class="token punctuation">,</span> c<span class="token punctuation">)</span>
+	<span class="token keyword">return</span> Promise<span class="token punctuation">.</span><span class="token function">new</span><span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span>resolve<span class="token punctuation">,</span> reject<span class="token punctuation">)</span>
+		<span class="token comment">-- do something that can fail</span>
+
+		<span class="token keyword">local</span> failed<span class="token punctuation">,</span> thing <span class="token operator">=</span> <span class="token function">doSomethingThatCanFail</span><span class="token punctuation">(</span>a<span class="token punctuation">,</span> b<span class="token punctuation">,</span> c<span class="token punctuation">)</span>
+
+		<span class="token keyword">if</span> failed <span class="token keyword">then</span>
+			<span class="token function">reject</span><span class="token punctuation">(</span><span class="token string">"it failed"</span><span class="token punctuation">)</span>
+		<span class="token keyword">else</span>
+			<span class="token function">resolve</span><span class="token punctuation">(</span>thing<span class="token punctuation">)</span>
+		<span class="token keyword">end</span>
+	<span class="token keyword">end</span><span class="token punctuation">)</span>
+<span class="token keyword">end</span>
+
+<span class="token keyword">local</span> MAX_RETRIES <span class="token operator">=</span> <span class="token number">10</span>
+<span class="token keyword">local</span> value <span class="token operator">=</span> Promise<span class="token punctuation">.</span><span class="token function">retry</span><span class="token punctuation">(</span>canFail<span class="token punctuation">,</span> MAX_RETRIES<span class="token punctuation">,</span> <span class="token string">"foo"</span><span class="token punctuation">,</span> <span class="token string">"bar"</span><span class="token punctuation">,</span> <span class="token string">"baz"</span><span class="token punctuation">)</span> <span class="token comment">-- args to send to canFail</span>
+</code></pre>
+</div><div class="divider_wJfn"></div><h3><a aria-hidden="true" tabindex="-1" class="anchor anchor__h3 anchorWithStickyNavbar_31ik" id="fromEvent"></a><code style="text-decoration:none">fromEvent</code><a class="hash-link" href="#fromEvent" title="Direct link to heading">#</a></h3><div class="repositoryDetailsContainer_1YsL"><span class="releaseVersion_1J0o">since 3.0.0</span><a class="sourceButton_3Nc5" href="https://github.com/evaera/roblox-lua-promise/blob/master/lib/init.lua#L1977"><div class="sourceButtonText_B34l">&lt;/&gt;</div></a></div><div class="memberString_2_bn"><code>Promise.</code><code class="green_K7bQ">fromEvent</code><code>(</code><div class="inset_2aGl"><div><code>event: </code><code class="blue_1B1Q">Event</code><code>,</code><span class="inlineDescription_30X9">-- <span>
+<p>Any object with a <code>Connect</code> method. This includes all Roblox events.</p>
+</span></span></div><div><code>predicate?: </code><code class="green_K7bQ">(</code><code>...</code><code>:</code> <code class="blue_1B1Q">P</code><code class="green_K7bQ">)</code><code class="green_K7bQ"> → </code><code class="blue_1B1Q">boolean</code><span class="inlineDescription_30X9">-- <span>
+<p>A function which determines if the Promise should resolve with the given value, or wait for the next event to check again.</p>
+</span></span></div></div><code>) → </code><code class="blue_1B1Q">Promise&lt;P&gt;</code></div><div>
+<p>Converts an event into a Promise which resolves the next time the event fires.</p>
+<p>The optional <code>predicate</code> callback, if passed, will receive the event arguments and should return <code>true</code> or <code>false</code>, based on if this fired event should resolve the Promise or not. If <code>true</code>, the Promise resolves. If <code>false</code>, nothing happens and the predicate will be rerun the next time the event fires.</p>
+<p>The Promise will resolve with the event arguments.</p>
+<div class="admonition admonition-tip alert alert--success">
+  <div class="admonition-heading">
+    <h5><span class="admonition-icon"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="16" viewBox="0 0 12 16">
+          <path d="M6.5 0C3.48 0 1 2.19 1 5c0 .92.55 2.25 1 3 1.34 2.25 1.78 2.78 2 4v1h5v-1c.22-1.22.66-1.75 2-4 .45-.75 1-2.08 1-3 0-2.81-2.48-5-5.5-5zm3.64 7.48c-.25.44-.47.8-.67 1.11-.86 1.41-1.25 2.06-1.45 3.23-.02.05-.02.11-.02.17H5c0-.06 0-.13-.02-.17-.2-1.17-.59-1.83-1.45-3.23-.2-.31-.42-.67-.67-1.11C2.44 6.78 2 5.65 2 5c0-2.2 2.02-4 4.5-4 1.22 0 2.36.42 3.22 1.19C10.55 2.94 11 3.94 11 5c0 .66-.44 1.78-.86 2.48zM4 14h5c-.23 1.14-1.3 2-2.5 2s-2.27-.86-2.5-2z"></path>
+        </svg></span>tip</h5>
+  </div>
+  <div class="admonition-content">
+    <p>This function will work given any object with a <code>Connect</code> method. This includes all Roblox events.</p>
+  </div>
+</div>
+<pre class="language-lua"><code class="language-lua"><span class="token comment">-- Creates a Promise which only resolves when `somePart` is touched</span>
+<span class="token comment">-- by a part named `"Something specific"`.</span>
+<span class="token keyword">return</span> Promise<span class="token punctuation">.</span><span class="token function">fromEvent</span><span class="token punctuation">(</span>somePart<span class="token punctuation">.</span>Touched<span class="token punctuation">,</span> <span class="token keyword">function</span><span class="token punctuation">(</span>part<span class="token punctuation">)</span>
+	<span class="token keyword">return</span> part<span class="token punctuation">.</span>Name <span class="token operator">==</span> <span class="token string">"Something specific"</span>
+<span class="token keyword">end</span><span class="token punctuation">)</span>
+</code></pre>
+</div></div></article></div></div><div class="col col--3"><div class="tableOfContents_35-E thin-scrollbar"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#types" class="table-of-contents__link">Types</a><ul><li><a href="#Status" class="table-of-contents__link">Status</a></li></ul></li><li><a href="#properties" class="table-of-contents__link">Properties</a><ul><li><a href="#Status" class="table-of-contents__link">Status</a></li></ul></li><li><a href="#functions" class="table-of-contents__link">Functions</a><ul><li><a href="#new" class="table-of-contents__link">new</a></li><li><a href="#defer" class="table-of-contents__link">defer</a></li><li><a href="#resolve" class="table-of-contents__link">resolve</a></li><li><a href="#reject" class="table-of-contents__link">reject</a></li><li><a href="#try" class="table-of-contents__link">try</a></li><li><a href="#all" class="table-of-contents__link">all</a></li><li><a href="#fold" class="table-of-contents__link">fold</a></li><li><a href="#some" class="table-of-contents__link">some</a></li><li><a href="#any" class="table-of-contents__link">any</a></li><li><a href="#allSettled" class="table-of-contents__link">allSettled</a></li><li><a href="#race" class="table-of-contents__link">race</a></li><li><a href="#each" class="table-of-contents__link">each</a></li><li><a href="#is" class="table-of-contents__link">is</a></li><li><a href="#promisify" class="table-of-contents__link">promisify</a></li><li><a href="#delay" class="table-of-contents__link">delay</a></li><li><a href="#timeout" class="table-of-contents__link">timeout</a></li><li><a href="#getStatus" class="table-of-contents__link">getStatus</a></li><li><a href="#andThen" class="table-of-contents__link">andThen</a></li><li><a href="#catch" class="table-of-contents__link">catch</a></li><li><a href="#tap" class="table-of-contents__link">tap</a></li><li><a href="#andThenCall" class="table-of-contents__link">andThenCall</a></li><li><a href="#andThenReturn" class="table-of-contents__link">andThenReturn</a></li><li><a href="#cancel" class="table-of-contents__link">cancel</a></li><li><a href="#finally" class="table-of-contents__link">finally</a></li><li><a href="#finallyCall" class="table-of-contents__link">finallyCall</a></li><li><a href="#finallyReturn" class="table-of-contents__link">finallyReturn</a></li><li><a href="#done" class="table-of-contents__link">done</a></li><li><a href="#doneCall" class="table-of-contents__link">doneCall</a></li><li><a href="#doneReturn" class="table-of-contents__link">doneReturn</a></li><li><a href="#awaitStatus" class="table-of-contents__link">awaitStatus</a></li><li><a href="#await" class="table-of-contents__link">await</a></li><li><a href="#expect" class="table-of-contents__link">expect</a></li><li><a href="#now" class="table-of-contents__link">now</a></li><li><a href="#retry" class="table-of-contents__link">retry</a></li><li><a href="#fromEvent" class="table-of-contents__link">fromEvent</a></li></ul></li></ul></div></div></div><details><summary>Show raw api</summary><pre style="max-width:100%;white-space:pre-wrap">{
+    &quot;functions&quot;: [
+        {
+            &quot;name&quot;: &quot;new&quot;,
+            &quot;desc&quot;: &quot;Construct a new Promise that will be resolved or rejected with the given callbacks.\n\nIf you `resolve` with a Promise, it will be chained onto.\n\nYou can safely yield within the executor function and it will not block the creating thread.\n\n```lua\nlocal myFunction()\n\treturn Promise.new(function(resolve, reject, onCancel)\n\t\twait(1)\n\t\tresolve(\&quot;Hello world!\&quot;)\n\tend)\nend\n\nmyFunction():andThen(print)\n```\n\nYou do not need to use `pcall` within a Promise. Errors that occur during execution will be caught and turned into a rejection automatically. If `error()` is called with a table, that table will be the rejection value. Otherwise, string errors will be converted into `Promise.Error(Promise.Error.Kind.ExecutionError)` objects for tracking debug information.\n\nYou may register an optional cancellation hook by using the `onCancel` argument:\n\n* This should be used to abort any ongoing operations leading up to the promise being settled.\n* Call the `onCancel` function with a function callback as its only argument to set a hook which will in turn be called when/if the promise is cancelled.\n* `onCancel` returns `true` if the Promise was already cancelled when you called `onCancel`.\n* Calling `onCancel` with no argument will not override a previously set cancellation hook, but it will still return `true` if the Promise is currently cancelled.\n* You can set the cancellation hook at any time before resolving.\n* When a promise is cancelled, calls to `resolve` or `reject` will be ignored, regardless of if you set a cancellation hook or not.&quot;,
+            &quot;params&quot;: [
+                {
+                    &quot;name&quot;: &quot;executor&quot;,
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;(resolve: (...: any) -&gt; (), reject: (...: any) -&gt; (), onCancel: (abortHandler: () -&gt; boolean)) -&gt; ()&quot;
+                }
+            ],
+            &quot;returns&quot;: [
+                {
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;Promise&quot;
+                }
+            ],
+            &quot;function_type&quot;: &quot;static&quot;,
+            &quot;source&quot;: {
+                &quot;line&quot;: 325,
+                &quot;path&quot;: &quot;lib/init.lua&quot;
+            }
+        },
+        {
+            &quot;name&quot;: &quot;defer&quot;,
+            &quot;desc&quot;: &quot;The same as [Promise.new](/api/Promise#new), except execution begins after the next `Heartbeat` event.\n\nThis is a spiritual replacement for `spawn`, but it does not suffer from the same [issues](https://eryn.io/gist/3db84579866c099cdd5bb2ff37947cec) as `spawn`.\n\n```lua\nlocal function waitForChild(instance, childName, timeout)\n  return Promise.defer(function(resolve, reject)\n\tlocal child = instance:WaitForChild(childName, timeout)\n\n\t;(child and resolve or reject)(child)\n  end)\nend\n```&quot;,
+            &quot;params&quot;: [
+                {
+                    &quot;name&quot;: &quot;executor&quot;,
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;(resolve: (...: any) -&gt; (), reject: (...: any) -&gt; (), onCancel: (abortHandler: () -&gt; boolean)) -&gt; ()&quot;
+                }
+            ],
+            &quot;returns&quot;: [
+                {
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;Promise&quot;
+                }
+            ],
+            &quot;function_type&quot;: &quot;static&quot;,
+            &quot;source&quot;: {
+                &quot;line&quot;: 351,
+                &quot;path&quot;: &quot;lib/init.lua&quot;
+            }
+        },
+        {
+            &quot;name&quot;: &quot;resolve&quot;,
+            &quot;desc&quot;: &quot;Creates an immediately resolved Promise with the given value.&quot;,
+            &quot;params&quot;: [
+                {
+                    &quot;name&quot;: &quot;...&quot;,
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;any&quot;
+                }
+            ],
+            &quot;returns&quot;: [
+                {
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;Promise&lt;...any&gt;&quot;
+                }
+            ],
+            &quot;function_type&quot;: &quot;static&quot;,
+            &quot;source&quot;: {
+                &quot;line&quot;: 378,
+                &quot;path&quot;: &quot;lib/init.lua&quot;
+            }
+        },
+        {
+            &quot;name&quot;: &quot;reject&quot;,
+            &quot;desc&quot;: &quot;Creates an immediately rejected Promise with the given value.\n\n:::caution\nSomething needs to consume this rejection (i.e. `:catch()` it), otherwise it will emit an unhandled Promise rejection warning on the next frame. Thus, you should not create and store rejected Promises for later use. Only create them on-demand as needed.\n:::\n\n```lua\n-- Example using Promise.resolve to deliver cached values:\nfunction getSomething(name)\n\tif cache[name] then\n\t\treturn Promise.resolve(cache[name])\n\telse\n\t\treturn Promise.new(function(resolve, reject)\n\t\t\tlocal thing = getTheThing()\n\t\t\tcache[name] = thing\n\n\t\t\tresolve(thing)\n\t\tend)\n\tend\nend\n```&quot;,
+            &quot;params&quot;: [
+                {
+                    &quot;name&quot;: &quot;...&quot;,
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;any&quot;
+                }
+            ],
+            &quot;returns&quot;: [
+                {
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;Promise&lt;...any&gt;&quot;
+                }
+            ],
+            &quot;function_type&quot;: &quot;static&quot;,
+            &quot;source&quot;: {
+                &quot;line&quot;: 411,
+                &quot;path&quot;: &quot;lib/init.lua&quot;
+            }
+        },
+        {
+            &quot;name&quot;: &quot;try&quot;,
+            &quot;desc&quot;: &quot;Begins a Promise chain, calling a function and returning a Promise resolving with its return value. If the function errors, the returned Promise will be rejected with the error. You can safely yield within the Promise.try callback.\n\n:::info\n`Promise.try` is similar to [Promise.promisify](#promisify), except the callback is invoked immediately instead of returning a new function.\n:::\n\n```lua\nPromise.try(function()\n\treturn math.random(1, 2) == 1 and \&quot;ok\&quot; or error(\&quot;Oh an error!\&quot;)\nend)\n\t:andThen(function(text)\n\t\tprint(text)\n\tend)\n\t:catch(function(err)\n\t\twarn(\&quot;Something went wrong\&quot;)\n\tend)\n```&quot;,
+            &quot;params&quot;: [
+                {
+                    &quot;name&quot;: &quot;callback&quot;,
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;(...: any) -&gt; ...any&quot;
+                }
+            ],
+            &quot;returns&quot;: [
+                {
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;Promise&quot;
+                }
+            ],
+            &quot;function_type&quot;: &quot;static&quot;,
+            &quot;source&quot;: {
+                &quot;line&quot;: 452,
+                &quot;path&quot;: &quot;lib/init.lua&quot;
+            }
+        },
+        {
+            &quot;name&quot;: &quot;all&quot;,
+            &quot;desc&quot;: &quot;Accepts an array of Promises and returns a new promise that:\n* is resolved after all input promises resolve.\n* is rejected if *any* input promises reject.\n\n:::info\nOnly the first return value from each promise will be present in the resulting array.\n:::\n\nAfter any input Promise rejects, all other input Promises that are still pending will be cancelled if they have no other consumers.\n\n```lua\nlocal promises = {\n\treturnsAPromise(\&quot;example 1\&quot;),\n\treturnsAPromise(\&quot;example 2\&quot;),\n\treturnsAPromise(\&quot;example 3\&quot;),\n}\n\nreturn Promise.all(promises)\n```&quot;,
+            &quot;params&quot;: [
+                {
+                    &quot;name&quot;: &quot;promises&quot;,
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;{Promise&lt;T&gt;}&quot;
+                }
+            ],
+            &quot;returns&quot;: [
+                {
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;Promise&lt;{T}&gt;&quot;
+                }
+            ],
+            &quot;function_type&quot;: &quot;static&quot;,
+            &quot;source&quot;: {
+                &quot;line&quot;: 569,
+                &quot;path&quot;: &quot;lib/init.lua&quot;
+            }
+        },
+        {
+            &quot;name&quot;: &quot;fold&quot;,
+            &quot;desc&quot;: &quot;Folds an array of values or promises into a single value. The array is traversed sequentially.\n\nThe reducer function can return a promise or value directly. Each iteration receives the resolved value from the previous, and the first receives your defined initial value.\n\nThe folding will stop at the first rejection encountered.\n```lua\nlocal basket = {\&quot;blueberry\&quot;, \&quot;melon\&quot;, \&quot;pear\&quot;, \&quot;melon\&quot;}\nPromise.fold(basket, function(cost, fruit)\n\tif fruit == \&quot;blueberry\&quot; then\n\t\treturn cost -- blueberries are free!\n\telse\n\t\t-- call a function that returns a promise with the fruit price\n\t\treturn fetchPrice(fruit):andThen(function(fruitCost)\n\t\t\treturn cost + fruitCost\n\t\tend)\n\tend\nend, 0)\n```&quot;,
+            &quot;params&quot;: [
+                {
+                    &quot;name&quot;: &quot;list&quot;,
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;{T | Promise&lt;T&gt;}&quot;
+                },
+                {
+                    &quot;name&quot;: &quot;reducer&quot;,
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;(accumulator: U, value: T, index: number) -&gt; U | Promise&lt;U&gt;&quot;
+                },
+                {
+                    &quot;name&quot;: &quot;initialValue&quot;,
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;U&quot;
+                }
+            ],
+            &quot;returns&quot;: [],
+            &quot;function_type&quot;: &quot;static&quot;,
+            &quot;since&quot;: &quot;v3.1.0&quot;,
+            &quot;source&quot;: {
+                &quot;line&quot;: 598,
+                &quot;path&quot;: &quot;lib/init.lua&quot;
+            }
+        },
+        {
+            &quot;name&quot;: &quot;some&quot;,
+            &quot;desc&quot;: &quot;Accepts an array of Promises and returns a Promise that is resolved as soon as `count` Promises are resolved from the input array. The resolved array values are in the order that the Promises resolved in. When this Promise resolves, all other pending Promises are cancelled if they have no other consumers.\n\n`count` 0 results in an empty array. The resultant array will never have more than `count` elements.\n\n```lua\nlocal promises = {\n\treturnsAPromise(\&quot;example 1\&quot;),\n\treturnsAPromise(\&quot;example 2\&quot;),\n\treturnsAPromise(\&quot;example 3\&quot;),\n}\n\nreturn Promise.some(promises, 2) -- Only resolves with first 2 promises to resolve\n```&quot;,
+            &quot;params&quot;: [
+                {
+                    &quot;name&quot;: &quot;promises&quot;,
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;{Promise&lt;T&gt;}&quot;
+                },
+                {
+                    &quot;name&quot;: &quot;count&quot;,
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;number&quot;
+                }
+            ],
+            &quot;returns&quot;: [
+                {
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;Promise&lt;{T}&gt;&quot;
+                }
+            ],
+            &quot;function_type&quot;: &quot;static&quot;,
+            &quot;source&quot;: {
+                &quot;line&quot;: 629,
+                &quot;path&quot;: &quot;lib/init.lua&quot;
+            }
+        },
+        {
+            &quot;name&quot;: &quot;any&quot;,
+            &quot;desc&quot;: &quot;Accepts an array of Promises and returns a Promise that is resolved as soon as *any* of the input Promises resolves. It will reject only if *all* input Promises reject. As soon as one Promises resolves, all other pending Promises are cancelled if they have no other consumers.\n\nResolves directly with the value of the first resolved Promise. This is essentially [[Promise.some]] with `1` count, except the Promise resolves with the value directly instead of an array with one element.\n\n```lua\nlocal promises = {\n\treturnsAPromise(\&quot;example 1\&quot;),\n\treturnsAPromise(\&quot;example 2\&quot;),\n\treturnsAPromise(\&quot;example 3\&quot;),\n}\n\nreturn Promise.any(promises) -- Resolves with first value to resolve (only rejects if all 3 rejected)\n```&quot;,
+            &quot;params&quot;: [
+                {
+                    &quot;name&quot;: &quot;promises&quot;,
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;{Promise&lt;T&gt;}&quot;
+                }
+            ],
+            &quot;returns&quot;: [
+                {
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;Promise&lt;T&gt;&quot;
+                }
+            ],
+            &quot;function_type&quot;: &quot;static&quot;,
+            &quot;source&quot;: {
+                &quot;line&quot;: 653,
+                &quot;path&quot;: &quot;lib/init.lua&quot;
+            }
+        },
+        {
+            &quot;name&quot;: &quot;allSettled&quot;,
+            &quot;desc&quot;: &quot;Accepts an array of Promises and returns a new Promise that resolves with an array of in-place Statuses when all input Promises have settled. This is equivalent to mapping `promise:finally` over the array of Promises.\n\n```lua\nlocal promises = {\n\treturnsAPromise(\&quot;example 1\&quot;),\n\treturnsAPromise(\&quot;example 2\&quot;),\n\treturnsAPromise(\&quot;example 3\&quot;),\n}\n\nreturn Promise.allSettled(promises)\n```&quot;,
+            &quot;params&quot;: [
+                {
+                    &quot;name&quot;: &quot;promises&quot;,
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;{Promise&lt;T&gt;}&quot;
+                }
+            ],
+            &quot;returns&quot;: [
+                {
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;Promise&lt;{Status}&gt;&quot;
+                }
+            ],
+            &quot;function_type&quot;: &quot;static&quot;,
+            &quot;source&quot;: {
+                &quot;line&quot;: 675,
+                &quot;path&quot;: &quot;lib/init.lua&quot;
+            }
+        },
+        {
+            &quot;name&quot;: &quot;race&quot;,
+            &quot;desc&quot;: &quot;Accepts an array of Promises and returns a new promise that is resolved or rejected as soon as any Promise in the array resolves or rejects.\n\n:::warning\nIf the first Promise to settle from the array settles with a rejection, the resulting Promise from `race` will reject.\n\nIf you instead want to tolerate rejections, and only care about at least one Promise resolving, you should use [Promise.any](#any) or [Promise.some](#some) instead.\n:::\n\nAll other Promises that don&#x27;t win the race will be cancelled if they have no other consumers.\n\n```lua\nlocal promises = {\n\treturnsAPromise(\&quot;example 1\&quot;),\n\treturnsAPromise(\&quot;example 2\&quot;),\n\treturnsAPromise(\&quot;example 3\&quot;),\n}\n\nreturn Promise.race(promises) -- Only returns 1st value to resolve or reject\n```&quot;,
+            &quot;params&quot;: [
+                {
+                    &quot;name&quot;: &quot;promises:&quot;,
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;{Promise&lt;T&gt;}&quot;
+                }
+            ],
+            &quot;returns&quot;: [
+                {
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;Promise&lt;T&gt;&quot;
+                }
+            ],
+            &quot;function_type&quot;: &quot;static&quot;,
+            &quot;source&quot;: {
+                &quot;line&quot;: 755,
+                &quot;path&quot;: &quot;lib/init.lua&quot;
+            }
+        },
+        {
+            &quot;name&quot;: &quot;each&quot;,
+            &quot;desc&quot;: &quot;Iterates serially over the given an array of values, calling the predicate callback on each value before continuing.\n\nIf the predicate returns a Promise, we wait for that Promise to resolve before moving on to the next item\nin the array.\n\n:::info\n`Promise.each` is similar to `Promise.all`, except the Promises are ran in order instead of all at once.\n\nBut because Promises are eager, by the time they are created, they&#x27;re already running. Thus, we need a way to defer creation of each Promise until a later time.\n\nThe predicate function exists as a way for us to operate on our data instead of creating a new closure for each Promise. If you would prefer, you can pass in an array of functions, and in the predicate, call the function and return its return value.\n:::\n\n```lua\nPromise.each({\n\t\&quot;foo\&quot;,\n\t\&quot;bar\&quot;,\n\t\&quot;baz\&quot;,\n\t\&quot;qux\&quot;\n}, function(value, index)\n\treturn Promise.delay(1):andThen(function()\n\tprint((\&quot;%d) Got %s!\&quot;):format(index, value))\n\tend)\nend)\n\n--[[\n\t(1 second passes)\n\t&gt; 1) Got foo!\n\t(1 second passes)\n\t&gt; 2) Got bar!\n\t(1 second passes)\n\t&gt; 3) Got baz!\n\t(1 second passes)\n\t&gt; 4) Got qux!\n]]\n```\n\nIf the Promise a predicate returns rejects, the Promise from `Promise.each` is also rejected with the same value.\n\nIf the array of values contains a Promise, when we get to that point in the list, we wait for the Promise to resolve before calling the predicate with the value.\n\nIf a Promise in the array of values is already Rejected when `Promise.each` is called, `Promise.each` rejects with that value immediately (the predicate callback will never be called even once). If a Promise in the list is already Cancelled when `Promise.each` is called, `Promise.each` rejects with `Promise.Error(Promise.Error.Kind.AlreadyCancelled`). If a Promise in the array of values is Started at first, but later rejects, `Promise.each` will reject with that value and iteration will not continue once iteration encounters that value.\n\nReturns a Promise containing an array of the returned/resolved values from the predicate for each item in the array of values.\n\nIf this Promise returned from `Promise.each` rejects or is cancelled for any reason, the following are true:\n- Iteration will not continue.\n- Any Promises within the array of values will now be cancelled if they have no other consumers.\n- The Promise returned from the currently active predicate will be cancelled if it hasn&#x27;t resolved yet.&quot;,
+            &quot;params&quot;: [
+                {
+                    &quot;name&quot;: &quot;list&quot;,
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;{T | Promise&lt;T&gt;}&quot;
+                },
+                {
+                    &quot;name&quot;: &quot;predicate&quot;,
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;(value: T, index: number) -&gt; U | Promise&lt;U&gt;&quot;
+                }
+            ],
+            &quot;returns&quot;: [
+                {
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;Promise&lt;{U}&gt;&quot;
+                }
+            ],
+            &quot;function_type&quot;: &quot;static&quot;,
+            &quot;since&quot;: &quot;3.0.0&quot;,
+            &quot;source&quot;: {
+                &quot;line&quot;: 850,
+                &quot;path&quot;: &quot;lib/init.lua&quot;
+            }
+        },
+        {
+            &quot;name&quot;: &quot;is&quot;,
+            &quot;desc&quot;: &quot;Checks whether the given object is a Promise via duck typing. This only checks if the object is a table and has an `andThen` method.&quot;,
+            &quot;params&quot;: [
+                {
+                    &quot;name&quot;: &quot;object&quot;,
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;any&quot;
+                }
+            ],
+            &quot;returns&quot;: [
+                {
+                    &quot;desc&quot;: &quot;`true` if the given `object` is a Promise.&quot;,
+                    &quot;lua_type&quot;: &quot;boolean&quot;
+                }
+            ],
+            &quot;function_type&quot;: &quot;static&quot;,
+            &quot;source&quot;: {
+                &quot;line&quot;: 949,
+                &quot;path&quot;: &quot;lib/init.lua&quot;
+            }
+        },
+        {
+            &quot;name&quot;: &quot;promisify&quot;,
+            &quot;desc&quot;: &quot;Wraps a function that yields into one that returns a Promise.\n\nAny errors that occur while executing the function will be turned into rejections.\n\n:::info\n`Promise.promisify` is similar to [Promise.try](#try), except the callback is returned as a callable function instead of being invoked immediately.\n:::\n\n```lua\nlocal sleep = Promise.promisify(wait)\n\nsleep(1):andThen(print)\n```\n\n```lua\nlocal isPlayerInGroup = Promise.promisify(function(player, groupId)\n\treturn player:IsInGroup(groupId)\nend)\n```&quot;,
+            &quot;params&quot;: [
+                {
+                    &quot;name&quot;: &quot;callback&quot;,
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;(...: any) -&gt; ...any&quot;
+                }
+            ],
+            &quot;returns&quot;: [
+                {
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;(...: any) -&gt; Promise&quot;
+                }
+            ],
+            &quot;function_type&quot;: &quot;static&quot;,
+            &quot;source&quot;: {
+                &quot;line&quot;: 998,
+                &quot;path&quot;: &quot;lib/init.lua&quot;
+            }
+        },
+        {
+            &quot;name&quot;: &quot;delay&quot;,
+            &quot;desc&quot;: &quot;Returns a Promise that resolves after `seconds` seconds have passed. The Promise resolves with the actual amount of time that was waited.\n\nThis function is **not** a wrapper around `wait`. `Promise.delay` uses a custom scheduler which provides more accurate timing. As an optimization, cancelling this Promise instantly removes the task from the scheduler.\n\n:::warning\nPassing `NaN`, infinity, or a number less than 1/60 is equivalent to passing 1/60.\n:::\n\n```lua\n\tPromise.delay(5):andThenCall(print, \&quot;This prints after 5 seconds\&quot;)\n```&quot;,
+            &quot;params&quot;: [
+                {
+                    &quot;name&quot;: &quot;seconds&quot;,
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;number&quot;
+                }
+            ],
+            &quot;returns&quot;: [
+                {
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;Promise&lt;number&gt;&quot;
+                }
+            ],
+            &quot;function_type&quot;: &quot;static&quot;,
+            &quot;source&quot;: {
+                &quot;line&quot;: 1022,
+                &quot;path&quot;: &quot;lib/init.lua&quot;
+            }
+        },
+        {
+            &quot;name&quot;: &quot;timeout&quot;,
+            &quot;desc&quot;: &quot;Returns a new Promise that resolves if the chained Promise resolves within `seconds` seconds, or rejects if execution time exceeds `seconds`. The chained Promise will be cancelled if the timeout is reached.\n\nRejects with `rejectionValue` if it is non-nil. If a `rejectionValue` is not given, it will reject with a `Promise.Error(Promise.Error.Kind.TimedOut)`. This can be checked with [[Error.isKind]].\n\n```lua\ngetSomething():timeout(5):andThen(function(something)\n\t-- got something and it only took at max 5 seconds\nend):catch(function(e)\n\t-- Either getting something failed or the time was exceeded.\n\n\tif Promise.Error.isKind(e, Promise.Error.Kind.TimedOut) then\n\t\twarn(\&quot;Operation timed out!\&quot;)\n\telse\n\t\twarn(\&quot;Operation encountered an error!\&quot;)\n\tend\nend)\n```\n\nSugar for:\n\n```lua\nPromise.race({\n\tPromise.delay(seconds):andThen(function()\n\t\treturn Promise.reject(\n\t\t\trejectionValue == nil\n\t\t\tand Promise.Error.new({ kind = Promise.Error.Kind.TimedOut })\n\t\t\tor rejectionValue\n\t\t)\n\tend),\n\tpromise\n})\n```&quot;,
+            &quot;params&quot;: [
+                {
+                    &quot;name&quot;: &quot;seconds&quot;,
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;number&quot;
+                },
+                {
+                    &quot;name&quot;: &quot;rejectionValue?&quot;,
+                    &quot;desc&quot;: &quot;The value to reject with if the timeout is reached&quot;,
+                    &quot;lua_type&quot;: &quot;any&quot;
+                }
+            ],
+            &quot;returns&quot;: [
+                {
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;Promise&quot;
+                }
+            ],
+            &quot;function_type&quot;: &quot;method&quot;,
+            &quot;source&quot;: {
+                &quot;line&quot;: 1158,
+                &quot;path&quot;: &quot;lib/init.lua&quot;
+            }
+        },
+        {
+            &quot;name&quot;: &quot;getStatus&quot;,
+            &quot;desc&quot;: &quot;Returns the current Promise status.&quot;,
+            &quot;params&quot;: [],
+            &quot;returns&quot;: [
+                {
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;Status&quot;
+                }
+            ],
+            &quot;function_type&quot;: &quot;method&quot;,
+            &quot;source&quot;: {
+                &quot;line&quot;: 1182,
+                &quot;path&quot;: &quot;lib/init.lua&quot;
+            }
+        },
+        {
+            &quot;name&quot;: &quot;andThen&quot;,
+            &quot;desc&quot;: &quot;Chains onto an existing Promise and returns a new Promise.\n\n:::warning\nWithin the failure handler, you should never assume that the rejection value is a string. Some rejections within the Promise library are represented by [[Error]] objects. If you want to treat it as a string for debugging, you should call `tostring` on it first.\n:::\n\nReturn a Promise from the success or failure handler and it will be chained onto.&quot;,
+            &quot;params&quot;: [
+                {
+                    &quot;name&quot;: &quot;successHandler&quot;,
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;(...: any) -&gt; ...any&quot;
+                },
+                {
+                    &quot;name&quot;: &quot;failureHandler?&quot;,
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;(...: any) -&gt; ...any&quot;
+                }
+            ],
+            &quot;returns&quot;: [
+                {
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;Promise&lt;...any&gt;&quot;
+                }
+            ],
+            &quot;function_type&quot;: &quot;method&quot;,
+            &quot;source&quot;: {
+                &quot;line&quot;: 1254,
+                &quot;path&quot;: &quot;lib/init.lua&quot;
+            }
+        },
+        {
+            &quot;name&quot;: &quot;catch&quot;,
+            &quot;desc&quot;: &quot;Shorthand for `Promise:andThen(nil, failureHandler)`.\n\nReturns a Promise that resolves if the `failureHandler` worked without encountering an additional error.\n\n:::warning\nWithin the failure handler, you should never assume that the rejection value is a string. Some rejections within the Promise library are represented by [[Error]] objects. If you want to treat it as a string for debugging, you should call `tostring` on it first.\n:::&quot;,
+            &quot;params&quot;: [
+                {
+                    &quot;name&quot;: &quot;failureHandler&quot;,
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;(...: any) -&gt; ...any&quot;
+                }
+            ],
+            &quot;returns&quot;: [
+                {
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;Promise&lt;...any&gt;&quot;
+                }
+            ],
+            &quot;function_type&quot;: &quot;method&quot;,
+            &quot;source&quot;: {
+                &quot;line&quot;: 1280,
+                &quot;path&quot;: &quot;lib/init.lua&quot;
+            }
+        },
+        {
+            &quot;name&quot;: &quot;tap&quot;,
+            &quot;desc&quot;: &quot;Similar to [Promise.andThen](#andThen), except the return value is the same as the value passed to the handler. In other words, you can insert a `:tap` into a Promise chain without affecting the value that downstream Promises receive.\n\n```lua\n\tgetTheValue()\n\t:tap(print)\n\t:andThen(function(theValue)\n\t\tprint(\&quot;Got\&quot;, theValue, \&quot;even though print returns nil!\&quot;)\n\tend)\n```\n\nIf you return a Promise from the tap handler callback, its value will be discarded but `tap` will still wait until it resolves before passing the original value through.&quot;,
+            &quot;params&quot;: [
+                {
+                    &quot;name&quot;: &quot;tapHandler&quot;,
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;(...: any) -&gt; ...any&quot;
+                }
+            ],
+            &quot;returns&quot;: [
+                {
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;Promise&lt;...any&gt;&quot;
+                }
+            ],
+            &quot;function_type&quot;: &quot;method&quot;,
+            &quot;source&quot;: {
+                &quot;line&quot;: 1304,
+                &quot;path&quot;: &quot;lib/init.lua&quot;
+            }
+        },
+        {
+            &quot;name&quot;: &quot;andThenCall&quot;,
+            &quot;desc&quot;: &quot;Attaches an `andThen` handler to this Promise that calls the given callback with the predefined arguments. The resolved value is discarded.\n\n```lua\n\tpromise:andThenCall(someFunction, \&quot;some\&quot;, \&quot;arguments\&quot;)\n```\n\nThis is sugar for\n\n```lua\n\tpromise:andThen(function()\n\treturn someFunction(\&quot;some\&quot;, \&quot;arguments\&quot;)\n\tend)\n```&quot;,
+            &quot;params&quot;: [
+                {
+                    &quot;name&quot;: &quot;callback&quot;,
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;(...: any) -&gt; any&quot;
+                },
+                {
+                    &quot;name&quot;: &quot;...?&quot;,
+                    &quot;desc&quot;: &quot;Additional arguments which will be passed to `callback`&quot;,
+                    &quot;lua_type&quot;: &quot;any&quot;
+                }
+            ],
+            &quot;returns&quot;: [
+                {
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;Promise&quot;
+                }
+            ],
+            &quot;function_type&quot;: &quot;method&quot;,
+            &quot;source&quot;: {
+                &quot;line&quot;: 1339,
+                &quot;path&quot;: &quot;lib/init.lua&quot;
+            }
+        },
+        {
+            &quot;name&quot;: &quot;andThenReturn&quot;,
+            &quot;desc&quot;: &quot;Attaches an `andThen` handler to this Promise that discards the resolved value and returns the given value from it.\n\n```lua\n\tpromise:andThenReturn(\&quot;some\&quot;, \&quot;values\&quot;)\n```\n\nThis is sugar for\n\n```lua\n\tpromise:andThen(function()\n\t\treturn \&quot;some\&quot;, \&quot;values\&quot;\n\tend)\n```\n\n:::caution\nPromises are eager, so if you pass a Promise to `andThenReturn`, it will begin executing before `andThenReturn` is reached in the chain. Likewise, if you pass a Promise created from [[Promise.reject]] into `andThenReturn`, it&#x27;s possible that this will trigger the unhandled rejection warning. If you need to return a Promise, it&#x27;s usually best practice to use [[Promise.andThen]].\n:::&quot;,
+            &quot;params&quot;: [
+                {
+                    &quot;name&quot;: &quot;...&quot;,
+                    &quot;desc&quot;: &quot;Values to return from the function&quot;,
+                    &quot;lua_type&quot;: &quot;any&quot;
+                }
+            ],
+            &quot;returns&quot;: [
+                {
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;Promise&quot;
+                }
+            ],
+            &quot;function_type&quot;: &quot;method&quot;,
+            &quot;source&quot;: {
+                &quot;line&quot;: 1369,
+                &quot;path&quot;: &quot;lib/init.lua&quot;
+            }
+        },
+        {
+            &quot;name&quot;: &quot;cancel&quot;,
+            &quot;desc&quot;: &quot;Cancels this promise, preventing the promise from resolving or rejecting. Does not do anything if the promise is already settled.\n\nCancellations will propagate upwards and downwards through chained promises.\n\nPromises will only be cancelled if all of their consumers are also cancelled. This is to say that if you call `andThen` twice on the same promise, and you cancel only one of the child promises, it will not cancel the parent promise until the other child promise is also cancelled.\n\n```lua\n\tpromise:cancel()\n```&quot;,
+            &quot;params&quot;: [],
+            &quot;returns&quot;: [],
+            &quot;function_type&quot;: &quot;method&quot;,
+            &quot;source&quot;: {
+                &quot;line&quot;: 1387,
+                &quot;path&quot;: &quot;lib/init.lua&quot;
+            }
+        },
+        {
+            &quot;name&quot;: &quot;finally&quot;,
+            &quot;desc&quot;: &quot;Set a handler that will be called regardless of the promise&#x27;s fate. The handler is called when the promise is resolved, rejected, *or* cancelled.\n\nReturns a new promise chained from this promise.\n\n:::caution\nIf the Promise is cancelled, any Promises chained off of it with `andThen` won&#x27;t run. Only Promises chained with `finally` or `done` will run in the case of cancellation.\n:::\n\n```lua\nlocal thing = createSomething()\n\ndoSomethingWith(thing)\n\t:andThen(function()\n\t\tprint(\&quot;It worked!\&quot;)\n\t\t-- do something..\n\tend)\n\t:catch(function()\n\t\twarn(\&quot;Oh no it failed!\&quot;)\n\tend)\n\t:finally(function()\n\t\t-- either way, destroy thing\n\n\t\tthing:Destroy()\n\tend)\n\n```&quot;,
+            &quot;params&quot;: [
+                {
+                    &quot;name&quot;: &quot;finallyHandler&quot;,
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;(status: Status) -&gt; ...any&quot;
+                }
+            ],
+            &quot;returns&quot;: [
+                {
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;Promise&lt;...any&gt;&quot;
+                }
+            ],
+            &quot;function_type&quot;: &quot;method&quot;,
+            &quot;source&quot;: {
+                &quot;line&quot;: 1498,
+                &quot;path&quot;: &quot;lib/init.lua&quot;
+            }
+        },
+        {
+            &quot;name&quot;: &quot;finallyCall&quot;,
+            &quot;desc&quot;: &quot;Same as `andThenCall`, except for `finally`.\n\nAttaches a `finally` handler to this Promise that calls the given callback with the predefined arguments.&quot;,
+            &quot;params&quot;: [
+                {
+                    &quot;name&quot;: &quot;callback&quot;,
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;(...: any) -&gt; any&quot;
+                },
+                {
+                    &quot;name&quot;: &quot;...?&quot;,
+                    &quot;desc&quot;: &quot;Additional arguments which will be passed to `callback`&quot;,
+                    &quot;lua_type&quot;: &quot;any&quot;
+                }
+            ],
+            &quot;returns&quot;: [
+                {
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;Promise&quot;
+                }
+            ],
+            &quot;function_type&quot;: &quot;method&quot;,
+            &quot;source&quot;: {
+                &quot;line&quot;: 1515,
+                &quot;path&quot;: &quot;lib/init.lua&quot;
+            }
+        },
+        {
+            &quot;name&quot;: &quot;finallyReturn&quot;,
+            &quot;desc&quot;: &quot;Attaches a `finally` handler to this Promise that discards the resolved value and returns the given value from it.\n\n```lua\n\tpromise:finallyReturn(\&quot;some\&quot;, \&quot;values\&quot;)\n```\n\nThis is sugar for\n\n```lua\n\tpromise:finally(function()\n\t\treturn \&quot;some\&quot;, \&quot;values\&quot;\n\tend)\n```&quot;,
+            &quot;params&quot;: [
+                {
+                    &quot;name&quot;: &quot;...&quot;,
+                    &quot;desc&quot;: &quot;Values to return from the function&quot;,
+                    &quot;lua_type&quot;: &quot;any&quot;
+                }
+            ],
+            &quot;returns&quot;: [
+                {
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;Promise&quot;
+                }
+            ],
+            &quot;function_type&quot;: &quot;method&quot;,
+            &quot;source&quot;: {
+                &quot;line&quot;: 1541,
+                &quot;path&quot;: &quot;lib/init.lua&quot;
+            }
+        },
+        {
+            &quot;name&quot;: &quot;done&quot;,
+            &quot;desc&quot;: &quot;Set a handler that will be called only if the Promise resolves or is cancelled. This method is similar to `finally`, except it doesn&#x27;t catch rejections.\n\n:::caution\n`done` should be reserved specifically when you want to perform some operation after the Promise is finished (like `finally`), but you don&#x27;t want to consume rejections (like in &lt;a href=\&quot;/roblox-lua-promise/lib/Examples.html#cancellable-animation-sequence\&quot;&gt;this example&lt;/a&gt;). You should use `andThen` instead if you only care about the Resolved case.\n:::\n\n:::warning\nLike `finally`, if the Promise is cancelled, any Promises chained off of it with `andThen` won&#x27;t run. Only Promises chained with `done` and `finally` will run in the case of cancellation.\n:::\n\nReturns a new promise chained from this promise.&quot;,
+            &quot;params&quot;: [
+                {
+                    &quot;name&quot;: &quot;doneHandler&quot;,
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;(status: Status) -&gt; ...any&quot;
+                }
+            ],
+            &quot;returns&quot;: [
+                {
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;Promise&lt;...any&gt;&quot;
+                }
+            ],
+            &quot;function_type&quot;: &quot;method&quot;,
+            &quot;source&quot;: {
+                &quot;line&quot;: 1564,
+                &quot;path&quot;: &quot;lib/init.lua&quot;
+            }
+        },
+        {
+            &quot;name&quot;: &quot;doneCall&quot;,
+            &quot;desc&quot;: &quot;Same as `andThenCall`, except for `done`.\n\nAttaches a `done` handler to this Promise that calls the given callback with the predefined arguments.&quot;,
+            &quot;params&quot;: [
+                {
+                    &quot;name&quot;: &quot;callback&quot;,
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;(...: any) -&gt; any&quot;
+                },
+                {
+                    &quot;name&quot;: &quot;...?&quot;,
+                    &quot;desc&quot;: &quot;Additional arguments which will be passed to `callback`&quot;,
+                    &quot;lua_type&quot;: &quot;any&quot;
+                }
+            ],
+            &quot;returns&quot;: [
+                {
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;Promise&quot;
+                }
+            ],
+            &quot;function_type&quot;: &quot;method&quot;,
+            &quot;source&quot;: {
+                &quot;line&quot;: 1581,
+                &quot;path&quot;: &quot;lib/init.lua&quot;
+            }
+        },
+        {
+            &quot;name&quot;: &quot;doneReturn&quot;,
+            &quot;desc&quot;: &quot;Attaches a `done` handler to this Promise that discards the resolved value and returns the given value from it.\n\n```lua\n\tpromise:doneReturn(\&quot;some\&quot;, \&quot;values\&quot;)\n```\n\nThis is sugar for\n\n```lua\n\tpromise:done(function()\n\t\treturn \&quot;some\&quot;, \&quot;values\&quot;\n\tend)\n```&quot;,
+            &quot;params&quot;: [
+                {
+                    &quot;name&quot;: &quot;...&quot;,
+                    &quot;desc&quot;: &quot;Values to return from the function&quot;,
+                    &quot;lua_type&quot;: &quot;any&quot;
+                }
+            ],
+            &quot;returns&quot;: [
+                {
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;Promise&quot;
+                }
+            ],
+            &quot;function_type&quot;: &quot;method&quot;,
+            &quot;source&quot;: {
+                &quot;line&quot;: 1607,
+                &quot;path&quot;: &quot;lib/init.lua&quot;
+            }
+        },
+        {
+            &quot;name&quot;: &quot;awaitStatus&quot;,
+            &quot;desc&quot;: &quot;Yields the current thread until the given Promise completes. Returns the Promise&#x27;s status, followed by the values that the promise resolved or rejected with.&quot;,
+            &quot;params&quot;: [],
+            &quot;returns&quot;: [
+                {
+                    &quot;desc&quot;: &quot;The Status representing the fate of the Promise&quot;,
+                    &quot;lua_type&quot;: &quot;Status&quot;
+                },
+                {
+                    &quot;desc&quot;: &quot;The values the Promise resolved or rejected with.&quot;,
+                    &quot;lua_type&quot;: &quot;...any&quot;
+                }
+            ],
+            &quot;function_type&quot;: &quot;method&quot;,
+            &quot;yields&quot;: true,
+            &quot;source&quot;: {
+                &quot;line&quot;: 1621,
+                &quot;path&quot;: &quot;lib/init.lua&quot;
+            }
+        },
+        {
+            &quot;name&quot;: &quot;await&quot;,
+            &quot;desc&quot;: &quot;Yields the current thread until the given Promise completes. Returns true if the Promise resolved, followed by the values that the promise resolved or rejected with.\n\n:::caution\nIf the Promise gets cancelled, this function will return `false`, which is indistinguishable from a rejection. If you need to differentiate, you should use [[Promise.awaitStatus]] instead.\n:::\n\n```lua\n\tlocal worked, value = getTheValue():await()\n\nif worked then\n\tprint(\&quot;got\&quot;, value)\nelse\n\twarn(\&quot;it failed\&quot;)\nend\n```&quot;,
+            &quot;params&quot;: [],
+            &quot;returns&quot;: [
+                {
+                    &quot;desc&quot;: &quot;`true` if the Promise successfully resolved&quot;,
+                    &quot;lua_type&quot;: &quot;boolean&quot;
+                },
+                {
+                    &quot;desc&quot;: &quot;The values the Promise resolved or rejected with.&quot;,
+                    &quot;lua_type&quot;: &quot;...any&quot;
+                }
+            ],
+            &quot;function_type&quot;: &quot;method&quot;,
+            &quot;yields&quot;: true,
+            &quot;source&quot;: {
+                &quot;line&quot;: 1669,
+                &quot;path&quot;: &quot;lib/init.lua&quot;
+            }
+        },
+        {
+            &quot;name&quot;: &quot;expect&quot;,
+            &quot;desc&quot;: &quot;Yields the current thread until the given Promise completes. Returns the the values that the promise resolved with.\n\n```lua\nlocal worked = pcall(function()\n\tprint(\&quot;got\&quot;, getTheValue():expect())\nend)\n\nif not worked then\n\twarn(\&quot;it failed\&quot;)\nend\n```\n\nThis is essentially sugar for:\n\n```lua\nselect(2, assert(promise:await()))\n```\n\n**Errors** if the Promise rejects or gets cancelled.&quot;,
+            &quot;params&quot;: [],
+            &quot;returns&quot;: [
+                {
+                    &quot;desc&quot;: &quot;The values the Promise resolved with.&quot;,
+                    &quot;lua_type&quot;: &quot;...any&quot;
+                }
+            ],
+            &quot;function_type&quot;: &quot;method&quot;,
+            &quot;errors&quot;: [
+                {
+                    &quot;lua_type&quot;: &quot;any&quot;,
+                    &quot;desc&quot;: &quot;Errors with the rejection value if this Promise rejects or gets cancelled.&quot;
+                }
+            ],
+            &quot;yields&quot;: true,
+            &quot;source&quot;: {
+                &quot;line&quot;: 1706,
+                &quot;path&quot;: &quot;lib/init.lua&quot;
+            }
+        },
+        {
+            &quot;name&quot;: &quot;now&quot;,
+            &quot;desc&quot;: &quot;Chains a Promise from this one that is resolved if this Promise is already resolved, and rejected if it is not resolved at the time of calling `:now()`. This can be used to ensure your `andThen` handler occurs on the same frame as the root Promise execution.\n\n```lua\ndoSomething()\n\t:now()\n\t:andThen(function(value)\n\t\tprint(\&quot;Got\&quot;, value, \&quot;synchronously.\&quot;)\n\tend)\n```\n\nIf this Promise is still running, Rejected, or Cancelled, the Promise returned from `:now()` will reject with the `rejectionValue` if passed, otherwise with a `Promise.Error(Promise.Error.Kind.NotResolvedInTime)`. This can be checked with [[Error.isKind]].&quot;,
+            &quot;params&quot;: [
+                {
+                    &quot;name&quot;: &quot;rejectionValue?&quot;,
+                    &quot;desc&quot;: &quot;The value to reject with if the Promise isn&#x27;t resolved&quot;,
+                    &quot;lua_type&quot;: &quot;any&quot;
+                }
+            ],
+            &quot;returns&quot;: [
+                {
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;Promise&quot;
+                }
+            ],
+            &quot;function_type&quot;: &quot;method&quot;,
+            &quot;source&quot;: {
+                &quot;line&quot;: 1894,
+                &quot;path&quot;: &quot;lib/init.lua&quot;
+            }
+        },
+        {
+            &quot;name&quot;: &quot;retry&quot;,
+            &quot;desc&quot;: &quot;Repeatedly calls a Promise-returning function up to `times` number of times, until the returned Promise resolves.\n\nIf the amount of retries is exceeded, the function will return the latest rejected Promise.\n\n```lua\nlocal function canFail(a, b, c)\n\treturn Promise.new(function(resolve, reject)\n\t\t-- do something that can fail\n\n\t\tlocal failed, thing = doSomethingThatCanFail(a, b, c)\n\n\t\tif failed then\n\t\t\treject(\&quot;it failed\&quot;)\n\t\telse\n\t\t\tresolve(thing)\n\t\tend\n\tend)\nend\n\nlocal MAX_RETRIES = 10\nlocal value = Promise.retry(canFail, MAX_RETRIES, \&quot;foo\&quot;, \&quot;bar\&quot;, \&quot;baz\&quot;) -- args to send to canFail\n```&quot;,
+            &quot;params&quot;: [
+                {
+                    &quot;name&quot;: &quot;callback&quot;,
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;(...: P) -&gt; Promise&lt;T&gt;&quot;
+                },
+                {
+                    &quot;name&quot;: &quot;times&quot;,
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;number&quot;
+                },
+                {
+                    &quot;name&quot;: &quot;...?&quot;,
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;P&quot;
+                }
+            ],
+            &quot;returns&quot;: [],
+            &quot;function_type&quot;: &quot;static&quot;,
+            &quot;since&quot;: &quot;3.0.0&quot;,
+            &quot;source&quot;: {
+                &quot;line&quot;: 1938,
+                &quot;path&quot;: &quot;lib/init.lua&quot;
+            }
+        },
+        {
+            &quot;name&quot;: &quot;fromEvent&quot;,
+            &quot;desc&quot;: &quot;Converts an event into a Promise which resolves the next time the event fires.\n\nThe optional `predicate` callback, if passed, will receive the event arguments and should return `true` or `false`, based on if this fired event should resolve the Promise or not. If `true`, the Promise resolves. If `false`, nothing happens and the predicate will be rerun the next time the event fires.\n\nThe Promise will resolve with the event arguments.\n\n:::tip\nThis function will work given any object with a `Connect` method. This includes all Roblox events.\n:::\n\n```lua\n-- Creates a Promise which only resolves when `somePart` is touched\n-- by a part named `\&quot;Something specific\&quot;`.\nreturn Promise.fromEvent(somePart.Touched, function(part)\n\treturn part.Name == \&quot;Something specific\&quot;\nend)\n```&quot;,
+            &quot;params&quot;: [
+                {
+                    &quot;name&quot;: &quot;event&quot;,
+                    &quot;desc&quot;: &quot;Any object with a `Connect` method. This includes all Roblox events.&quot;,
+                    &quot;lua_type&quot;: &quot;Event&quot;
+                },
+                {
+                    &quot;name&quot;: &quot;predicate?&quot;,
+                    &quot;desc&quot;: &quot;A function which determines if the Promise should resolve with the given value, or wait for the next event to check again.&quot;,
+                    &quot;lua_type&quot;: &quot;(...: P) -&gt; boolean&quot;
+                }
+            ],
+            &quot;returns&quot;: [
+                {
+                    &quot;desc&quot;: &quot;&quot;,
+                    &quot;lua_type&quot;: &quot;Promise&lt;P&gt;&quot;
+                }
+            ],
+            &quot;function_type&quot;: &quot;static&quot;,
+            &quot;since&quot;: &quot;3.0.0&quot;,
+            &quot;source&quot;: {
+                &quot;line&quot;: 1977,
+                &quot;path&quot;: &quot;lib/init.lua&quot;
+            }
+        }
+    ],
+    &quot;properties&quot;: [
+        {
+            &quot;name&quot;: &quot;Status&quot;,
+            &quot;desc&quot;: &quot;A table containing all members of the `Status` enum, e.g., `Promise.Status.Resolved`.&quot;,
+            &quot;lua_type&quot;: &quot;Status&quot;,
+            &quot;tags&quot;: [
+                &quot;enums&quot;,
+                &quot;static&quot;
+            ],
+            &quot;readonly&quot;: true,
+            &quot;source&quot;: {
+                &quot;line&quot;: 194,
+                &quot;path&quot;: &quot;lib/init.lua&quot;
+            }
+        }
+    ],
+    &quot;types&quot;: [
+        {
+            &quot;name&quot;: &quot;Status&quot;,
+            &quot;desc&quot;: &quot;An enum value used to represent the Promise&#x27;s status.&quot;,
+            &quot;fields&quot;: [
+                {
+                    &quot;name&quot;: &quot;Started&quot;,
+                    &quot;lua_type&quot;: &quot;\&quot;Started\&quot;&quot;,
+                    &quot;desc&quot;: &quot;The Promise is executing, and not settled yet.&quot;
+                },
+                {
+                    &quot;name&quot;: &quot;Resolved&quot;,
+                    &quot;lua_type&quot;: &quot;\&quot;Resolved\&quot;&quot;,
+                    &quot;desc&quot;: &quot;The Promise finished successfully.&quot;
+                },
+                {
+                    &quot;name&quot;: &quot;Rejected&quot;,
+                    &quot;lua_type&quot;: &quot;\&quot;Rejected\&quot;&quot;,
+                    &quot;desc&quot;: &quot;The Promise was rejected.&quot;
+                },
+                {
+                    &quot;name&quot;: &quot;Cancelled&quot;,
+                    &quot;lua_type&quot;: &quot;\&quot;Cancelled\&quot;&quot;,
+                    &quot;desc&quot;: &quot;The Promise was cancelled before it finished.&quot;
+                }
+            ],
+            &quot;tags&quot;: [
+                &quot;enum&quot;
+            ],
+            &quot;source&quot;: {
+                &quot;line&quot;: 186,
+                &quot;path&quot;: &quot;lib/init.lua&quot;
+            }
+        }
+    ],
+    &quot;name&quot;: &quot;Promise&quot;,
+    &quot;desc&quot;: &quot;A Promise is an object that represents a value that will exist in the future, but doesn&#x27;t right now.\nPromises allow you to then attach callbacks that can run once the value becomes available (known as *resolving*),\nor if an error has occurred (known as *rejecting*).&quot;,
+    &quot;source&quot;: {
+        &quot;line&quot;: 202,
+        &quot;path&quot;: &quot;lib/init.lua&quot;
+    }
+}</pre></details></div></main></div></div><footer class="footer footer--dark"><div class="container"><div class="footer__bottom text--center"><div class="footer__copyright">Copyright © 2021 evaera. Built with Moonwave and Docusaurus.</div></div></div></footer></div>
+<script src="/roblox-lua-promise/assets/js/runtime~main.3ffdb875.js"></script>
+<script src="/roblox-lua-promise/assets/js/main.9487701b.js"></script>
+</body>
+</html>
