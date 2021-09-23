@@ -1,5 +1,6 @@
 
 [docusaurus]
+url = "https://eryn.io"
 tagline = "Promise implementation for Roblox"
 
 [[navbar.items]]
