@@ -1,5 +1,5 @@
 ---
-title: Installation
+sidebar_position: 2
 ---
 
 # Installation
@@ -9,15 +9,21 @@ title: Installation
 1. In Roblox Studio, select the folder where you keep your third party modules / utilities.
 2. Run this in the command bar:
 
-<textarea readonly style="width: 100%" onclick="this.select()">local Http = game:GetService("HttpService")
-local HttpEnabled = Http.HttpEnabled
-Http.HttpEnabled = true
-local m = Instance.new("ModuleScript")
-m.Parent = game:GetService("Selection"):Get()[1] or game:GetService("ServerScriptService")
-m.Name = "Promise"
-m.Source = Http:GetAsync("https://raw.githubusercontent.com/evaera/roblox-lua-promise/master/lib/init.lua")
-game:GetService("Selection"):Set({m})
-Http.HttpEnabled = HttpEnabled</textarea>
+<textarea readonly onClick={e => e.target.select()} style={{
+   width: "100%"
+}}>
+   {`
+   local Http = game:GetService("HttpService")
+   local HttpEnabled = Http.HttpEnabled
+   Http.HttpEnabled = true
+   local m = Instance.new("ModuleScript")
+   m.Parent = game:GetService("Selection"):Get()[1] or game:GetService("ServerScriptService")
+   m.Name = "Promise"
+   m.Source = Http:GetAsync("https://raw.githubusercontent.com/evaera/roblox-lua-promise/master/lib/init.lua")
+   game:GetService("Selection"):Set({m})
+   Http.HttpEnabled = HttpEnabled
+   `}
+</textarea>
 
 ### Method 2 - Manual
 

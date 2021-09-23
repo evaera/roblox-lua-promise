@@ -1,0 +1,24 @@
+
+[docusaurus]
+tagline = "Promise implementation for Roblox"
+
+[[navbar.items]]
+href = "https://discord.gg/ECEDZbFXnE"
+label = "Discord"
+position = "right"
+
+[home]
+enabled = true
+includeReadme = true
+
+[[home.features]]
+title = "Versatile, composable, predictable"
+description = "Promises model asynchronous operations in a way that makes them delightful to work with. You can easily chain together multiple async functions and you don't have to worry about accidentally yielding."
+
+[[home.features]]
+title = "Rich API"
+description = "This library includes many utility functions beyond the basic functionality which make composing and creating Promises a breeze."
+
+[[home.features]]
+title = "Cancellation"
+description = "On second thought, we don't want that value anymore. Promises support cancellation, which allows you to prematurely stop an async task and clean up if needed."

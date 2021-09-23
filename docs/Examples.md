@@ -18,7 +18,7 @@ Chain together multiple Promise-returning functions, and only handle a potential
 
 ## IsInGroup wrapper
 
-This function demonstrates how to convert a function that yields into a function that returns a Promise. (Assuming you don't want to use <ApiLink to="Promise.promisify" />)
+This function demonstrates how to convert a function that yields into a function that returns a Promise. (Assuming you don't want to use [Promise.promisify](/api/Promise#promisify))
 
 ```lua
 local function isPlayerInGroup(player, groupId)
@@ -52,7 +52,7 @@ end
 ## Cancellable animation sequence
 The following is an example of an animation sequence which is composable and cancellable. If the sequence is cancelled, the animated part will instantly jump to the end position as if it had played all the way through.
 
-We use <ApiLink to="Promise.doneCall" />, which uses `done` internally, instead of `andThen` because we want the Promises to run even if the Promise is cancelled. We handle the case of the Promise being cancelled with the `onCancel` function.
+We use [Promise.doneCall](/api/Promise#doneCall), which uses `done` internally, instead of `andThen` because we want the Promises to run even if the Promise is cancelled. We handle the case of the Promise being cancelled with the `onCancel` function.
 
 We take advantage of Promise chaining by returning Promises from the `done` handler functions. Because of this behavior, cancelling the final Promise in the chain will propagate up to the very top and cancel every single Promise you see here.
 

@@ -3,6 +3,7 @@
 	<p>An implementation of <code>Promise</code> similar to Promise/A+.</p>
 	<a href="https://eryn.io/roblox-lua-promise/"><strong>View docs</strong></a>
 </div>
+<!--moonwave-hide-before-this-line-->
 
 
 ## Why you should use Promises
@@ -23,7 +24,7 @@ This Promise implementation attempts to satisfy these traits:
 ## Example
 `Promise.new` returns synchronously.
 
-```lua
+```
 local HttpService = game:GetService("HttpService")
 
 -- A light wrapper around HttpService

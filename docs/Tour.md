@@ -1,5 +1,5 @@
 ---
-title: Tour of Promises
+sidebar_position: 3
 ---
 
 # Tour of Promises
@@ -8,7 +8,7 @@ Here's quick introduction to Promises. For more complete information, check out 
 
 ## Creating a Promise
 
-There are a few ways to create a Promise. The most common way is to call <ApiLink to="Promise.new" />:
+There are a few ways to create a Promise. The most common way is to call [Promise.new](/api/Promise#new):
 
 ```lua
 local myFunction()
@@ -23,8 +23,8 @@ myFunction():andThen(print)
 
 Another example which resolves a Promise after the first time an event fires:
 
-::: tip
-There's actually a built-in function called <ApiLink to="Promise.fromEvent" /> that does exactly this!
+:::tip
+There's actually a built-in function called [Promise.fromEvent](/api/Promise#fromEvent) that does exactly this!
 :::
 
 ```lua
@@ -46,7 +46,7 @@ end
 myFunction():andThen(print)
 ```
 
-If you just want to wrap a single value in a Promise, you can use <ApiLink to="Promise.resolve" />:
+If you just want to wrap a single value in a Promise, you can use [Promise.resolve](/api/Promise#resolve):
 
 ```lua
 local myFunction()
@@ -56,7 +56,7 @@ end
 myFunction():andThen(print)
 ```
 
-If you already have a function that yields, and you want it to return a Promise instead, you can use <ApiLink to="Promise.promisify" /> or <ApiLink to="Promise.try" />:
+If you already have a function that yields, and you want it to return a Promise instead, you can use [Promise.promisify](/api/Promise#promisify) or [Promise.try](/api/Promise#promisify):
 
 ```lua
 local function myYieldingFunction(waitTime, text)
@@ -123,7 +123,7 @@ Using `spawn`, `wait`, or `delay` alongside asynchronous code can be tempting, b
 
 `spawn`, `wait`, and `delay` do not resume threads at a consistent interval. If Roblox has resumed too many threads in a single Lua step, it will begin throttling and your thread that was meant to be resumed on the next frame could actually be resumed several seconds later. The unexpected delay caused by this behavior will cause cascading timing issues in your game and could lead to some potentially ugly bugs.
 
-You should use <ApiLink to="Promise.delay" /> instead, which has an accurate custom scheduler.
+You should use [Promise.delay](/api/Promise#delay) instead, which has an accurate custom scheduler.
 
 ```lua
 Promise.delay(5):andThen(function()
@@ -131,7 +131,7 @@ Promise.delay(5):andThen(function()
 end)
 ```
 
-For quickly launching a new thread (similar to `spawn`), you can use <ApiLink to="Promise.try" />:
+For quickly launching a new thread (similar to `spawn`), you can use [Promise.try](/api/Promise#try):
 
 ```lua
 Promise.try(function()
@@ -141,7 +141,7 @@ end)
 someCode()
 ```
 
-As a convenience, <ApiLink to="Promise.timeout" /> exists, which will return a rejected Promise if the Promise you call it on doesn't resolve within the given amount of seconds:
+As a convenience, [Promise:timeout](/api/Promise#timeout) exists, which will return a rejected Promise if the Promise you call it on doesn't resolve within the given amount of seconds:
 
 ```lua
 returnsAPromise():timeout(5):andThen(function()
@@ -154,7 +154,7 @@ Promises are cancellable, but abort semantics are optional. This means that you 
 
 If a Promise is already cancelled at the time of calling its `onCancel` hook, the hook will be called immediately.
 
-::: tip
+:::tip
 It's good practice to add an `onCancel` hook to all of your asynchronous Promises unless it's impossible to abort an operation safely.
 
 Even if you don't plan to directly cancel a particular Promise, chaining with other Promises can cause it to become automatically cancelled if no one cares about the value anymore.
@@ -162,7 +162,7 @@ Even if you don't plan to directly cancel a particular Promise, chaining with ot
 
 If you attach a `:andThen` or `:catch` handler to a Promise after it's been cancelled, the chained Promise will be instantly rejected with `Promise.Error(Promise.Error.Kind.AlreadyCancelled)`. This also applies to Promises that you pass to `resolve`. However, `finally` does not have this constraint.
 
-::: warning
+:::warning
 If you cancel a Promise immediately after creating it without yielding in between, the fate of the Promise is dependent on if the Promise handler yields or not. If the Promise handler resolves without yielding, then the Promise will already be settled by the time you are able to cancel it, thus any consumers of the Promise will have already been called and cancellation is not possible.
 
 If the Promise does yield, then cancelling it immediately *will* prevent its resolution.

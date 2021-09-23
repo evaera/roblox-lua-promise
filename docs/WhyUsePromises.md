@@ -1,5 +1,5 @@
 ---
-title: Why use Promises?
+sidebar_position: 4
 ---
 
 # Why use Promises?
@@ -241,7 +241,7 @@ Now, let's revisit the problems we laid about before and see if we've solved the
 - It's impossible to know if a function that you call is going to yield or not.
   - Calling a function that returns a Promise will never yield! To use the value, we must call `andThen` or `await`, so we are sure that the caller knows that this is an asynchronous operation.
 - When an asynchronous operation fails or an error is encountered, Lua functions usually either raise an error or return a success value followed by the actual value. Both of these methods lead to repeating the same patterns.
-  - We have `Promise:catch` to allow catching errors that will cascade down a Promise chain and jump to the nearst `catch` handler.
+  - We have `Promise:catch` to allow catching errors that will cascade down a Promise chain and jump to the nearest `catch` handler.
 - It is difficult to deal with running multiple asynchronous operations concurrently and then retrieve all of their values at the end without extraneous machinery.
   - We have `Promise.all`, `Promise.race`, or other utilities to make this a breeze.
 - Coroutines lack easy access to introspection without manual work to enable it at the call site.
@@ -253,4 +253,4 @@ Another point that's important to drive home is that you *can* do all of these t
 
 ## Next steps
 
-Now that you are hopefully convinced of the benefits of using Promises in your code, move on to the [Guide](/lib/Tour.html) for a quick introduction, or dive in to the [API reference](/lib/)
+Now that you are hopefully convinced of the benefits of using Promises in your code, move on to the [Guide](/docs/Tour) for a quick introduction, or dive in to the [API reference](/api/Promise)
