@@ -44,4 +44,4 @@ Using a package manager? The repository has a [`rotriever.toml`](https://github.
 
 ## Next
 
-Now, check out the [API reference](/roblox-lua-promise/lib/)!
+Now, check out the [API reference](/api/Promise)!

@@ -4,7 +4,7 @@ sidebar_position: 3
 
 # Tour of Promises
 
-Here's quick introduction to Promises. For more complete information, check out the [API Reference](/lib).
+Here's quick introduction to Promises. For more complete information, check out the [API Reference](/api/Promise).
 
 ## Creating a Promise
 
