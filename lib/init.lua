@@ -543,7 +543,7 @@ function Promise._all(traceback, promises, amount)
 end
 
 --[=[
-	Accepts an array of Promises and returns a new promise that:
+	Accepts an array of, single, or multiple Promises and returns a new promise that:
 	* is resolved after all input promises resolve.
 	* is rejected if *any* input promises reject.
 
@@ -563,10 +563,18 @@ end
 	return Promise.all(promises)
 	```
 
-	@param promises {Promise<T>}
+	@param promises ...Promise<T> | {Promise<T>}
 	@return Promise<{T}>
 ]=]
-function Promise.all(promises)
+function Promise.all(...)
+	local promises = {...}
+
+	-- check if we've been given a list of promises, not just a variable number of promises
+	if type(promises[1]) == "table" and not Promise.is(promises[1]) then
+		-- we've been given a table of promises already
+		promises = promises[1]
+	end
+
 	return Promise._all(debug.traceback(nil, 2), promises)
 end
 
