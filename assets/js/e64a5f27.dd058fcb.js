@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkdocs=self.webpackChunkdocs||[]).push([[861],{97868:function(s){s.exports=JSON.parse('{"sourceUrl":"https://github.com/evaera/roblox-lua-promise/blob/master","baseUrl":"/roblox-lua-promise/","classOrder":["Promise"]}')}}]);
