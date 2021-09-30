@@ -188,7 +188,6 @@ end
 	@within Promise
 	@readonly
 	@tag enums
-	@tag static
 	A table containing all members of the `Status` enum, e.g., `Promise.Status.Resolved`.
 ]=]
 --[=[
