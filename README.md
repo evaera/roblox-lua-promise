@@ -24,7 +24,7 @@ This Promise implementation attempts to satisfy these traits:
 ## Example
 `Promise.new` returns synchronously.
 
-```
+```lua
 local HttpService = game:GetService("HttpService")
 
 -- A light wrapper around HttpService
