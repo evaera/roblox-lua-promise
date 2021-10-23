@@ -318,7 +318,7 @@ end
 	* You can set the cancellation hook at any time before resolving.
 	* When a promise is cancelled, calls to `resolve` or `reject` will be ignored, regardless of if you set a cancellation hook or not.
 
-	@param executor (resolve: (...: any) -> (), reject: (...: any) -> (), onCancel: (abortHandler: () -> boolean)) -> ()
+	@param executor (resolve: (...: any) -> (), reject: (...: any) -> (), onCancel: (abortHandler?: () -> ()) -> boolean) -> ()
 	@return Promise
 ]=]
 function Promise.new(executor)
@@ -344,7 +344,7 @@ end
 	end
 	```
 
-	@param executor (resolve: (...: any) -> (), reject: (...: any) -> (), onCancel: (abortHandler: () -> boolean)) -> ()
+	@param executor (resolve: (...: any) -> (), reject: (...: any) -> (), onCancel: (abortHandler?: () -> ()) -> boolean) -> ()
 	@return Promise
 ]=]
 function Promise.defer(callback)
