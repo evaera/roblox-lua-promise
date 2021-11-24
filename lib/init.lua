@@ -369,6 +369,22 @@ Promise.async = Promise.defer
 --[=[
 	Creates an immediately resolved Promise with the given value.
 
+	```lua
+	-- Example using Promise.resolve to deliver cached values:
+	function getSomething(name)
+		if cache[name] then
+			return Promise.resolve(cache[name])
+		else
+			return Promise.new(function(resolve, reject)
+				local thing = getTheThing()
+				cache[name] = thing
+
+				resolve(thing)
+			end)
+		end
+	end
+	```
+
 	@param ... any
 	@return Promise<...any>
 ]=]
@@ -385,22 +401,6 @@ end
 	:::caution
 	Something needs to consume this rejection (i.e. `:catch()` it), otherwise it will emit an unhandled Promise rejection warning on the next frame. Thus, you should not create and store rejected Promises for later use. Only create them on-demand as needed.
 	:::
-
-	```lua
-	-- Example using Promise.resolve to deliver cached values:
-	function getSomething(name)
-		if cache[name] then
-			return Promise.resolve(cache[name])
-		else
-			return Promise.new(function(resolve, reject)
-				local thing = getTheThing()
-				cache[name] = thing
-
-				resolve(thing)
-			end)
-		end
-	end
-	```
 
 	@param ... any
 	@return Promise<...any>
