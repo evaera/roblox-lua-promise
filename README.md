@@ -20,34 +20,3 @@ This Promise implementation attempts to satisfy these traits:
 * An object that represents a unit of asynchronous work
 * Composability
 * Predictable timing
-
-## Example
-`Promise.new` returns synchronously.
-
-```
-local HttpService = game:GetService("HttpService")
-
--- A light wrapper around HttpService
--- Ideally, you do this once per project per async method that you use.
-local function httpGet(url)
-	return Promise.new(function(resolve, reject)
-		local result = HttpService:JSONDecode(HttpService:GetAsync(url))
-
-		if result.ok then
-			resolve(result.data)
-		else
-			reject(result.error)
-		end
-	end)
-end
-
--- Usage
-httpGet("https://some-api.example")
-	:andThen(function(body)
-		print("Here's the web api result:", body)
-	end)
-	:catch(function(err)
-		warn("Web api encountered an error:", err)
-	end)
-```
-
