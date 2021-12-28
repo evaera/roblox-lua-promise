@@ -543,6 +543,27 @@ return function()
 			expect(y).to.equal(2)
 			expect(z).to.equal(3)
 		end)
+
+		it("should not call queued callbacks from a cancelled sub-promise", function()
+			local resolve
+			local count = 0
+
+			local root = Promise.new(function(r)
+				resolve = r
+			end)
+
+			root:andThen(function()
+				count += 1
+			end)
+
+			root:andThen(function()
+				count += 1
+			end):cancel()
+
+			resolve("foo")
+
+			expect(count).to.equal(1)
+		end)
 	end)
 
 	describe("Promise:cancel", function()

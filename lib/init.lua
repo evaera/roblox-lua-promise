@@ -1206,7 +1206,7 @@ function Promise.prototype:_andThen(traceback, successHandler, failureHandler)
 	self._unhandledRejection = false
 
 	-- Create a new promise to follow this part of the chain
-	return Promise._new(traceback, function(resolve, reject)
+	return Promise._new(traceback, function(resolve, reject, onCancel)
 		-- Our default callbacks just pass values onto the next promise.
 		-- This lets success and failure cascade correctly!
 
@@ -1224,6 +1224,15 @@ function Promise.prototype:_andThen(traceback, successHandler, failureHandler)
 			-- If we haven't resolved yet, put ourselves into the queue
 			table.insert(self._queuedResolve, successCallback)
 			table.insert(self._queuedReject, failureCallback)
+
+			onCancel(function()
+				-- These are guaranteed to exist because the cancellation handler is guaranteed to only
+				-- be called at most once
+				if self._status == Promise.Status.Started then
+					table.remove(self._queuedResolve, table.find(self._queuedResolve, successCallback))
+					table.remove(self._queuedReject, table.find(self._queuedReject, failureCallback))
+				end
+			end)
 		elseif self._status == Promise.Status.Resolved then
 			-- This promise has already resolved! Trigger success immediately.
 			successCallback(unpack(self._values, 1, self._valuesLength))
