@@ -1436,11 +1436,17 @@ function Promise.prototype:_finally(traceback, finallyHandler)
 	self._unhandledRejection = false
 
 	local promise = Promise._new(traceback, function(resolve, reject, onCancel)
+		local handlerPromise
+
 		onCancel(function()
 			-- The finally Promise is not a proper consumer of self. We don't care about the resolved value.
 			-- All we care about is running at the end. Therefore, if self has no other consumers, it's safe to
 			-- cancel. We don't need to hold out cancelling just because there's a finally handler.
 			self:_consumerCancelled(self)
+
+			if handlerPromise then
+				handlerPromise:cancel()
+			end
 		end)
 
 		local finallyCallback = resolve
@@ -1449,6 +1455,8 @@ function Promise.prototype:_finally(traceback, finallyHandler)
 				local callbackReturn = finallyHandler(...)
 
 				if Promise.is(callbackReturn) then
+					handlerPromise = callbackReturn
+
 					callbackReturn
 						:finally(function(status)
 							if status ~= Promise.Status.Rejected then

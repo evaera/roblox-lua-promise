@@ -835,6 +835,18 @@ return function()
 			expect(finallyRan).to.equal(true)
 			expect(andThenRan).to.equal(false)
 		end)
+
+		it("should cancel returned promise if cancelled", function()
+			local internal = Promise.new(function() end)
+
+			local promise = Promise.resolve():finally(function()
+				return internal
+			end)
+
+			promise:cancel()
+
+			expect(internal:getStatus()).to.equal(Promise.Status.Cancelled)
+		end)
 	end)
 
 	describe("Promise.all", function()
