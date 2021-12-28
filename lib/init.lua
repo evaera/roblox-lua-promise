@@ -1997,6 +1997,7 @@ end
 
 	The callback is called with the actual promise that rejected, followed by the rejection values.
 
+	@since v3.2.0
 	@param callback (promise: Promise, ...: any) -- A callback that runs when an unhandled rejection happens.
 	@return () -> () -- Function that unregisters the `callback` when called
 ]=]
