@@ -1611,6 +1611,37 @@ return function()
 		end)
 	end)
 
+	describe("Promise.retryWithDelay", function()
+		it("should retry after a delay", function()
+			local counter = 0
+
+			local promise = Promise.retryWithDelay(function(parameter)
+				expect(parameter).to.equal("foo")
+
+				counter = counter + 1
+
+				if counter == 3 then
+					return Promise.resolve("ok")
+				end
+
+				return Promise.reject("fail")
+			end, 3, 10, "foo")
+
+			expect(counter).to.equal(1)
+
+			advanceTime(11)
+
+			expect(counter).to.equal(2)
+
+			advanceTime(11)
+
+			expect(counter).to.equal(3)
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Resolved)
+			expect(promise._values[1]).to.equal("ok")
+		end)
+	end)
+
 	describe("Promise.fromEvent", function()
 		it("should convert a Promise into an event", function()
 			local event = Instance.new("BindableEvent")

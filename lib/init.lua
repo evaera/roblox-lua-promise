@@ -1926,6 +1926,36 @@ function Promise.retry(callback, times, ...)
 end
 
 --[=[
+	Repeatedly calls a Promise-returning function up to `times` number of times, waiting `seconds` seconds between each
+	retry, until the returned Promise resolves.
+
+	If the amount of retries is exceeded, the function will return the latest rejected Promise.
+
+	@since v3.2.0
+	@param callback (...: P) -> Promise<T>
+	@param times number
+	@param seconds number
+	@param ...? P
+]=]
+function Promise.retryWithDelay(callback, times, seconds, ...)
+	assert(isCallable(callback), "Parameter #1 to Promise.retry must be a function")
+	assert(type(times) == "number", "Parameter #2 (times) to Promise.retry must be a number")
+	assert(type(seconds) == "number", "Parameter #3 (seconds) to Promise.retry must be a number")
+
+	local args, length = { ... }, select("#", ...)
+
+	return Promise.resolve(callback(...)):catch(function(...)
+		if times > 0 then
+			Promise.delay(seconds):await()
+
+			return Promise.retryWithDelay(callback, times - 1, seconds, unpack(args, 1, length))
+		else
+			return Promise.reject(...)
+		end
+	end)
+end
+
+--[=[
 	Converts an event into a Promise which resolves the next time the event fires.
 
 	The optional `predicate` callback, if passed, will receive the event arguments and should return `true` or `false`, based on if this fired event should resolve the Promise or not. If `true`, the Promise resolves. If `false`, nothing happens and the predicate will be rerun the next time the event fires.
