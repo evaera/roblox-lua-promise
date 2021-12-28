@@ -160,7 +160,7 @@ It's good practice to add an `onCancel` hook to all of your asynchronous Promise
 Even if you don't plan to directly cancel a particular Promise, chaining with other Promises can cause it to become automatically cancelled if no one cares about the value anymore.
 :::
 
-If you attach a `:andThen` or `:catch` handler to a Promise after it's been cancelled, the chained Promise will be instantly rejected with `Promise.Error(Promise.Error.Kind.AlreadyCancelled)`. This also applies to Promises that you pass to `resolve`. However, `finally` does not have this constraint.
+If you attach a `:andThen` or `:catch` handler to a Promise after it's been cancelled, the chained Promise will be cancelled as well. This also applies to Promises that you pass to `resolve`. 
 
 :::warning
 If you cancel a Promise immediately after creating it without yielding in between, the fate of the Promise is dependent on if the Promise handler yields or not. If the Promise handler resolves without yielding, then the Promise will already be settled by the time you are able to cancel it, thus any consumers of the Promise will have already been called and cancellation is not possible.

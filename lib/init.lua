@@ -337,6 +337,12 @@ end
 	* You can set the cancellation hook at any time before resolving.
 	* When a promise is cancelled, calls to `resolve` or `reject` will be ignored, regardless of if you set a cancellation hook or not.
 
+	:::caution
+	If the Promise is cancelled, the `executor` thread is closed with `coroutine.close` after the cancellation hook is called.
+
+	You must perform any cleanup code in the cancellation hook: any time your executor yields, it **may never resume**.
+	:::
+
 	@param executor (resolve: (...: any) -> (), reject: (...: any) -> (), onCancel: (abortHandler?: () -> ()) -> boolean) -> ()
 	@return Promise
 ]=]
@@ -1258,7 +1264,15 @@ end
 	Within the failure handler, you should never assume that the rejection value is a string. Some rejections within the Promise library are represented by [[Error]] objects. If you want to treat it as a string for debugging, you should call `tostring` on it first.
 	:::
 
-	Return a Promise from the success or failure handler and it will be chained onto.
+	You can return a Promise from the success or failure handler and it will be chained onto.
+
+	Calling `andThen` on a cancelled Promise returns a cancelled Promise.
+
+	:::tip
+	If the Promise returned by `andThen` is cancelled, `successHandler` and `failureHandler` will not run.
+
+	To run code no matter what, use [Promise:finally].
+	:::
 
 	@param successHandler (...: any) -> ...any
 	@param failureHandler? (...: any) -> ...any
@@ -1280,6 +1294,13 @@ end
 	Within the failure handler, you should never assume that the rejection value is a string. Some rejections within the Promise library are represented by [[Error]] objects. If you want to treat it as a string for debugging, you should call `tostring` on it first.
 	:::
 
+	Calling `catch` on a cancelled Promise returns a cancelled Promise.
+
+	:::tip
+	If the Promise returned by `catch` is cancelled,  `failureHandler` will not run.
+
+	To run code no matter what, use [Promise:finally].
+	:::
 
 	@param failureHandler (...: any) -> ...any
 	@return Promise<...any>
@@ -1485,12 +1506,30 @@ function Promise.prototype:_finally(traceback, finallyHandler)
 end
 
 --[=[
-	Set a handler that will be called regardless of the promise's fate. The handler is called when the promise is resolved, rejected, *or* cancelled.
+	Set a handler that will be called regardless of the promise's fate. The handler is called when the promise is
+	resolved, rejected, *or* cancelled.
 
-	Returns a new promise chained from this promise.
+	Returns a new Promise that:
+	- resolves with the same values that this Promise resolves with.
+	- rejects with the same values that this Promise rejects with.
+	- is cancelled if this Promise is cancelled.
 
-	:::caution
-	If the Promise is cancelled, any Promises chained off of it with `andThen` won't run. Only Promises chained with `finally` or `done` will run in the case of cancellation.
+	If the value you return from the handler is a Promise:
+	- We wait for the Promise to resolve, but we ultimately discard the resolved value.
+	- If the returned Promise rejects, the Promise returned from `finally` will reject with the rejected value from the
+	*returned* promise.
+	- If the `finally` Promise is cancelled, and you returned a Promise from the handler, we cancel that Promise too.
+
+	Otherwise, the return value from the `finally` handler is entirely discarded.
+
+	:::note Cancellation
+	As of Promise v4, `Promise:finally` does not count as a consumer of the parent Promise for cancellation purposes.
+	This means that if all of a Promise's consumers are cancelled and the only remaining callbacks are finally handlers,
+	the Promise is cancelled and the finally callbacks run then and there.
+
+	Cancellation still propagates through the `finally` Promise though: if you cancel the `finally` Promise, it can cancel
+	its parent Promise if it had no other consumers. Likewise, if the parent Promise is cancelled, the `finally` Promise
+	will also be cancelled.
 	:::
 
 	```lua
