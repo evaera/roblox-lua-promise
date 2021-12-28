@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.2.0] - 2021-12-27
+### Added
+- Add `Promise.onUnhandledRejection` global event
+- Add `Promise.retryWithDelay`
+
+### Changed
+- Callable tables are now allowed anywhere that a function are allowed (`Promise.new`, `andThen`, etc)
+
 ## [3.1.0] - 2020-12-01
 
 ### Added
