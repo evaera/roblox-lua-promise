@@ -35,6 +35,40 @@ return function()
 		end)
 	end)
 
+	describe("Unhandled rejection signal", function()
+		it("should call unhandled rejection callbacks", function()
+			local badPromise = Promise.new(function(_resolve, reject)
+				reject(1, 2)
+			end)
+
+			local callCount = 0
+
+			local function callback(promise, rejectionA, rejectionB)
+				callCount += 1
+
+				expect(promise).to.equal(badPromise)
+				expect(rejectionA).to.equal(1)
+				expect(rejectionB).to.equal(2)
+			end
+
+			local unregister = Promise.onUnhandledRejection(callback)
+
+			advanceTime()
+
+			expect(callCount).to.equal(1)
+
+			unregister()
+
+			Promise.new(function(_resolve, reject)
+				reject(3, 4)
+			end)
+
+			advanceTime()
+
+			expect(callCount).to.equal(1)
+		end)
+	end)
+
 	describe("Promise.new", function()
 		it("should instantiate with a callback", function()
 			local promise = Promise.new(function() end)
