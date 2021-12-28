@@ -233,6 +233,9 @@ function Promise._new(traceback, callback, parent)
 	end
 
 	local self = {
+		-- The executor thread.
+		_thread = nil,
+
 		-- Used to locate where a promise was created
 		_source = traceback,
 
@@ -292,13 +295,15 @@ function Promise._new(traceback, callback, parent)
 		return self._status == Promise.Status.Cancelled
 	end
 
-	coroutine.wrap(function()
+	self._thread = coroutine.create(function()
 		local ok, _, result = runExecutor(self._source, callback, resolve, reject, onCancel)
 
 		if not ok then
 			reject(result[1])
 		end
-	end)()
+	end)
+
+	task.spawn(self._thread)
 
 	return self
 end
@@ -1385,6 +1390,8 @@ function Promise.prototype:cancel()
 		self._cancellationHook()
 	end
 
+	coroutine.close(self._thread)
+
 	if self._parent then
 		self._parent:_consumerCancelled(self)
 	end
@@ -1847,6 +1854,8 @@ function Promise.prototype:_finalize()
 		self._parent = nil
 		self._consumers = nil
 	end
+
+	task.defer(coroutine.close, self._thread)
 end
 
 --[=[

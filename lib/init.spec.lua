@@ -218,6 +218,20 @@ return function()
 
 			expect(called).to.equal(true)
 		end)
+
+		itSKIP("should close the thread after resolve", function()
+			local count = 0
+			Promise.new(function(resolve)
+				count += 1
+				resolve()
+				Promise.delay(1):await()
+				count += 1
+			end)
+
+			task.wait(1)
+
+			expect(count).to.equal(1)
+		end)
 	end)
 
 	describe("Promise.defer", function()
@@ -626,6 +640,20 @@ return function()
 
 			expect(p1._status).to.equal(Promise.Status.Cancelled)
 			expect(p2._status).to.equal(Promise.Status.Cancelled)
+		end)
+
+		it("should close the promise thread", function()
+			local count = 0
+			local promise = Promise.new(function()
+				count += 1
+				Promise.delay(1):await()
+				count += 1
+			end)
+
+			promise:cancel()
+			advanceTime(2)
+
+			expect(count).to.equal(1)
 		end)
 	end)
 
