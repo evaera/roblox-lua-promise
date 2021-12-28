@@ -1362,6 +1362,18 @@ return function()
 			expect(d).to.equal(nil)
 			expect(e).to.equal(7)
 		end)
+
+		it("should work if yielding is needed", function()
+			local ran = false
+			task.spawn(function()
+				local _, actualTime = Promise.delay(1):await()
+				expect(type(actualTime)).to.equal("number")
+				ran = true
+			end)
+
+			advanceTime(2)
+			expect(ran).to.equal(true)
+		end)
 	end)
 
 	describe("Promise:expect", function()
