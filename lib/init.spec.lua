@@ -556,9 +556,11 @@ return function()
 				count += 1
 			end)
 
-			root:andThen(function()
-				count += 1
-			end):cancel()
+			root
+				:andThen(function()
+					count += 1
+				end)
+				:cancel()
 
 			resolve("foo")
 
@@ -636,7 +638,7 @@ return function()
 		it("should track consumers", function()
 			local pending = Promise.new(function() end)
 			local p0 = Promise.resolve()
-			local p1 = p0:finally(function()
+			local p1 = p0:andThen(function()
 				return pending
 			end)
 			local p2 = Promise.new(function(resolve)
@@ -703,18 +705,10 @@ return function()
 			expect(callCount).to.equal(5)
 		end)
 
-		it("should be a child of the parent Promise", function()
-			local p1 = Promise.new(function() end)
-			local p2 = p1:finally(function() end)
-
-			expect(p2._parent).to.equal(p1)
-			expect(p1._consumers[p2]).to.equal(true)
-		end)
-
-		it("should forward return values", function()
+		it("should not forward return values", function()
 			local value
 
-			Promise.resolve()
+			Promise.resolve(2)
 				:finally(function()
 					return 1
 				end)
@@ -722,7 +716,124 @@ return function()
 					value = v
 				end)
 
-			expect(value).to.equal(1)
+			expect(value).to.equal(2)
+		end)
+
+		it("should not consume rejections", function()
+			local catchRan = false
+			local thenRan = false
+			Promise.reject(5)
+				:finally(function()
+					return 42
+				end)
+				:andThen(function()
+					thenRan = true
+				end)
+				:catch(function(value)
+					catchRan = true
+					expect(value).to.equal(5)
+				end)
+
+			expect(catchRan).to.equal(true)
+			expect(thenRan).to.equal(false)
+		end)
+
+		it("should wait for returned promises", function()
+			local resolve
+			local promise = Promise.reject("foo"):finally(function()
+				return Promise.new(function(r)
+					resolve = r
+				end)
+			end)
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Started)
+
+			resolve()
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Rejected)
+			local _, value = promise:_unwrap()
+			expect(value).to.equal("foo")
+		end)
+
+		it("should reject with a returned rejected promise's value", function()
+			local reject
+			local promise = Promise.reject("foo"):finally(function()
+				return Promise.new(function(_, r)
+					reject = r
+				end)
+			end)
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Started)
+
+			reject("bar")
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Rejected)
+			local _, value = promise:_unwrap()
+			expect(value).to.equal("bar")
+		end)
+
+		it("should reject when handler errors", function()
+			local errorValue = {}
+			local promise = Promise.reject("bar"):finally(function()
+				error(errorValue)
+			end)
+
+			local ok, value = promise:_unwrap()
+
+			expect(ok).to.equal(false)
+			expect(value).to.equal(errorValue)
+		end)
+
+		it("should not prevent cancellation", function()
+			local promise = Promise.new(function() end)
+
+			local finallyRan = false
+			promise:finally(function()
+				finallyRan = true
+			end)
+
+			local consumer = promise:andThen(function() end)
+
+			consumer:cancel()
+
+			expect(promise:getStatus()).to.equal(Promise.Status.Cancelled)
+			expect(finallyRan).to.equal(true)
+		end)
+
+		it("should propagate cancellation downwards", function()
+			local finallyRan = false
+			local andThenRan = false
+			local root = Promise.new(function() end)
+
+			local consumer = root:finally(function()
+				finallyRan = true
+			end)
+
+			root:cancel()
+
+			expect(root:getStatus()).to.equal(Promise.Status.Cancelled)
+			expect(consumer:getStatus()).to.equal(Promise.Status.Cancelled)
+
+			expect(finallyRan).to.equal(true)
+			expect(andThenRan).to.equal(false)
+		end)
+
+		it("should propagate cancellation upwards", function()
+			local finallyRan = false
+			local andThenRan = false
+			local root = Promise.new(function() end)
+
+			local consumer = root:finally(function()
+				finallyRan = true
+			end)
+
+			consumer:cancel()
+
+			expect(root:getStatus()).to.equal(Promise.Status.Cancelled)
+			expect(consumer:getStatus()).to.equal(Promise.Status.Cancelled)
+
+			expect(finallyRan).to.equal(true)
+			expect(andThenRan).to.equal(false)
 		end)
 	end)
 
@@ -1168,20 +1279,6 @@ return function()
 		end)
 	end)
 
-	describe("Promise:doneReturn", function()
-		it("should return the given values", function()
-			local value1, value2
-
-			Promise.resolve():doneReturn(1, 2):andThen(function(one, two)
-				value1 = one
-				value2 = two
-			end)
-
-			expect(value1).to.equal(1)
-			expect(value2).to.equal(2)
-		end)
-	end)
-
 	describe("Promise:andThenCall", function()
 		it("should call the given function with arguments", function()
 			local value1, value2
@@ -1192,47 +1289,6 @@ return function()
 
 			expect(value1).to.equal(3)
 			expect(value2).to.equal(4)
-		end)
-	end)
-
-	describe("Promise:doneCall", function()
-		it("should call the given function with arguments", function()
-			local value1, value2
-			Promise.resolve():doneCall(function(a, b)
-				value1 = a
-				value2 = b
-			end, 3, 4)
-
-			expect(value1).to.equal(3)
-			expect(value2).to.equal(4)
-		end)
-	end)
-
-	describe("Promise:done", function()
-		it("should trigger on resolve or cancel", function()
-			local promise = Promise.new(function() end)
-			local value
-
-			local p = promise:done(function()
-				value = true
-			end)
-
-			expect(value).to.never.be.ok()
-			promise:cancel()
-			expect(p:getStatus()).to.equal(Promise.Status.Cancelled)
-			expect(value).to.equal(true)
-
-			local never, always
-			Promise.reject()
-				:done(function()
-					never = true
-				end)
-				:finally(function()
-					always = true
-				end)
-
-			expect(never).to.never.be.ok()
-			expect(always).to.be.ok()
 		end)
 	end)
 

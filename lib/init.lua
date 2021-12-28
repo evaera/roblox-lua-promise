@@ -1205,6 +1205,14 @@ end
 function Promise.prototype:_andThen(traceback, successHandler, failureHandler)
 	self._unhandledRejection = false
 
+	-- If we are already cancelled, we return a cancelled Promise
+	if self._status == Promise.Status.Cancelled then
+		local promise = Promise.new(function() end)
+		promise:cancel()
+
+		return promise
+	end
+
 	-- Create a new promise to follow this part of the chain
 	return Promise._new(traceback, function(resolve, reject, onCancel)
 		-- Our default callbacks just pass values onto the next promise.
@@ -1239,14 +1247,6 @@ function Promise.prototype:_andThen(traceback, successHandler, failureHandler)
 		elseif self._status == Promise.Status.Rejected then
 			-- This promise died a terrible death! Trigger failure immediately.
 			failureCallback(unpack(self._values, 1, self._valuesLength))
-		elseif self._status == Promise.Status.Cancelled then
-			-- We don't want to call the success handler or the failure handler,
-			-- we just reject this promise outright.
-			reject(Error.new({
-				error = "Promise is cancelled",
-				kind = Error.Kind.AlreadyCancelled,
-				context = "Promise created at\n\n" .. traceback,
-			}))
 		end
 	end, self)
 end
@@ -1430,28 +1430,37 @@ end
 
 --[[
 	Used to set a handler for when the promise resolves, rejects, or is
-	cancelled. Returns a new promise chained from this promise.
+	cancelled.
 ]]
-function Promise.prototype:_finally(traceback, finallyHandler, onlyOk)
-	if not onlyOk then
-		self._unhandledRejection = false
-	end
+function Promise.prototype:_finally(traceback, finallyHandler)
+	self._unhandledRejection = false
 
-	-- Return a promise chained off of this promise
-	return Promise._new(traceback, function(resolve, reject)
+	local promise = Promise._new(traceback, function(resolve, reject, onCancel)
+		onCancel(function()
+			-- The finally Promise is not a proper consumer of self. We don't care about the resolved value.
+			-- All we care about is running at the end. Therefore, if self has no other consumers, it's safe to
+			-- cancel. We don't need to hold out cancelling just because there's a finally handler.
+			self:_consumerCancelled(self)
+		end)
+
 		local finallyCallback = resolve
 		if finallyHandler then
-			finallyCallback = createAdvancer(traceback, finallyHandler, resolve, reject)
-		end
-
-		if onlyOk then
-			local callback = finallyCallback
 			finallyCallback = function(...)
-				if self._status == Promise.Status.Rejected then
-					return resolve(self)
-				end
+				local callbackReturn = finallyHandler(...)
 
-				return callback(...)
+				if Promise.is(callbackReturn) then
+					callbackReturn
+						:finally(function(status)
+							if status ~= Promise.Status.Rejected then
+								resolve(self)
+							end
+						end)
+						:catch(function(...)
+							reject(...)
+						end)
+				else
+					resolve(self)
+				end
 			end
 		end
 
@@ -1462,7 +1471,9 @@ function Promise.prototype:_finally(traceback, finallyHandler, onlyOk)
 			-- The promise already settled or was cancelled, run the callback now.
 			finallyCallback(self._status)
 		end
-	end, self)
+	end)
+
+	return promise
 end
 
 --[=[
@@ -1541,69 +1552,6 @@ function Promise.prototype:finallyReturn(...)
 	return self:_finally(debug.traceback(nil, 2), function()
 		return unpack(values, 1, length)
 	end)
-end
-
---[=[
-	Set a handler that will be called only if the Promise resolves or is cancelled. This method is similar to `finally`, except it doesn't catch rejections.
-
-	:::caution
-	`done` should be reserved specifically when you want to perform some operation after the Promise is finished (like `finally`), but you don't want to consume rejections (like in <a href="/roblox-lua-promise/lib/Examples.html#cancellable-animation-sequence">this example</a>). You should use `andThen` instead if you only care about the Resolved case.
-	:::
-
-	:::warning
-	Like `finally`, if the Promise is cancelled, any Promises chained off of it with `andThen` won't run. Only Promises chained with `done` and `finally` will run in the case of cancellation.
-	:::
-
-	Returns a new promise chained from this promise.
-
-	@param doneHandler (status: Status) -> ...any
-	@return Promise<...any>
-]=]
-function Promise.prototype:done(doneHandler)
-	assert(doneHandler == nil or isCallable(doneHandler), string.format(ERROR_NON_FUNCTION, "Promise:done"))
-	return self:_finally(debug.traceback(nil, 2), doneHandler, true)
-end
-
---[=[
-	Same as `andThenCall`, except for `done`.
-
-	Attaches a `done` handler to this Promise that calls the given callback with the predefined arguments.
-
-	@param callback (...: any) -> any
-	@param ...? any -- Additional arguments which will be passed to `callback`
-	@return Promise
-]=]
-function Promise.prototype:doneCall(callback, ...)
-	assert(isCallable(callback), string.format(ERROR_NON_FUNCTION, "Promise:doneCall"))
-	local length, values = pack(...)
-	return self:_finally(debug.traceback(nil, 2), function()
-		return callback(unpack(values, 1, length))
-	end, true)
-end
-
---[=[
-	Attaches a `done` handler to this Promise that discards the resolved value and returns the given value from it.
-
-	```lua
-		promise:doneReturn("some", "values")
-	```
-
-	This is sugar for
-
-	```lua
-		promise:done(function()
-			return "some", "values"
-		end)
-	```
-
-	@param ... any -- Values to return from the function
-	@return Promise
-]=]
-function Promise.prototype:doneReturn(...)
-	local length, values = pack(...)
-	return self:_finally(debug.traceback(nil, 2), function()
-		return unpack(values, 1, length)
-	end, true)
 end
 
 --[=[
