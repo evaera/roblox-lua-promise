@@ -1654,7 +1654,7 @@ local function expectHelper(status, ...)
 end
 
 --[=[
-	Yields the current thread until the given Promise completes. Returns the the values that the promise resolved with.
+	Yields the current thread until the given Promise completes. Returns the values that the promise resolved with.
 
 	```lua
 	local worked = pcall(function()
