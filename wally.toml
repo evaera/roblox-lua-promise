@@ -1,7 +1,7 @@
 [package]
 name = "evaera/promise"
 description = "Promise implementation for Roblox"
-version = "4.0.0-rc.1"
+version = "4.0.0-rc.2"
 license = "MIT"
 registry = "https://github.com/UpliftGames/wally-index"
 realm = "shared"
