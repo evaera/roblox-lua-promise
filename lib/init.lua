@@ -626,7 +626,9 @@ function Promise.fold(list, reducer, initialValue)
 		accumulator = accumulator:andThen(function(previousValueResolved)
 			return reducer(previousValueResolved, resolvedElement, i)
 		end)
-	end):andThenReturn(accumulator)
+	end):andThen(function()
+		return accumulator
+	end)
 end
 
 --[=[
