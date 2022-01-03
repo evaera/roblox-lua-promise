@@ -11,7 +11,7 @@ Here's quick introduction to Promises. For more complete information, check out 
 There are a few ways to create a Promise. The most common way is to call [Promise.new](/api/Promise#new):
 
 ```lua
-local myFunction()
+local function myFunction()
 	return Promise.new(function(resolve, reject, onCancel)
 		somethingThatYields()
 		resolve("Hello world!")
