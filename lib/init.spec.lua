@@ -871,9 +871,16 @@ return function()
 		end)
 
 		it("should accept promises in the list", function()
-			local sum = Promise.fold({ Promise.resolve(1), 2, 3 }, function(sum, element)
+			local resolve
+
+			local sum = Promise.fold({ Promise.new(function(r)
+				resolve = r
+			end), 2, 3 }, function(sum, element)
 				return sum + element
 			end, 0)
+
+			resolve(1)
+
 			expect(Promise.is(sum)).to.equal(true)
 			expect(sum:getStatus()).to.equal(Promise.Status.Resolved)
 			expect(sum:expect()).to.equal(6)
