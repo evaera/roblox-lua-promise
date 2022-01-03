@@ -1,5 +1,9 @@
 # Changelog
 
+## [3.2.1] - 2022-01-02
+### Fixed
+- Fix bug where Promise.fold does not return correct value if there is an unresolved Promise in the passed list (#77)
+
 ## [3.2.0] - 2021-12-27
 ### Added
 - Add `Promise.onUnhandledRejection` global event
