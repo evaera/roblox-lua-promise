@@ -4,6 +4,10 @@
 ### Fixed
 - Fix bug where Promise.fold does not return correct value if there is an unresolved Promise in the passed list (#77)
 
+## [3.2.1] - 2022-01-02
+### Fixed
+- Fix bug where Promise.fold does not return correct value if there is an unresolved Promise in the passed list (#77)
+
 ## [4.0.0-rc.1] - 2021-12-28
 ### Changed
 - `Promise:finally` no longer observes a rejection from a Promise. Calling `Promise:finally` is mostly transparent now.
