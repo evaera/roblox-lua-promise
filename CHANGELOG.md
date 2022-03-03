@@ -1,5 +1,19 @@
 # Changelog
 
+## [4.0.0]
+### Changed
+- `Promise:finally` no longer observes a rejection from a Promise. Calling `Promise:finally` is mostly transparent now.
+  - The Promise returned by `Promise:finally` resolves or rejects with whatever the parent Promise resolved or rejected with. It will be cancelled if the parent Promise is cancelled.
+  - The value returned from the `finally` handler is discarded now.
+  - If the value returned from the `finally` handler is a Promise, we wait for it to resolve, but we do not use its value.
+  - If the value returned from the `finally` handler is a Promise and it rejects, `finally` returns the new rejected value.
+- `Promise:finally` no longer counts as a consumer of the parent Promise for cancellation purposes. If all consumers are cancelled and the only remaining callbacks are finally handlers, the Promise is now cancelled.
+- The Promise executor thread is now closed with `coroutine.close` when the Promise is cancelled.
+- The Promise executor thread is now closed after the Promise settles (calling `resolve` or `reject`).
+- Callbacks enqueued with `andThen` and `catch` are now dequeued if the Promise returned by `andThen`/`catch` is cancelled.
+- Calling `andThen` or `catch` on an already-cancelled Promise now returns a cancelled Promise instead of returning a rejected Promise
+- `:await`, `:expect`, and `:awaitStatus` are no longer backed by BindableEvents, and now use the task library directly, so performance should be better.
+
 ## [4.0.0-rc.3]
 ### Fixed
 - Fix unhandled rejection warning appearing when using :awaitStatus
