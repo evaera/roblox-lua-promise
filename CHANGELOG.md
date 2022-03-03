@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## [4.0.0-rc.3]
 ### Fixed
 - Fix unhandled rejection warning appearing when using :awaitStatus
 
