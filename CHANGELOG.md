@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+### Fixed
+- Fix unhandled rejection warning appearing when using :awaitStatus
+
 ## [4.0.0-rc.2] - 2022-01-02
 ### Fixed
 - Fix bug where Promise.fold does not return correct value if there is an unresolved Promise in the passed list (#77)

@@ -1616,9 +1616,15 @@ function Promise.prototype:awaitStatus()
 	if self._status == Promise.Status.Started then
 		local thread = coroutine.running()
 
-		self:finally(function()
-			task.spawn(thread)
-		end)
+		self
+			:finally(function()
+				task.spawn(thread)
+			end)
+			-- The finally promise can propagate rejections, so we attach a catch handler to prevent the unhandled
+			-- rejection warning from appearing
+			:catch(
+				function() end
+			)
 
 		coroutine.yield()
 	end
