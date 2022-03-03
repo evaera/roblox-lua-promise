@@ -1929,6 +1929,7 @@ end
 	@param callback (...: P) -> Promise<T>
 	@param times number
 	@param ...? P
+	@return Promise<T>
 ]=]
 function Promise.retry(callback, times, ...)
 	assert(isCallable(callback), "Parameter #1 to Promise.retry must be a function")
@@ -1956,6 +1957,7 @@ end
 	@param times number
 	@param seconds number
 	@param ...? P
+	@return Promise<T>
 ]=]
 function Promise.retryWithDelay(callback, times, seconds, ...)
 	assert(isCallable(callback), "Parameter #1 to Promise.retry must be a function")
