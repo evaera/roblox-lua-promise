@@ -2,7 +2,7 @@
 	An implementation of Promises similar to Promise/A+.
 ]]
 
-type Event = {Connect: (Event, callback: () -> ()) -> (),}
+type Event = {Connect: (Event, callback: (...any) -> ()) -> (),}
 
 type PromiseStatus = {
 	Started: string,
