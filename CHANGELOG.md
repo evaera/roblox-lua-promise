@@ -1,5 +1,11 @@
 # Changelog
 
+## [4.0.1]
+
+### Changed
+
+- Luau types have now been implemented into Promises.
+
 ## [4.0.0]
 ### Changed
 - `Promise:finally` no longer observes a rejection from a Promise. Calling `Promise:finally` is mostly transparent now.
