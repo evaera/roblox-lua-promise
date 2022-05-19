@@ -2,6 +2,34 @@
 	An implementation of Promises similar to Promise/A+.
 ]]
 
+type Event = {Connect: (Event, callback: () -> ()) -> (),}
+
+type PromiseStatus = {
+	Started: string,
+	Resolved: string,
+	Rejected: string,
+	Cancelled: string,
+}
+
+-- This type is directly created from the actual types listed out in the API (https://eryn.io/roblox-lua-promise/api/Promise).
+export type Promise = {
+	andThen: (Promise, successHandler: ((...any) -> ...any)?, failureHandler: ((...any) -> ...any)?) -> Promise,
+	catch: (Promise, failureHandler: (...any) -> ...any) -> Promise,
+	await: (Promise) -> (boolean, ...any),
+	expect: (Promise) -> ...any,
+	cancel: (Promise) -> (),
+	now: (Promise, rejectionValue: any) -> Promise,
+	andThenCall: (Promise, callback: (...any) -> any) -> Promise,
+	andThenReturn: (Promise, ...any) -> Promise,
+	awaitStatus: (Promise) -> (PromiseStatus, ...any),
+	finally: (Promise, finallyHandler: (status: PromiseStatus) -> ...any) -> Promise,
+	finallyCall: (Promise, callback: (...any) -> any, ...any?) -> Promise,
+	finallyReturn: (Promise, ...any) -> Promise,
+	getStatus: (Promise) -> PromiseStatus,
+	tap: (Promise, tapHandler: (...any) -> ...any) -> Promise,
+	timeout: (Promise, seconds: number, rejectionValue: any?) -> Promise,
+}
+
 local ERROR_NON_PROMISE_IN_LIST = "Non-promise value passed into %s at index %s"
 local ERROR_NON_LIST = "Please pass a list of promises to %s"
 local ERROR_NON_FUNCTION = "Please pass a handler function to %s!"
@@ -217,13 +245,13 @@ end
 	@class Promise
 	@__index prototype
 ]=]
-local Promise = {
-	Error = Error,
-	Status = makeEnum("Promise.Status", { "Started", "Resolved", "Rejected", "Cancelled" }),
-	_getTime = os.clock,
-	_timeEvent = game:GetService("RunService").Heartbeat,
-	_unhandledRejectionCallbacks = {},
-}
+local Promise = {}
+Promise.TEST = false
+Promise.Error = Error
+Promise.Status = makeEnum("Promise.Status", { "Started", "Resolved", "Rejected", "Cancelled" })
+Promise._getTime = os.clock
+Promise._timeEvent = game:GetService("RunService").Heartbeat
+Promise._unhandledRejectionCallbacks = {}
 Promise.prototype = {}
 Promise.__index = Promise.prototype
 
@@ -346,7 +374,7 @@ end
 	@param executor (resolve: (...: any) -> (), reject: (...: any) -> (), onCancel: (abortHandler?: () -> ()) -> boolean) -> ()
 	@return Promise
 ]=]
-function Promise.new(executor)
+function Promise.new(executor): Promise
 	return Promise._new(debug.traceback(nil, 2), executor)
 end
 
@@ -415,7 +443,7 @@ Promise.async = Promise.defer
 	@param ... any
 	@return Promise<...any>
 ]=]
-function Promise.resolve(...)
+function Promise.resolve(...): Promise
 	local length, values = pack(...)
 	return Promise._new(debug.traceback(nil, 2), function(resolve)
 		resolve(unpack(values, 1, length))
@@ -432,7 +460,7 @@ end
 	@param ... any
 	@return Promise<...any>
 ]=]
-function Promise.reject(...)
+function Promise.reject(...): Promise
 	local length, values = pack(...)
 	return Promise._new(debug.traceback(nil, 2), function(_, reject)
 		reject(unpack(values, 1, length))
@@ -474,7 +502,7 @@ end
 	@param ... T... -- Additional arguments passed to `callback`
 	@return Promise
 ]=]
-function Promise.try(callback, ...)
+function Promise.try(callback, ...): Promise
 	return Promise._try(debug.traceback(nil, 2), callback, ...)
 end
 
@@ -588,7 +616,7 @@ end
 	@param promises {Promise<T>}
 	@return Promise<{T}>
 ]=]
-function Promise.all(promises)
+function Promise.all(promises: {Promise}): Promise
 	return Promise._all(debug.traceback(nil, 2), promises)
 end
 
@@ -617,7 +645,7 @@ end
 	@param reducer (accumulator: U, value: T, index: number) -> U | Promise<U>
 	@param initialValue U
 ]=]
-function Promise.fold(list, reducer, initialValue)
+function Promise.fold(list: {Promise} | {any}, reducer: (accumulator: any, value: Promise | any, index: number) -> (Promise | any), initialValue: any)
 	assert(type(list) == "table", "Bad argument #1 to Promise.fold: must be a table")
 	assert(isCallable(reducer), "Bad argument #2 to Promise.fold: must be a function")
 
@@ -650,7 +678,7 @@ end
 	@param count number
 	@return Promise<{T}>
 ]=]
-function Promise.some(promises, count)
+function Promise.some(promises: {Promise}, count: number): Promise
 	assert(type(count) == "number", "Bad argument #2 to Promise.some: must be a number")
 
 	return Promise._all(debug.traceback(nil, 2), promises, count)
@@ -674,7 +702,7 @@ end
 	@param promises {Promise<T>}
 	@return Promise<T>
 ]=]
-function Promise.any(promises)
+function Promise.any(promises: {Promise}): Promise
 	return Promise._all(debug.traceback(nil, 2), promises, 1):andThen(function(values)
 		return values[1]
 	end)
@@ -696,7 +724,7 @@ end
 	@param promises {Promise<T>}
 	@return Promise<{Status}>
 ]=]
-function Promise.allSettled(promises)
+function Promise.allSettled(promises: {Promise}): Promise
 	if type(promises) ~= "table" then
 		error(string.format(ERROR_NON_LIST, "Promise.allSettled"), 2)
 	end
@@ -774,7 +802,7 @@ end
 	@param promises {Promise<T>}
 	@return Promise<T>
 ]=]
-function Promise.race(promises)
+function Promise.race(promises: {Promise}): Promise
 	assert(type(promises) == "table", string.format(ERROR_NON_LIST, "Promise.race"))
 
 	for i, promise in pairs(promises) do
@@ -869,7 +897,7 @@ end
 	@param predicate (value: T, index: number) -> U | Promise<U>
 	@return Promise<{U}>
 ]=]
-function Promise.each(list, predicate)
+function Promise.each(list: {Promise | any}, predicate: (value: any, index: number) -> Promise): Promise
 	assert(type(list) == "table", string.format(ERROR_NON_LIST, "Promise.each"))
 	assert(isCallable(predicate), string.format(ERROR_NON_FUNCTION, "Promise.each"))
 
@@ -968,7 +996,7 @@ end
 	@param object any
 	@return boolean -- `true` if the given `object` is a Promise.
 ]=]
-function Promise.is(object)
+function Promise.is(object: any): boolean
 	if type(object) ~= "table" then
 		return false
 	end
@@ -1017,7 +1045,7 @@ end
 	@param callback (...: any) -> ...any
 	@return (...: any) -> Promise
 ]=]
-function Promise.promisify(callback)
+function Promise.promisify(callback: (...any) -> ...any): (...any) -> Promise
 	return function(...)
 		return Promise._try(debug.traceback(nil, 2), callback, ...)
 	end
@@ -1481,14 +1509,14 @@ function Promise.prototype:_finally(traceback, finallyHandler)
 					handlerPromise = callbackReturn
 
 					callbackReturn
-						:finally(function(status)
-							if status ~= Promise.Status.Rejected then
-								resolve(self)
-							end
-						end)
-						:catch(function(...)
-							reject(...)
-						end)
+					:finally(function(status)
+						if status ~= Promise.Status.Rejected then
+							resolve(self)
+						end
+					end)
+					:catch(function(...)
+						reject(...)
+					end)
 				else
 					resolve(self)
 				end
@@ -1617,14 +1645,14 @@ function Promise.prototype:awaitStatus()
 		local thread = coroutine.running()
 
 		self
-			:finally(function()
-				task.spawn(thread)
-			end)
-			-- The finally promise can propagate rejections, so we attach a catch handler to prevent the unhandled
-			-- rejection warning from appearing
-			:catch(
-				function() end
-			)
+		:finally(function()
+			task.spawn(thread)
+		end)
+		-- The finally promise can propagate rejections, so we attach a catch handler to prevent the unhandled
+		-- rejection warning from appearing
+		:catch(
+			function() end
+		)
 
 		coroutine.yield()
 	end
@@ -1886,7 +1914,7 @@ end
 	@param rejectionValue? any -- The value to reject with if the Promise isn't resolved
 	@return Promise
 ]=]
-function Promise.prototype:now(rejectionValue)
+function Promise.prototype:now(rejectionValue: any) : Promise
 	local traceback = debug.traceback(nil, 2)
 	if self._status == Promise.Status.Resolved then
 		return self:_andThen(traceback, function(...)
@@ -1931,7 +1959,7 @@ end
 	@param ...? P
 	@return Promise<T>
 ]=]
-function Promise.retry(callback, times, ...)
+function Promise.retry(callback: (...any) -> Promise, times: number, ...: any?): Promise
 	assert(isCallable(callback), "Parameter #1 to Promise.retry must be a function")
 	assert(type(times) == "number", "Parameter #2 to Promise.retry must be a number")
 
@@ -1959,7 +1987,7 @@ end
 	@param ...? P
 	@return Promise<T>
 ]=]
-function Promise.retryWithDelay(callback, times, seconds, ...)
+function Promise.retryWithDelay(callback: (...any) -> (), times: number, seconds: number, ...: any): Promise
 	assert(isCallable(callback), "Parameter #1 to Promise.retry must be a function")
 	assert(type(times) == "number", "Parameter #2 (times) to Promise.retry must be a number")
 	assert(type(seconds) == "number", "Parameter #3 (seconds) to Promise.retry must be a number")
@@ -2001,7 +2029,7 @@ end
 	@param predicate? (...: P) -> boolean -- A function which determines if the Promise should resolve with the given value, or wait for the next event to check again.
 	@return Promise<P>
 ]=]
-function Promise.fromEvent(event, predicate)
+function Promise.fromEvent(event: Event, predicate: (...any) -> boolean)
 	predicate = predicate or function()
 		return true
 	end
@@ -2053,7 +2081,7 @@ end
 	@param callback (promise: Promise, ...: any) -- A callback that runs when an unhandled rejection happens.
 	@return () -> () -- Function that unregisters the `callback` when called
 ]=]
-function Promise.onUnhandledRejection(callback)
+function Promise.onUnhandledRejection(callback: (promise: Promise, ...any) -> ())
 	table.insert(Promise._unhandledRejectionCallbacks, callback)
 
 	return function()
