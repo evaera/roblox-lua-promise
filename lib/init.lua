@@ -1669,7 +1669,13 @@ end
 
 local function expectHelper(status, ...)
 	if status ~= Promise.Status.Resolved then
-		error((...) == nil and "Expected Promise rejected with no value." or (...), 3)
+		local message = (...)
+		error(
+			if (message == nil) or (message == "")
+				then "Expected Promise rejected with no value."
+				else message,
+			3
+		)
 	end
 
 	return ...
