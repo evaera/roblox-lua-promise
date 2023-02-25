@@ -376,9 +376,7 @@ function Promise.defer(executor)
 	local traceback = debug.traceback(nil, 2)
 	local promise
 	promise = Promise._new(traceback, function(resolve, reject, onCancel)
-		local connection
-		connection = Promise._timeEvent:Connect(function()
-			connection:Disconnect()
+		task.defer(function()
 			local ok, _, result = runExecutor(traceback, executor, resolve, reject, onCancel)
 
 			if not ok then
