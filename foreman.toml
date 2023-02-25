@@ -1,3 +1,0 @@
-[tools]
-wally = { source = "upliftgames/wally", version = "0.3.1" }
-rojo = { source = "rojo-rbx/rojo", version = "7.0.0" }
