@@ -1764,7 +1764,7 @@ function Promise.prototype:_finalize()
 		-- Purposefully not passing values to callbacks here, as it could be the
 		-- resolved values, or rejected errors. If the developer needs the values,
 		-- they should use :andThen or :catch explicitly.
-		coroutine.wrap(callback)(self._status)
+		coroutine.resume(coroutine.create(callback), self._status)
 	end
 
 	self._queuedFinally = nil
