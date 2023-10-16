@@ -1385,12 +1385,16 @@ function Promise.prototype:_finally(traceback, finallyHandler)
 		local finallyCallback = resolve
 		if finallyHandler then
 			finallyCallback = function(...)
-				local callbackReturn = finallyHandler(...)
+				local ok, _, resultList = runExecutor(traceback, finallyHandler, ...)
+				local result = resultList[1]
+				if not ok then
+					return reject(result)
+				end
 
-				if Promise.is(callbackReturn) then
-					handlerPromise = callbackReturn
+				if Promise.is(result) then
+					handlerPromise = result
 
-					callbackReturn
+					result
 						:finally(function(status)
 							if status ~= Promise.Status.Rejected then
 								resolve(self)
@@ -1764,7 +1768,7 @@ function Promise.prototype:_finalize()
 		-- Purposefully not passing values to callbacks here, as it could be the
 		-- resolved values, or rejected errors. If the developer needs the values,
 		-- they should use :andThen or :catch explicitly.
-		coroutine.resume(coroutine.create(callback), self._status)
+		coroutine.wrap(callback)(self._status)
 	end
 
 	self._queuedFinally = nil
