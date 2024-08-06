@@ -1851,7 +1851,7 @@ function Promise.retry(callback, times, ...)
 
 	local args, length = { ... }, select("#", ...)
 
-	return Promise.resolve(callback(...)):catch(function(...)
+	return Promise.try(callback, ...):catch(function(...)
 		if times > 0 then
 			return Promise.retry(callback, times - 1, unpack(args, 1, length))
 		else
@@ -1880,7 +1880,7 @@ function Promise.retryWithDelay(callback, times, seconds, ...)
 
 	local args, length = { ... }, select("#", ...)
 
-	return Promise.resolve(callback(...)):catch(function(...)
+	return Promise.try(callback, ...):catch(function(...)
 		if times > 0 then
 			Promise.delay(seconds):await()
 
