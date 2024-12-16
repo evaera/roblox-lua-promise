@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+### Fixed
+- Fix promise returned by `Promise.defer` not able to be cancelled properly.
+
 ### Changed
 - `Promise.defer` now uses `task.defer` instead of waiting for the next `Heartbeat`. This has *different behavior*: while the deferred code will still run at the end of the frame, it runs alongside other Lua wake-ups which moves its position in the frame. Also, if you call `Promise.defer` from inside of an already-deferred thread/Promise, the code will run after your current thread/Promise is finished, during the same frame, rather than on the *next* frame.
 - `Promise.delay` now wraps `task.delay`. This shouldn't result in any noticeable behavior changes, but changes in behavior are still possible as we don't have direct control over how Roblox's task scheduler works.

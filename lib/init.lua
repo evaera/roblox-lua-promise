@@ -376,12 +376,16 @@ function Promise.defer(executor)
 	local traceback = debug.traceback(nil, 2)
 	local promise
 	promise = Promise._new(traceback, function(resolve, reject, onCancel)
-		task.defer(function()
+		local deferredThread = task.defer(function()
 			local ok, _, result = runExecutor(traceback, executor, resolve, reject, onCancel)
 
 			if not ok then
 				reject(result[1])
 			end
+		end)
+
+		onCancel(function()
+			task.cancel(deferredThread)
 		end)
 	end)
 
